@@ -528,7 +528,8 @@
       .char-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:2em;}
       .char-card{background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:1.2em;cursor:pointer;transition:all 0.3s ease;text-align:center;}
       .char-card:hover{border-color:var(--green-mid);transform:translateY(-2px);}
-      .char-card-avatar{width:60px;height:60px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--green-light);font-weight:700;margin:0 auto 0.8em;}
+      .char-card-avatar{width:60px;height:60px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--green-light);font-weight:700;margin:0 auto 0.8em;overflow:hidden;}
+      .char-card-avatar img{width:100%;height:100%;object-fit:cover;}
       .char-card-name{font-size:0.9rem;font-weight:500;color:var(--text-bright);margin-bottom:0.3em;}
       .char-card-status{font-size:0.65rem;color:var(--text-dim);letter-spacing:0.1em;}
       .char-card-title{font-size:0.65rem;color:var(--green-mid);margin-top:0.3em;}
@@ -539,7 +540,9 @@
       .char-profile-back{font-size:0.8rem;color:var(--text-dim);cursor:pointer;margin-bottom:1.5em;transition:color 0.3s ease;}
       .char-profile-back:hover{color:var(--green-light);}
       .char-profile-top{display:flex;gap:2em;align-items:flex-start;margin-bottom:2em;}
-      .char-profile-avatar{width:80px;height:80px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--green-light);font-weight:700;flex-shrink:0;}
+      .char-profile-avatar{width:80px;height:80px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--green-light);font-weight:700;flex-shrink:0;overflow:hidden;position:relative;cursor:pointer;}
+      .char-profile-avatar img{width:100%;height:100%;object-fit:cover;}
+      .char-profile-avatar:hover::after{content:'변경';position:absolute;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:var(--text-bright);letter-spacing:0.1em;}
       .char-profile-info{flex:1;}
       .char-profile-name{font-size:1.3rem;font-weight:700;color:var(--text-bright);margin-bottom:0.2em;}
       .char-profile-title{font-size:0.75rem;color:var(--green-mid);letter-spacing:0.1em;margin-bottom:0.5em;}
@@ -593,7 +596,8 @@
       <div class="char-profile" id="charProfile">
         <div class="char-profile-back" id="charProfileBack">← 목록으로 돌아가기</div>
         <div class="char-profile-top">
-          <div class="char-profile-avatar" id="charPAvatar"></div>
+          <div class="char-profile-avatar" id="charPAvatar" title="클릭하여 인장 변경"></div>
+          <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
           <div class="char-profile-info">
             <div class="char-profile-name" id="charPName"></div>
             <div class="char-profile-title" id="charPTitle"></div>
@@ -748,7 +752,8 @@
       /* Composer */
       .tl-composer{background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:1.2em;margin-bottom:1.5em;}
       .tl-composer-top{display:flex;align-items:center;gap:0.8em;margin-bottom:0.8em;}
-      .tl-avatar{width:36px;height:36px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--green-light);font-weight:700;flex-shrink:0;}
+      .tl-avatar{width:36px;height:36px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--green-light);font-weight:700;flex-shrink:0;overflow:hidden;}
+      .tl-avatar img{width:100%;height:100%;object-fit:cover;}
       .tl-composer-name{font-size:0.82rem;font-weight:500;color:var(--green-light);letter-spacing:0.05em;}
       .tl-composer textarea{width:100%;min-height:80px;padding:12px;background:rgba(10,12,8,0.6);border:1px solid var(--border);border-radius:2px;color:var(--text-bright);font-family:'Noto Serif KR',serif;font-size:0.85rem;line-height:1.8;outline:none;resize:vertical;}
       .tl-composer textarea::placeholder{color:var(--text-dim);}
@@ -1648,8 +1653,13 @@ function showBoard(){
   document.getElementById('boardAuth').style.display='none';
   document.getElementById('boardContent').style.display='block';
   document.getElementById('boardUserName').textContent=boardCharName;
-  document.getElementById('tlAvatar').textContent=boardCharName.charAt(0);
-  loadPosts();
+  loadAvatarCache().then(()=>{
+    const myAv=getAvatarByName(boardCharName);
+    const tlAv=document.getElementById('tlAvatar');
+    if(myAv){tlAv.innerHTML=`<img src="${myAv}" alt="">`;}
+    else{tlAv.textContent=boardCharName.charAt(0);}
+    loadPosts();
+  });
 }
 
 // Filter buttons
@@ -1760,9 +1770,12 @@ async function loadPosts(){
     // Count replies
     const{count:replyCount}=await sb.from('board_posts').select('*',{count:'exact',head:true}).eq('reply_to',post.id);
     
+    const postAv=getAvatarByName(post.author_name);
+    const postAvHtml=postAv?`<img src="${postAv}" alt="">`:`${post.author_name.charAt(0)}`;
+    
     div.innerHTML=`
       <div class="tl-post-header">
-        <div class="tl-avatar">${post.author_name.charAt(0)}</div>
+        <div class="tl-avatar">${postAvHtml}</div>
         <div class="tl-post-name">${escHtml(post.author_name)}</div>
         <div class="tl-post-meta">
           <span class="tl-post-time">${timeStr}</span>
@@ -1814,9 +1827,11 @@ async function loadReplies(postId){
     const isLiked=likedSet.has(r.id);
     const isAuthor=r.author_code===boardUserCode;
     const isAdmin=boardUserCode.includes('ADMIN');
+    const rAv=getAvatarByName(r.author_name);
+    const rAvHtml=rAv?`<img src="${rAv}" alt="">`:`${r.author_name.charAt(0)}`;
     return `<div class="tl-post reply">
       <div class="tl-post-header">
-        <div class="tl-avatar" style="width:28px;height:28px;font-size:0.6rem;">${r.author_name.charAt(0)}</div>
+        <div class="tl-avatar" style="width:28px;height:28px;font-size:0.6rem;">${rAvHtml}</div>
         <div class="tl-post-name" style="font-size:0.78rem;">${escHtml(r.author_name)}</div>
         <div class="tl-post-meta">
           <span class="tl-post-time">${formatTime(r.created_at)}</span>
@@ -1955,20 +1970,49 @@ function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
 
 // === CHARACTER PROFILE SYSTEM ===
 let charAllData=[];
+let charAvatarCache={};
+let charCurrentCode=null;
+
+// Avatar helper: returns HTML for avatar (image or letter fallback)
+function avatarHtml(name,avatarUrl,size){
+  size=size||36;
+  if(avatarUrl){
+    return `<img src="${avatarUrl}" alt="" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;">`;
+  }
+  return name?name.charAt(0):'?';
+}
+
+// Load all avatar URLs (cached)
+async function loadAvatarCache(){
+  const{data}=await sb.from('invite_codes').select('code,character_name,avatar_url').not('character_name','is',null);
+  if(data){
+    charAvatarCache={};
+    data.forEach(d=>{
+      if(d.character_name)charAvatarCache[d.character_name]=d.avatar_url||null;
+      if(d.code)charAvatarCache['code_'+d.code]=d.avatar_url||null;
+    });
+  }
+}
+
+// Get avatar URL by character name
+function getAvatarByName(name){
+  return charAvatarCache[name]||null;
+}
 
 async function loadCharGrid(){
   const grid=document.getElementById('charGrid');
   grid.innerHTML='<div class="char-empty" style="text-align:center;padding:2em;grid-column:1/-1;">불러오는 중...</div>';
   
-  const{data}=await sb.from('invite_codes').select('code,character_name,status').not('character_name','is',null).order('character_name');
+  const{data}=await sb.from('invite_codes').select('code,character_name,status,avatar_url').not('character_name','is',null).order('character_name');
   if(!data||data.length===0){grid.innerHTML='<div class="char-empty" style="text-align:center;padding:2em;grid-column:1/-1;">등록된 캐릭터가 없습니다.</div>';return;}
   
   charAllData=data.filter(d=>d.character_name&&!d.code.includes('ADMIN'));
   
   grid.innerHTML=charAllData.map(c=>{
     const statusLabel={active:'활동중',warned:'경고',banned:'제명',departed:'하차'};
+    const av=c.avatar_url?`<img src="${c.avatar_url}" alt="">`:`${c.character_name.charAt(0)}`;
     return `<div class="char-card" data-char-code="${c.code}">
-      <div class="char-card-avatar">${c.character_name.charAt(0)}</div>
+      <div class="char-card-avatar">${av}</div>
       <div class="char-card-name">${escHtml(c.character_name)}</div>
       <div class="char-card-status">${statusLabel[c.status||'active']}</div>
     </div>`;
@@ -1980,18 +2024,33 @@ async function loadCharGrid(){
 }
 
 async function openCharProfile(code){
+  charCurrentCode=code;
   document.getElementById('charGrid').style.display='none';
   const profile=document.getElementById('charProfile');
   profile.classList.add('open');
   
-  // Load user data
   const{data:user}=await sb.from('invite_codes').select('*').eq('code',code).maybeSingle();
   if(!user)return;
   
   const name=user.character_name||code;
   const statusLabel={active:'활동중',warned:'경고',banned:'제명',departed:'하차'};
   
-  document.getElementById('charPAvatar').textContent=name.charAt(0);
+  const avatarEl=document.getElementById('charPAvatar');
+  if(user.avatar_url){
+    avatarEl.innerHTML=`<img src="${user.avatar_url}" alt="">`;
+  }else{
+    avatarEl.innerHTML=name.charAt(0);
+  }
+  
+  // Only allow upload if viewing own profile
+  if(code===sessionCode){
+    avatarEl.style.cursor='pointer';
+    avatarEl.onclick=()=>document.getElementById('avatarFileInput').click();
+  }else{
+    avatarEl.style.cursor='default';
+    avatarEl.onclick=null;
+  }
+  
   document.getElementById('charPName').textContent=name;
   document.getElementById('charPTitle').textContent='';
   document.getElementById('charPCode').textContent=code;
@@ -2000,7 +2059,7 @@ async function openCharProfile(code){
   statusEl.textContent=statusLabel[user.status||'active'];
   statusEl.className='char-profile-status '+(user.status||'active');
   
-  // Stats (placeholder — will connect to character_stats table later)
+  // Stats
   document.getElementById('charPHp').textContent='100';
   document.getElementById('charPHpBar').style.width='100%';
   document.getElementById('charPSan').textContent='100';
@@ -2029,7 +2088,51 @@ async function openCharProfile(code){
   }
 }
 
+// Avatar upload handler
+document.getElementById('avatarFileInput').addEventListener('change',async(e)=>{
+  const file=e.target.files[0];
+  if(!file)return;
+  if(!file.type.startsWith('image/')){alert('이미지 파일만 업로드할 수 있습니다.');return;}
+  if(file.size>2*1024*1024){alert('파일 크기는 2MB 이하여야 합니다.');return;}
+  
+  const avatarEl=document.getElementById('charPAvatar');
+  avatarEl.innerHTML='<span style="font-size:0.6rem;color:var(--text-dim);">업로드 중...</span>';
+  
+  const ext=file.name.split('.').pop();
+  const path=`${sessionCode}.${ext}`;
+  
+  // Upload to Supabase Storage
+  const{error:upErr}=await sb.storage.from('avatars').upload(path,file,{upsert:true,contentType:file.type});
+  if(upErr){
+    console.error('Upload error:',upErr);
+    alert('업로드 실패: '+upErr.message);
+    avatarEl.innerHTML=sessionCharName.charAt(0);
+    return;
+  }
+  
+  // Get public URL
+  const{data:urlData}=sb.storage.from('avatars').getPublicUrl(path);
+  const avatarUrl=urlData.publicUrl+'?t='+Date.now();
+  
+  // Save to DB
+  await sb.from('invite_codes').update({avatar_url:avatarUrl}).eq('code',sessionCode);
+  
+  // Update UI
+  avatarEl.innerHTML=`<img src="${avatarUrl}" alt="">`;
+  
+  // Update cache
+  charAvatarCache[sessionCharName]=avatarUrl;
+  charAvatarCache['code_'+sessionCode]=avatarUrl;
+  
+  // Update composer avatar
+  const tlAv=document.getElementById('tlAvatar');
+  if(tlAv)tlAv.innerHTML=`<img src="${avatarUrl}" alt="">`;
+  
+  e.target.value='';
+});
+
 document.getElementById('charProfileBack').addEventListener('click',()=>{
+  charCurrentCode=null;
   document.getElementById('charProfile').classList.remove('open');
   document.getElementById('charGrid').style.display='grid';
 });
