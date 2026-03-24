@@ -409,6 +409,7 @@
       .jumpscare.active{display:flex;}
       .jumpscare-img{max-width:80vw;max-height:80vh;object-fit:contain;animation:scareFlash 0.15s ease-in-out 3;filter:drop-shadow(0 0 40px rgba(45,200,39,0.5));}
       @keyframes scareFlash{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.3;transform:scale(1.05);}}
+      @keyframes scareZoom{0%{transform:scale(3);opacity:0;}30%{opacity:1;}100%{transform:scale(1);opacity:1;}}
       @keyframes eyesFlash{0%,100%{opacity:1;}50%{opacity:0.3;}}
       /* Deer eyes ambient */
       .deer-eyes{position:absolute;top:10%;right:8%;width:100px;opacity:0;transition:opacity 2.5s ease;z-index:2;pointer-events:none;}
@@ -480,9 +481,17 @@
     <div class="jumpscare" id="jumpscare" onclick="dismissScare()">
       <img class="jumpscare-img" src="deer.png" alt="">
     </div>
-    <!-- Jumpscare 2 - Forest figure -->
+    <!-- Jumpscare 2 - Forest figure (fullscreen) -->
     <div class="jumpscare" id="jumpscare2" onclick="dismissScare2()">
       <img class="jumpscare-img" src="scare2.png" alt="" style="max-width:100vw;max-height:100vh;object-fit:cover;">
+    </div>
+    <!-- Jumpscare 3 - Stalker hand (fullscreen) -->
+    <div class="jumpscare" id="jumpscare3" onclick="dismissScare3()">
+      <img class="jumpscare-img" src="scare3.png" alt="" style="max-width:100vw;max-height:100vh;object-fit:cover;">
+    </div>
+    <!-- Jumpscare 4 - Fullscreen flash variant (reuses images with different effect) -->
+    <div class="jumpscare" id="jumpscare4" onclick="dismissScare4()" style="background:rgba(0,0,0,0.95);">
+      <img id="scare4img" class="jumpscare-img" src="deer.png" alt="" style="max-width:100vw;max-height:100vh;object-fit:cover;animation:scareZoom 0.4s ease-out forwards;">
     </div>
     <!-- Scare sound -->
     <audio id="scareSound" preload="auto"><source src="click.mp3" type="audio/mpeg"></audio>
@@ -494,92 +503,123 @@
   <!-- PAGE: QNA (준비중) -->
   <div class="page" id="page-qna"><div class="preparing"><div class="preparing-title">준비중</div><div class="preparing-desc">Q&A 페이지는 현재 준비중입니다.</div><div class="back-link" data-page="main">← 메인으로 돌아가기</div></div></div>
 
-  <!-- PAGE: BOARD -->
+  <!-- PAGE: TIMELINE (upgraded from board) -->
   <div class="page" id="page-board">
     <style>
-      .board-wrap{max-width:650px;margin:0 auto;padding:100px 24px 80px;}
-      .board-header{text-align:center;margin-bottom:2em;}
-      .board-header-label{font-family:'Cormorant Garamond',serif;font-size:0.75rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--green-mid);margin-bottom:0.8em;}
-      .board-header-title{font-size:1.8rem;font-weight:700;color:var(--text-bright);letter-spacing:0.1em;margin-bottom:0.5em;}
-      .board-header-line{width:40px;height:1px;background:var(--green-mid);margin:0 auto;}
+      .tl-wrap{max-width:650px;margin:0 auto;padding:100px 24px 80px;}
+      .tl-header{text-align:center;margin-bottom:1.5em;}
+      .tl-header-label{font-family:'Cormorant Garamond',serif;font-size:0.75rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--green-mid);margin-bottom:0.8em;}
+      .tl-header-title{font-size:1.8rem;font-weight:700;color:var(--text-bright);letter-spacing:0.1em;margin-bottom:0.5em;}
+      .tl-header-line{width:40px;height:1px;background:var(--green-mid);margin:0 auto;}
+
+      /* Filters */
+      .tl-filters{display:flex;gap:0;margin-bottom:1.5em;border:1px solid var(--border);border-radius:2px;overflow:hidden;}
+      .tl-filter{flex:1;padding:10px;background:transparent;border:none;color:var(--text-dim);font-family:'Noto Serif KR',serif;font-size:0.75rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.3s ease;text-align:center;border-right:1px solid var(--border);}
+      .tl-filter:last-child{border-right:none;}
+      .tl-filter:hover{color:var(--text-secondary);background:rgba(45,90,39,0.03);}
+      .tl-filter.active{color:var(--green-light);background:rgba(45,90,39,0.08);}
 
       /* Auth */
-      .board-auth{text-align:center;padding:3em 0;}
-      .board-auth-input{width:220px;padding:12px 16px;background:rgba(20,26,20,0.8);border:1px solid var(--border);border-radius:2px;color:var(--text-bright);font-family:'Cormorant Garamond',serif;font-size:1rem;letter-spacing:0.3em;text-align:center;outline:none;}
-      .board-auth-btn{margin-top:1em;padding:10px 24px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.8rem;letter-spacing:0.15em;cursor:pointer;transition:all 0.3s ease;}
-      .board-auth-btn:hover{border-color:var(--green-mid);color:var(--text-bright);}
+      .tl-auth{text-align:center;padding:3em 0;}
+      .tl-auth-btn{padding:12px 30px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.85rem;letter-spacing:0.15em;cursor:pointer;transition:all 0.3s ease;}
+      .tl-auth-btn:hover{border-color:var(--green-mid);color:var(--text-bright);}
 
       /* Composer */
-      .board-composer{background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:1.2em;margin-bottom:2em;}
-      .board-composer-name{font-size:0.8rem;font-weight:500;color:var(--green-light);margin-bottom:0.8em;letter-spacing:0.05em;}
-      .board-composer textarea{width:100%;min-height:80px;padding:12px;background:rgba(10,12,8,0.6);border:1px solid var(--border);border-radius:2px;color:var(--text-bright);font-family:'Noto Serif KR',serif;font-size:0.85rem;line-height:1.8;outline:none;resize:vertical;}
-      .board-composer textarea::placeholder{color:var(--text-dim);}
-      .board-composer textarea:focus{border-color:var(--green-mid);}
-      .board-composer-footer{display:flex;justify-content:space-between;align-items:center;margin-top:0.8em;}
-      .board-composer-count{font-size:0.7rem;color:var(--text-dim);}
-      .board-composer-submit{padding:8px 20px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.78rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.3s ease;}
-      .board-composer-submit:hover{border-color:var(--green-mid);color:var(--text-bright);}
+      .tl-composer{background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:1.2em;margin-bottom:1.5em;}
+      .tl-composer-top{display:flex;align-items:center;gap:0.8em;margin-bottom:0.8em;}
+      .tl-avatar{width:36px;height:36px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--green-light);font-weight:700;flex-shrink:0;}
+      .tl-composer-name{font-size:0.82rem;font-weight:500;color:var(--green-light);letter-spacing:0.05em;}
+      .tl-composer textarea{width:100%;min-height:80px;padding:12px;background:rgba(10,12,8,0.6);border:1px solid var(--border);border-radius:2px;color:var(--text-bright);font-family:'Noto Serif KR',serif;font-size:0.85rem;line-height:1.8;outline:none;resize:vertical;}
+      .tl-composer textarea::placeholder{color:var(--text-dim);}
+      .tl-composer textarea:focus{border-color:var(--green-mid);}
+      .tl-composer-footer{display:flex;justify-content:space-between;align-items:center;margin-top:0.8em;}
+      .tl-composer-count{font-size:0.7rem;color:var(--text-dim);}
+      .tl-composer-hint{font-size:0.65rem;color:var(--text-dim);font-style:italic;}
+      .tl-composer-submit{padding:8px 20px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.78rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.3s ease;}
+      .tl-composer-submit:hover{border-color:var(--green-mid);color:var(--text-bright);}
+
+      /* Reply composer (inline) */
+      .tl-reply-composer{margin-top:0.8em;padding:0.8em;background:rgba(10,12,8,0.4);border:1px solid var(--border);border-radius:2px;display:none;}
+      .tl-reply-composer.open{display:block;}
+      .tl-reply-to{font-size:0.7rem;color:var(--green-light);margin-bottom:0.5em;}
+      .tl-reply-input{width:100%;padding:10px;background:rgba(10,12,8,0.6);border:1px solid var(--border);border-radius:2px;color:var(--text-bright);font-family:'Noto Serif KR',serif;font-size:0.82rem;line-height:1.7;outline:none;resize:none;min-height:60px;}
+      .tl-reply-input:focus{border-color:var(--green-mid);}
+      .tl-reply-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:0.5em;}
+      .tl-reply-btn{padding:6px 14px;background:transparent;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);font-family:'Noto Serif KR',serif;font-size:0.72rem;cursor:pointer;transition:all 0.3s ease;}
+      .tl-reply-btn:hover{border-color:var(--green-mid);color:var(--text-secondary);}
+      .tl-reply-btn.submit{border-color:var(--green-dark);color:var(--text-secondary);}
 
       /* Posts */
-      .board-post{background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:1.2em;margin-bottom:1em;transition:border-color 0.3s ease;}
-      .board-post:hover{border-color:var(--green-dark);}
-      .board-post-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8em;}
-      .board-post-author{font-size:0.85rem;font-weight:500;color:var(--text-bright);letter-spacing:0.03em;}
-      .board-post-time{font-size:0.65rem;color:var(--text-dim);letter-spacing:0.05em;}
-      .board-post-content{font-size:0.88rem;font-weight:300;color:var(--text-secondary);line-height:2;white-space:pre-wrap;word-break:break-word;}
-      .board-post-actions{display:flex;gap:1.5em;margin-top:1em;padding-top:0.8em;border-top:1px solid rgba(30,38,30,0.5);}
-      .board-action{display:flex;align-items:center;gap:0.4em;font-size:0.75rem;color:var(--text-dim);cursor:pointer;transition:color 0.3s ease;background:none;border:none;font-family:'Noto Serif KR',serif;}
-      .board-action:hover{color:var(--green-light);}
-      .board-action.liked{color:var(--accent-red);}
+      .tl-post{background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:1.2em;margin-bottom:0.8em;transition:border-color 0.3s ease;}
+      .tl-post:hover{border-color:var(--green-dark);}
+      .tl-post.notice{border-left:3px solid var(--green-mid);}
+      .tl-post.reply{margin-left:2em;border-left:2px solid var(--border);opacity:0.9;}
+      .tl-post-header{display:flex;align-items:center;gap:0.8em;margin-bottom:0.6em;}
+      .tl-post-name{font-size:0.82rem;font-weight:500;color:var(--text-bright);letter-spacing:0.03em;}
+      .tl-post-meta{margin-left:auto;display:flex;align-items:center;gap:0.8em;}
+      .tl-post-time{font-size:0.62rem;color:var(--text-dim);letter-spacing:0.05em;}
+      .tl-post-delete{background:none;border:none;color:var(--text-dim);font-size:0.6rem;cursor:pointer;transition:color 0.3s ease;}
+      .tl-post-delete:hover{color:var(--accent-red);}
+      .tl-post-reply-tag{font-size:0.68rem;color:var(--text-dim);margin-bottom:0.4em;}
+      .tl-post-reply-tag span{color:var(--green-light);}
+      .tl-post-content{font-size:0.88rem;font-weight:300;color:var(--text-secondary);line-height:2;white-space:pre-wrap;word-break:break-word;}
+      .tl-post-content .mention{color:var(--green-light);cursor:pointer;font-weight:500;}
+      .tl-post-content .mention:hover{text-decoration:underline;}
+      .tl-post-actions{display:flex;gap:1.5em;margin-top:0.8em;padding-top:0.6em;border-top:1px solid rgba(30,38,30,0.4);}
+      .tl-action{display:flex;align-items:center;gap:0.4em;font-size:0.72rem;color:var(--text-dim);cursor:pointer;transition:color 0.3s ease;background:none;border:none;font-family:'Noto Serif KR',serif;}
+      .tl-action:hover{color:var(--green-light);}
+      .tl-action.liked{color:var(--accent-red);}
 
-      /* Comments */
-      .board-comments{margin-top:0.8em;padding-top:0.8em;}
-      .board-comment{display:flex;gap:0.8em;padding:0.6em 0;border-bottom:1px solid rgba(30,38,30,0.3);}
-      .board-comment:last-child{border-bottom:none;}
-      .board-comment-author{font-size:0.78rem;font-weight:500;color:var(--green-light);white-space:nowrap;min-width:60px;}
-      .board-comment-text{font-size:0.8rem;color:var(--text-secondary);line-height:1.7;flex:1;}
-      .board-comment-time{font-size:0.6rem;color:var(--text-dim);white-space:nowrap;}
+      /* Thread view */
+      .tl-thread{margin-top:0.5em;padding-left:1em;border-left:1px solid var(--border);}
 
-      /* Comment input */
-      .board-comment-input{display:flex;gap:0.5em;margin-top:0.6em;}
-      .board-comment-input input{flex:1;padding:8px 12px;background:rgba(10,12,8,0.6);border:1px solid var(--border);border-radius:2px;color:var(--text-bright);font-family:'Noto Serif KR',serif;font-size:0.8rem;outline:none;}
-      .board-comment-input input:focus{border-color:var(--green-mid);}
-      .board-comment-input button{padding:8px 14px;background:transparent;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);font-size:0.75rem;cursor:pointer;font-family:'Noto Serif KR',serif;transition:all 0.3s ease;}
-      .board-comment-input button:hover{border-color:var(--green-mid);color:var(--text-secondary);}
-
-      .board-empty{text-align:center;padding:3em;font-size:0.85rem;color:var(--text-dim);font-style:italic;}
-      .board-loading{text-align:center;padding:2em;font-size:0.8rem;color:var(--text-dim);}
+      .tl-empty{text-align:center;padding:3em;font-size:0.85rem;color:var(--text-dim);font-style:italic;}
+      .tl-loading{text-align:center;padding:2em;font-size:0.8rem;color:var(--text-dim);}
     </style>
 
-    <div class="board-wrap">
-      <div class="board-header">
-        <div class="board-header-label">Board</div>
-        <div class="board-header-title">게시판</div>
-        <div class="board-header-line"></div>
+    <div class="tl-wrap">
+      <div class="tl-header">
+        <div class="tl-header-label">Timeline</div>
+        <div class="tl-header-title">타임라인</div>
+        <div class="tl-header-line"></div>
       </div>
 
-      <!-- Board Auth -->
-      <div id="boardAuth" class="board-auth">
-        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1.5em;">게시판에 입장합니다.</p>
-        <button id="boardAuthBtn" class="board-auth-btn">게시판 입장</button>
+      <!-- Auth -->
+      <div id="boardAuth" class="tl-auth">
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1.5em;">타임라인에 입장합니다.</p>
+        <button id="boardAuthBtn" class="tl-auth-btn">입장</button>
         <div id="boardAuthErr" style="font-size:0.75rem;color:var(--accent-red);margin-top:0.8em;height:1.2em;"></div>
       </div>
 
-      <!-- Board Content (hidden until auth) -->
+      <!-- Content -->
       <div id="boardContent" style="display:none;">
+        <!-- Filters -->
+        <div class="tl-filters">
+          <button class="tl-filter active" data-filter="all">전체</button>
+          <button class="tl-filter" data-filter="mine">내 글</button>
+          <button class="tl-filter" data-filter="mentions">멘션</button>
+          <button class="tl-filter" data-filter="notice">공지</button>
+        </div>
+
         <!-- Composer -->
-        <div class="board-composer">
-          <div class="board-composer-name" id="boardUserName">캐릭터명</div>
+        <div class="tl-composer">
+          <div class="tl-composer-top">
+            <div class="tl-avatar" id="tlAvatar"></div>
+            <div class="tl-composer-name" id="boardUserName">캐릭터명</div>
+          </div>
           <textarea id="boardTextarea" placeholder="숲 속에서의 이야기를 남겨주세요..." maxlength="500"></textarea>
-          <div class="board-composer-footer">
-            <span class="board-composer-count"><span id="boardCharCount">0</span>/500</span>
-            <button class="board-composer-submit" id="boardSubmit">작성</button>
+          <div class="tl-composer-footer">
+            <div>
+              <span class="tl-composer-count"><span id="boardCharCount">0</span>/500</span>
+              <span class="tl-composer-hint"> · @캐릭터명으로 멘션</span>
+            </div>
+            <button class="tl-composer-submit" id="boardSubmit">작성</button>
           </div>
         </div>
 
         <!-- Posts -->
         <div id="boardPosts">
-          <div class="board-loading">불러오는 중...</div>
+          <div class="tl-loading">불러오는 중...</div>
         </div>
       </div>
     </div>
@@ -772,7 +812,7 @@ function diceHTML(r){
   return '<div class="game-dice '+cls+'">🎲 '+r.roll+bonusStr+' (목표 '+r.dc+') — '+label+'</div>';
 }
 
-// Enhanced scare system
+// Enhanced scare system — 4 types
 function triggerScare(intensity){
   const i=intensity||1;
   gScareCount++;
@@ -787,12 +827,39 @@ function triggerScare(intensity){
     setTimeout(()=>scene.classList.remove('glitch-active'),600);
   }
   
-  if(i>=1.5||Math.random()<0.3*i){
-    if(Math.random()<0.5){
-      const j=document.getElementById('jumpscare');j.classList.add('active');setTimeout(()=>j.classList.remove('active'),800+i*400);
+  // Pick scare type based on intensity
+  const roll=Math.random();
+  if(i>=2){
+    // High intensity — fullscreen scares
+    if(roll<0.3){
+      // Fullscreen zoom with random image
+      const imgs=['deer.png','scare2.png','scare3.png'];
+      document.getElementById('scare4img').src=imgs[Math.floor(Math.random()*imgs.length)];
+      const j4=document.getElementById('jumpscare4');j4.classList.add('active');setTimeout(()=>j4.classList.remove('active'),1200+i*300);
+    }else if(roll<0.55){
+      const j3=document.getElementById('jumpscare3');j3.classList.add('active');setTimeout(()=>j3.classList.remove('active'),1500+i*400);
+    }else if(roll<0.8){
+      const j2=document.getElementById('jumpscare2');j2.classList.add('active');setTimeout(()=>j2.classList.remove('active'),1500+i*400);
     }else{
-      const j2=document.getElementById('jumpscare2');j2.classList.add('active');setTimeout(()=>j2.classList.remove('active'),1000+i*500);
+      const j=document.getElementById('jumpscare');j.classList.add('active');setTimeout(()=>j.classList.remove('active'),800+i*400);
     }
+  }else if(i>=1){
+    // Medium intensity
+    if(roll<0.25){
+      const j3=document.getElementById('jumpscare3');j3.classList.add('active');setTimeout(()=>j3.classList.remove('active'),1200);
+    }else if(roll<0.5){
+      const j2=document.getElementById('jumpscare2');j2.classList.add('active');setTimeout(()=>j2.classList.remove('active'),1200);
+    }else if(roll<0.75){
+      const j=document.getElementById('jumpscare');j.classList.add('active');setTimeout(()=>j.classList.remove('active'),800);
+    }else{
+      // Glitch + flicker only, no image (psychological)
+      screenFlicker();
+    }
+  }else{
+    // Low intensity — subtle
+    if(roll<0.4){showDeerEyes();}
+    else if(roll<0.7){screenFlicker();}
+    else{randomWhisper();}
   }
   
   modStat('sanity',-Math.floor(5*i));
@@ -844,6 +911,8 @@ function showDeerEyes(){
 
 function dismissScare(){document.getElementById('jumpscare').classList.remove('active');}
 function dismissScare2(){document.getElementById('jumpscare2').classList.remove('active');}
+function dismissScare3(){document.getElementById('jumpscare3').classList.remove('active');}
+function dismissScare4(){document.getElementById('jumpscare4').classList.remove('active');}
 
 function updateInv(){
   document.getElementById('gInvCount').textContent=gCount;
@@ -954,7 +1023,7 @@ const scenes={
   ]},
 
   stream_look:{text:'loading',action:async()=>{
-    const r=rollDice(11);
+    const r=rollDice(16);
     if(r.critFail){triggerScare(2);modStat('sanity',-20);return{text:'물속을 들여다봤다.\n\n'+diceHTML(r)+'\n\n자신의 얼굴이 비친다. 하지만—\n\n<span class="danger">반사된 얼굴이 웃고 있다. 당신은 웃지 않았는데.</span>\n\n반사된 얼굴의 눈이 초록빛으로 변한다.\n\n뒤로 물러났다. 심장이 터질 것 같다.',choices:[{text:'▸ 개울에서 벗어난다',to:'mid_fork'}]};}
     if(r.success)return{text:'물속을 들여다봤다.\n\n'+diceHTML(r)+'\n\n물이 맑다. 바닥에 자갈이 보인다. 그리고 자갈 사이에 뭔가 빛나는 게 있다.\n\n<span class="eerie">하지만 물에 손을 넣는 건 꺼림칙하다.</span>',choices:[
       {text:'▸ 손을 넣어 꺼낸다 [용기 판정]',to:'stream_reach'},
@@ -964,7 +1033,7 @@ const scenes={
   }},
 
   stream_reach:{text:'loading',action:async()=>{
-    const r=rollDice(13);
+    const r=rollDice(16);
     const item=await findAvailableItem([13,18,25]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'물속에 손을 넣었다. 차갑다. 뼛속까지.\n\n'+diceHTML(r)+'\n\n손끝에 무언가 닿았다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n손을 뺐을 때, 물이 잠시 붉어졌다가 다시 맑아졌다.',choices:[{text:'▸ 개울을 건넌다',to:'stream_cross'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
     modStat('hp',-5);screenFlicker();
@@ -978,7 +1047,7 @@ const scenes={
   ]},
 
   cave_enter:{text:'loading',action:async()=>{
-    gDepth++;const r=rollDice(14);
+    gDepth++;const r=rollDice(17);
     if(r.critFail){triggerScare(2.5);modStat('sanity',-25);modStat('hp',-15);return{text:'동굴에 들어갔다.\n\n'+diceHTML(r)+'\n\n어둡다. 아무것도 보이지 않는다.\n\n<span class="danger">발밑이 무너졌다.</span>\n\n떨어졌다. 얼마나 떨어졌는지 모르겠다.\n\n몸이 아프다. 그리고—\n\n<span class="eerie">동굴 안에서 숨소리가 들린다. 당신의 것이 아니다.</span>',choices:[{text:'▸ 기어서 빛이 보이는 쪽으로',to:'deep_forest'},{text:'▸ 소리 나는 쪽을 살핀다',to:'cave_thing'}]};}
     const item=await findAvailableItem([22,21,16,17]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'동굴에 들어갔다.\n\n'+diceHTML(r)+'\n\n좁지만 비바람은 피할 수 있는 곳이다.\n\n벽에 기대어 있는 무언가를 발견했다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n동굴 안쪽에서 바람이 분다. 출구가 하나 더 있는 것 같다.',choices:[{text:'▸ 안쪽으로 더 들어간다',to:'cave_deep'},{text:'▸ 나간다',to:'mid_fork'}]};}
@@ -986,7 +1055,7 @@ const scenes={
   }},
 
   cave_deep:{text:'동굴 안쪽으로 걸었다. 공기가 차갑다.\n\n벽에 손을 대고 더듬으며 걸었다.\n\n<span class="eerie">벽이 맥박처럼 뛰고 있다.</span>',action:async()=>{
-    const r=rollDice(15);modStat('sanity',-10);
+    const r=rollDice(18);modStat('sanity',-10);
     if(r.success)return{text:''+diceHTML(r)+'\n\n벽의 진동을 무시하고 걸었다. 빛이 보인다.\n\n동굴이 끝나고 숲의 다른 구역이 나타났다.\n\n<span class="eerie">여기는... 나무가 거꾸로 자라고 있다.</span>',choices:[{text:'▸ 거꾸로 된 숲을 탐색한다',to:'inverted_forest'},{text:'▸ 돌아간다',to:'mid_fork'}]};
     triggerScare(1);return{text:''+diceHTML(r)+'\n\n더 이상 앞으로 갈 수 없다. 동굴이 좁아진다.\n\n돌아서는 순간, <span class="danger">자신이 들어온 입구가 없다.</span>\n\n벽이다. 돌벽.\n\n...잠시 후 옆에서 바람이 분다. 다른 출구가 있었다.',choices:[{text:'▸ 바람이 부는 쪽으로 나간다',to:'deep_forest'}]};
   }},
@@ -997,14 +1066,14 @@ const scenes={
   }},
 
   waterfall_search:{text:'loading',action:async()=>{
-    const r=rollDice(12);
+    const r=rollDice(16);
     const item=await findAvailableItem([9,10,5,6]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'폭포 주변의 바위 사이를 살폈다.\n\n'+diceHTML(r)+'\n\n이끼 밑에 무언가 있다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 동굴에 들어간다',to:'cave_enter'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
     return{text:'폭포 주변을 살폈다.\n\n'+diceHTML(r)+'\n\n미끄러운 바위뿐이다. 특별한 것은 없었다.',choices:[{text:'▸ 동굴에 들어간다',to:'cave_enter'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};
   }},
 
   stream_item:{text:'loading',action:async()=>{
-    const r=rollDice(10);
+    const r=rollDice(15);
     const item=await findAvailableItem([1,2,3,4]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'개울 옆을 살폈다.\n\n'+diceHTML(r)+'\n\n젖은 흙 위에 무언가가 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 더 둘러본다',to:'stream_cross'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
     if(r.critFail){modStat('hp',-5);return{text:'물건에 손을 뻗었다.\n\n'+diceHTML(r)+'\n\n<span class="danger">손이 미끄러져 날카로운 돌에 긁혔다.</span>\n\n물건은 물에 떠내려갔다.',choices:[{text:'▸ 개울을 건넌다',to:'stream_cross'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
@@ -1012,7 +1081,7 @@ const scenes={
   }},
 
   stream_cross:{text:'loading',action:async()=>{
-    const r=rollDice(11);
+    const r=rollDice(16);
     if(r.critFail){modStat('hp',-10);triggerScare(0.8);return{text:'개울을 건너려 했다.\n\n'+diceHTML(r)+'\n\n<span class="danger">발이 미끄러졌다. 물속으로 빠졌다.</span>\n\n물이 얼음처럼 차갑다. 옷이 젖었다.\n\n간신히 건너편에 올라왔다. 몸이 떨린다.\n\n뒤를 돌아보니 개울 건너편에 <span class="eerie">무언가 서 있다</span>.',choices:[{text:'▸ 서둘러 떠난다',to:'tree_marks'}]};}
     return{text:'개울을 건넜다.\n\n'+diceHTML(r)+'\n\n건너편에 이상한 것이 있다. 나무에 무언가 새겨져 있다.\n\n뒤에서 나뭇가지가 부러지는 소리.',choices:[{text:'▸ 뒤를 돌아본다 [관찰 판정]',to:'look_back_check'},{text:'▸ 무시하고 나무 자국을 살핀다',to:'tree_marks'}]};
   }},
@@ -1024,7 +1093,7 @@ const scenes={
   }},
 
   tree_marks:{text:'loading',action:async()=>{
-    const r=rollDice(12);
+    const r=rollDice(16);
     const item=await findAvailableItem([8,7]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'나무 자국을 살폈다.\n\n'+diceHTML(r)+'\n\n뿌리 사이에 무언가 끼어 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 더 깊이 들어간다',to:'deep_forest'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
     return{text:'나무에 새겨진 자국을 만졌다.\n\n'+diceHTML(r)+'\n\n차갑다. 발톱 자국이다. 크다.\n\n<span class="eerie">"3"이라는 숫자가 새겨져 있다. 세 번째라는 뜻일까.</span>',choices:[{text:'▸ 더 깊이 들어간다',to:'deep_forest'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};
@@ -1037,7 +1106,7 @@ const scenes={
   ]},
 
   rustling_item:{text:'loading',action:async()=>{
-    const r=rollDice(10);
+    const r=rollDice(15);
     const item=await findAvailableItem([5,6,9,10]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'낙엽을 헤쳤다.\n\n'+diceHTML(r)+'\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 주변을 더 탐색한다',to:'rustling_continue'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
     if(r.critFail){modStat('hp',-8);return{text:'낙엽을 헤쳤다.\n\n'+diceHTML(r)+'\n\n<span class="danger">가시덤불이었다. 손이 찢어졌다.</span>\n\n피가 낙엽 위에 떨어진다.\n\n<span class="eerie">어딘가에서 킁킁거리는 소리가 들린다. 피 냄새를 맡은 건가.</span>',choices:[{text:'▸ 서둘러 떠난다',to:'mid_fork'}]};}
@@ -1052,7 +1121,7 @@ const scenes={
 
   narrow_path:{text:'좁은 오솔길을 걸었다. 양쪽의 나무가 터널처럼 머리 위로 휘어져 있다.\n\n<span class="eerie">나무 사이로 속삭임이 들린다. 점점 많아진다.</span>',action:async()=>{
     modStat('sanity',-5);gDepth++;
-    const r=rollDice(12);
+    const r=rollDice(16);
     if(r.success)return{text:''+diceHTML(r)+'\n\n속삭임을 무시하고 걸었다. 길 끝에 공터가 있다.\n\n공터 한가운데 <span class="eerie">돌무더기</span>가 쌓여 있다. 의도적으로 쌓은 것이다.\n\n주변에 물건이 흩어져 있다.',choices:[
       {text:'▸ 돌무더기를 조사한다 [수색 판정]',to:'stone_pile'},
       {text:'▸ 흩어진 물건을 줍는다',to:'clearing_items'},
@@ -1063,7 +1132,7 @@ const scenes={
   }},
 
   stone_pile:{text:'loading',action:async()=>{
-    const r=rollDice(15);gDepth++;
+    const r=rollDice(18);gDepth++;
     const item=await findAvailableItem([22,21,25,13]);
     if(r.crit&&item){const c=await claimItemById(item.id);triggerScare(1);
     return{text:'돌무더기를 살폈다.\n\n'+diceHTML(r)+'\n\n돌 사이에서 무언가 빛났다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n<span class="danger">돌무더기가 무너지면서 아래에서 뼈가 나왔다. 사람의 뼈.</span>',choices:[{text:'▸ 서둘러 떠난다',to:'deep_forest'}]};}
@@ -1072,7 +1141,7 @@ const scenes={
   }},
 
   clearing_items:{text:'loading',action:async()=>{
-    const r=rollDice(11);
+    const r=rollDice(16);
     const item=await findAvailableItem([11,12,14,15,19,20]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'흩어진 물건을 살폈다.\n\n'+diceHTML(r)+'\n\n대부분은 부서져 쓸 수 없다. 하지만 하나—\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 더 깊이 들어간다',to:'deep_forest'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
     return{text:'물건을 살폈다.\n\n'+diceHTML(r)+'\n\n쓸 만한 것은 없다. 전부 부서져 있다.\n\n이전에 누군가 여기서 무언가를 했다. 좋은 일은 아니었을 것이다.',choices:[{text:'▸ 떠난다',to:'deep_forest'}]};
@@ -1123,13 +1192,13 @@ const scenes={
 
   follow_tracks:{text:'loading',action:async()=>{
     gDepth++;modStat('alert',10);
-    const r=rollDice(12);
+    const r=rollDice(16);
     if(r.success){return{text:'발자국을 따라갔다.\n\n'+diceHTML(r)+'\n\n사람의 발자국이 멈춘 곳이 있다. 옆에 무언가 떨어져 있다.\n\n<span class="eerie">그리고 사슴 발자국만 계속된다.</span>\n\n사람은... 여기서 사라진 것이다.',choices:[{text:'▸ 떨어진 것을 살핀다 [수색 판정]',to:'track_item'},{text:'▸ 더 깊이 간다',to:'deep_forest'}]};}
     return{text:'발자국을 따라갔다.\n\n'+diceHTML(r)+'\n\n발자국이 갑자기 사라졌다. 양쪽 다.\n\n<span class="eerie">마치 공중으로 들어올려진 것처럼.</span>',choices:[{text:'▸ 계속 간다',to:'deep_forest'}]};
   }},
 
   track_item:{text:'loading',action:async()=>{
-    const r=rollDice(11);
+    const r=rollDice(16);
     const item=await findAvailableItem([4,8,16,23,11,12]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'떨어진 것을 살폈다.\n\n'+diceHTML(r)+'\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n이전 탐색자의 것이었을 것이다.',choices:[{text:'▸ 더 깊이 간다',to:'deep_forest'},{text:'▸ 돌아간다',to:'mid_fork'}]};}
     return{text:'살폈지만 쓸 만한 것은 없었다.\n\n'+diceHTML(r),choices:[{text:'▸ 계속 간다',to:'deep_forest'}]};
@@ -1171,13 +1240,13 @@ const scenes={
   }},
 
   cabin_last_line:{text:'loading',action:async()=>{
-    const r=rollDice(15);modStat('sanity',-5);
+    const r=rollDice(18);modStat('sanity',-5);
     if(r.success)return{text:'긁어서 지워진 마지막 줄을 해독하려 했다.\n\n'+diceHTML(r)+'\n\n<span class="eerie">"...먹이를 준비한다. 자신도 모르게. 숲이 시키는 대로."</span>\n\n그 아래에 사슴 뿔 모양이 그려져 있다. 그 안에 사람 모양이 있다.',choices:[{text:'▸ 물건을 뒤진다',to:'cabin_item'},{text:'▸ 나간다',to:'deep_forest'}]};
     return{text:'마지막 줄을 해독하려 했다.\n\n'+diceHTML(r)+'\n\n읽을 수 없다. 너무 많이 긁혀 있다.',choices:[{text:'▸ 물건을 뒤진다',to:'cabin_item'},{text:'▸ 나간다',to:'deep_forest'}]};
   }},
 
   cabin_item:{text:'loading',action:async()=>{
-    const r=rollDice(12);
+    const r=rollDice(16);
     const item=await findAvailableItem([4,8,16,23]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'선반을 뒤졌다.\n\n'+diceHTML(r)+'\n\n먼지 아래에 무언가 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 오두막을 나간다',to:'deep_forest'}]};}
     if(r.critFail){triggerScare(1.5);return{text:'선반을 뒤지다가—\n\n'+diceHTML(r)+'\n\n<span class="danger">선반이 무너졌다. 먼지가 피어오르고 그 사이로—</span>\n\n<span class="eerie">선반 뒤 벽에 사슴 뿔이 박혀 있었다. 진짜 뿔이다. 피가 아직 굳지 않았다.</span>',choices:[{text:'▸ 나간다',to:'deep_forest'}]};}
@@ -1185,7 +1254,7 @@ const scenes={
   }},
 
   cabin_outside:{text:'loading',action:async()=>{
-    const r=rollDice(12);
+    const r=rollDice(16);
     const item=await findAvailableItem([9,10,5,6]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'오두막 뒤편을 살폈다.\n\n'+diceHTML(r)+'\n\n풀 사이에 무언가 있다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 안으로 들어간다',to:'cabin'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
     return{text:'오두막 주변을 둘러봤다.\n\n'+diceHTML(r)+'\n\n특별한 것은 없었다. 하지만—\n\n<span class="eerie">오두막 뒤에 무덤 같은 흙더미가 있다. 하나가 아니다. 여러 개.</span>',choices:[{text:'▸ 안으로 들어간다',to:'cabin'},{text:'▸ 떠난다',to:'mid_fork'}]};
@@ -1198,7 +1267,7 @@ const scenes={
   ]},
 
   deer_item:{text:'loading',action:async()=>{
-    const r=rollDice(13);
+    const r=rollDice(17);
     const item=await findAvailableItem([13,18,25,7,8,4]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'발자국 옆을 살폈다.\n\n'+diceHTML(r)+'\n\n이끼 사이에 무언가 빛나고 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 발자국을 따라간다',to:'deep_forest'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
     return{text:'발자국 옆을 살폈다.\n\n'+diceHTML(r)+'\n\n아무것도 없다. 발자국만.',choices:[{text:'▸ 계속 간다',to:'deep_forest'}]};
@@ -1212,14 +1281,14 @@ const scenes={
   ]},
 
   fork_search:{text:'loading',action:async()=>{
-    const r=rollDice(13);
+    const r=rollDice(17);
     const item=await findAvailableItem([11,12,14,15,19,20]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'갈림길 주변을 살폈다.\n\n'+diceHTML(r)+'\n\n나무 밑동에 무언가 묻혀 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 어두운 길로',to:'dark_path'},{text:'▸ 안개 길로',to:'fog_path'},{text:'▸ 소리 나는 길로',to:'sound_path'}]};}
     return{text:'주변을 살폈다.\n\n'+diceHTML(r)+'\n\n쓸 만한 것은 없다.',choices:[{text:'▸ 어두운 길로',to:'dark_path'},{text:'▸ 안개 길로',to:'fog_path'},{text:'▸ 소리 나는 길로',to:'sound_path'}]};
   }},
 
   dark_path:{text:'loading',action:async()=>{
-    gDepth++;const r=rollDice(13);
+    gDepth++;const r=rollDice(16);
     if(r.critFail){triggerScare(2);modStat('sanity',-15);modStat('hp',-10);
     return{text:'어둠 속을 걸었다.\n\n'+diceHTML(r)+'\n\n<span class="danger">무언가에 부딪혔다. 부드럽다. 따뜻하다.</span>\n\n손전등이 있었다면. 없다.\n\n<span class="eerie">그것도 당신을 만지고 있다.</span>',choices:[{text:'▸ 비명을 지르며 뛴다',to:'run_panic'},{text:'▸ 그대로 멈춘다',to:'dark_freeze'}]};}
     const item=await findAvailableItem([11,12,14,15]);
@@ -1228,14 +1297,14 @@ const scenes={
   }},
 
   dark_freeze:{text:'loading',action:async()=>{
-    const r=rollDice(16);modStat('sanity',-10);
+    const r=rollDice(18);modStat('sanity',-10);
     if(r.success){modStat('alert',-10);return{text:'멈췄다. 숨도 쉬지 않았다.\n\n'+diceHTML(r)+'\n\n부드러운 것이 천천히 물러났다. 발굽 소리가 멀어진다.\n\n...\n\n살았다.',choices:[{text:'▸ 조용히 떠난다',to:'deep_forest'}]};}
     triggerScare(2);return{text:'멈췄다.\n\n'+diceHTML(r)+'\n\n<span class="danger">코앞에서 숨소리가 느껴진다. 뜨겁다.</span>\n\n그리고 — 스쳐지나갔다. 옆구리를 긁으면서.',choices:[{text:'▸ 아프지만 뛴다',to:'mid_fork'}]};
   }},
 
   fog_path:{text:'loading',action:async()=>{
     gDepth++;modStat('sanity',-8);
-    const r=rollDice(12);
+    const r=rollDice(15);
     const item=await findAvailableItem([16,17,19,20]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'안개 속을 걸었다.\n\n'+diceHTML(r)+'\n\n발에 무언가 걸렸다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 계속 간다',to:'deep_forest'},{text:'▸ 돌아간다',to:'mid_fork'}]};}
     screenFlicker();
@@ -1269,7 +1338,7 @@ const scenes={
   }},
 
   deer_stare:{text:'loading',action:async()=>{
-    const r=rollDice(16);modStat('sanity',-15);
+    const r=rollDice(18);modStat('sanity',-15);
     const item=await findAvailableItem([22,21,25,13]);
     if(r.success){
       if(item){const c=await claimItemById(item.id);if(c)return{text:'눈을 마주했다.\n\n'+diceHTML(r)+'\n\n시간이 멈춘 것 같았다. 얼마나 지났는지 모르겠다.\n\n그것이 고개를 끄덕였다. 그리고 사라졌다.\n\n사라진 자리에 무언가 남아 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 탐색을 계속한다',to:'mid_fork'},{text:'▸ 숲에서 나간다',to:'ending'}]};}
@@ -1337,13 +1406,13 @@ async function goScene(name){
   });},800);
 }
 
-// === BOARD SYSTEM ===
+// === TIMELINE SYSTEM (upgraded from board) ===
 let boardUserCode=null,boardCharName=null;
+let tlFilter='all'; // all, mine, mentions, notice
 
 document.getElementById('boardAuthBtn').addEventListener('click',async()=>{
   if(!sessionCode){document.getElementById('boardAuthErr').textContent='먼저 사이트에 로그인해주세요.';return;}
   if(!sessionCharName||sessionCharName===sessionCode){
-    // Try to fetch character name from DB
     const{data}=await sb.from('invite_codes').select('character_name').eq('code',sessionCode).maybeSingle();
     if(data&&data.character_name){sessionCharName=data.character_name;}
     else if(sessionCode.includes('ADMIN')){sessionCharName='총괄';}
@@ -1358,7 +1427,37 @@ function showBoard(){
   document.getElementById('boardAuth').style.display='none';
   document.getElementById('boardContent').style.display='block';
   document.getElementById('boardUserName').textContent=boardCharName;
+  document.getElementById('tlAvatar').textContent=boardCharName.charAt(0);
   loadPosts();
+}
+
+// Filter buttons
+document.querySelectorAll('.tl-filter').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tl-filter').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    tlFilter=btn.dataset.filter;
+    loadPosts();
+  });
+});
+
+// Char counter
+document.getElementById('boardTextarea').addEventListener('input',()=>{
+  document.getElementById('boardCharCount').textContent=document.getElementById('boardTextarea').value.length;
+});
+
+// Parse mentions from text: @캐릭터명 → returns array of mentioned names
+function parseMentions(text){
+  const matches=text.match(/@([^\s@]+)/g);
+  if(!matches)return[];
+  return matches.map(m=>m.substring(1));
+}
+
+// Render text with mention highlights
+function renderContent(text){
+  let html=escHtml(text);
+  html=html.replace(/@([^\s@]+)/g,'<span class="mention" data-mention="$1">@$1</span>');
+  return html;
 }
 
 // Post
@@ -1368,11 +1467,37 @@ document.getElementById('boardSubmit').addEventListener('click',async()=>{
   const btn=document.getElementById('boardSubmit');
   btn.disabled=true;btn.textContent='작성 중...';
   
-  await sb.from('board_posts').insert({author_code:boardUserCode,author_name:boardCharName,content:text});
+  const mentions=parseMentions(text);
+  const isNotice=boardUserCode.includes('ADMIN')&&text.startsWith('[공지]');
   
-  // Send new_post notifications
+  await sb.from('board_posts').insert({
+    author_code:boardUserCode,
+    author_name:boardCharName,
+    content:text,
+    mentions:mentions,
+    post_type:isNotice?'notice':'normal'
+  });
+  
+  // Send notifications
   const{data:newPost}=await sb.from('board_posts').select('id').eq('author_code',boardUserCode).order('created_at',{ascending:false}).limit(1).maybeSingle();
-  if(newPost){sendNewPostNotifToAll(newPost.id,boardUserCode,boardCharName);}
+  if(newPost){
+    // Mention notifications
+    for(const name of mentions){
+      const{data:target}=await sb.from('invite_codes').select('code').eq('character_name',name).maybeSingle();
+      if(target&&target.code!==boardUserCode){
+        sendNotification(target.code,'comment',newPost.id,boardCharName,boardCharName+'님이 회원님을 멘션했습니다.');
+      }
+    }
+    // Notice notification
+    if(isNotice){
+      const{data:allUsers}=await sb.from('notification_settings').select('user_code').eq('notify_notice',true);
+      if(allUsers){for(const u of allUsers){if(u.user_code!==boardUserCode){
+        await sb.from('notifications').insert({recipient_code:u.user_code,type:'notice',post_id:newPost.id,actor_name:boardCharName,message:'새 공지가 등록되었습니다.'});
+      }}}
+    }
+    // New post notifications
+    sendNewPostNotifToAll(newPost.id,boardUserCode,boardCharName);
+  }
   
   document.getElementById('boardTextarea').value='';
   document.getElementById('boardCharCount').textContent='0';
@@ -1380,20 +1505,22 @@ document.getElementById('boardSubmit').addEventListener('click',async()=>{
   loadPosts();
 });
 
-// Char counter
-document.getElementById('boardTextarea').addEventListener('input',()=>{
-  document.getElementById('boardCharCount').textContent=document.getElementById('boardTextarea').value.length;
-});
-
-// Load posts
+// Load posts with filter
 async function loadPosts(){
   const postsEl=document.getElementById('boardPosts');
-  postsEl.innerHTML='<div class="board-loading">불러오는 중...</div>';
+  postsEl.innerHTML='<div class="tl-loading">불러오는 중...</div>';
   
-  const{data:posts}=await sb.from('board_posts').select('*').order('created_at',{ascending:false}).limit(50);
-  if(!posts||posts.length===0){postsEl.innerHTML='<div class="board-empty">아직 작성된 글이 없습니다.</div>';return;}
+  let query=sb.from('board_posts').select('*').order('created_at',{ascending:false}).limit(50);
   
-  // Get likes for current user
+  if(tlFilter==='mine'){query=query.eq('author_code',boardUserCode);}
+  else if(tlFilter==='mentions'){query=query.contains('mentions',[boardCharName]);}
+  else if(tlFilter==='notice'){query=query.eq('post_type','notice');}
+  // 'all' = no extra filter, but exclude replies from top level
+  if(tlFilter==='all'){query=query.is('reply_to',null);}
+  
+  const{data:posts}=await query;
+  if(!posts||posts.length===0){postsEl.innerHTML='<div class="tl-empty">아직 작성된 글이 없습니다.</div>';return;}
+  
   const{data:myLikes}=await sb.from('board_likes').select('post_id').eq('user_code',boardUserCode);
   const likedSet=new Set((myLikes||[]).map(l=>l.post_id));
   
@@ -1401,119 +1528,196 @@ async function loadPosts(){
   
   for(const post of posts){
     const div=document.createElement('div');
-    div.className='board-post';
+    div.className='tl-post'+(post.post_type==='notice'?' notice':'');
     
     const timeStr=formatTime(post.created_at);
     const isAuthor=post.author_code===boardUserCode;
+    const isAdmin=boardUserCode.includes('ADMIN');
     const isLiked=likedSet.has(post.id);
+    const content=renderContent(post.content);
+    
+    // Count replies
+    const{count:replyCount}=await sb.from('board_posts').select('*',{count:'exact',head:true}).eq('reply_to',post.id);
     
     div.innerHTML=`
-      <div class="board-post-header">
-        <div class="board-avatar">${post.author_name.charAt(0)}</div>
-        <div class="board-post-name">${escHtml(post.author_name)}</div>
-        <div class="board-post-time">${timeStr}${isAuthor||boardUserCode.includes('ADMIN')?'<button class="board-delete" data-del-post="'+post.id+'">삭제</button>':''}</div>
-      </div>
-      <div class="board-post-body">${escHtml(post.content)}</div>
-      <div class="board-post-actions">
-        <button class="board-action ${isLiked?'liked':''}" data-like="${post.id}">
-          ${isLiked?'♥':'♡'} <span>${post.likes||0}</span>
-        </button>
-        <button class="board-action" data-toggle-comments="${post.id}">
-          💬 댓글
-        </button>
-      </div>
-      <div class="board-comments" id="comments-${post.id}" style="display:none;">
-        <div id="commentsList-${post.id}"></div>
-        <div class="board-comment-input">
-          <input type="text" id="commentInput-${post.id}" placeholder="댓글을 입력하세요" maxlength="200">
-          <button data-submit-comment="${post.id}">작성</button>
+      <div class="tl-post-header">
+        <div class="tl-avatar">${post.author_name.charAt(0)}</div>
+        <div class="tl-post-name">${escHtml(post.author_name)}</div>
+        <div class="tl-post-meta">
+          <span class="tl-post-time">${timeStr}</span>
+          ${isAuthor||isAdmin?'<button class="tl-post-delete" data-del="'+post.id+'">삭제</button>':''}
         </div>
       </div>
+      ${post.post_type==='notice'?'<div style="font-size:0.65rem;color:var(--green-mid);letter-spacing:0.1em;margin-bottom:0.4em;">📢 공지</div>':''}
+      <div class="tl-post-content">${content}</div>
+      <div class="tl-post-actions">
+        <button class="tl-action ${isLiked?'liked':''}" data-like="${post.id}">
+          ${isLiked?'♥':'♡'} <span>${post.likes||0}</span>
+        </button>
+        <button class="tl-action" data-reply="${post.id}" data-reply-name="${escHtml(post.author_name)}">
+          💬 답글${replyCount>0?' '+replyCount:''}
+        </button>
+      </div>
+      <div class="tl-reply-composer" id="replyComposer-${post.id}">
+        <div class="tl-reply-to">↩ <span>${escHtml(post.author_name)}</span>에게 답글</div>
+        <textarea class="tl-reply-input" id="replyInput-${post.id}" placeholder="@${escHtml(post.author_name)} " maxlength="500"></textarea>
+        <div class="tl-reply-actions">
+          <button class="tl-reply-btn" data-reply-cancel="${post.id}">취소</button>
+          <button class="tl-reply-btn submit" data-reply-submit="${post.id}" data-reply-to-name="${escHtml(post.author_name)}" data-reply-to-code="${post.author_code}">답글 작성</button>
+        </div>
+      </div>
+      <div class="tl-thread" id="thread-${post.id}"></div>
     `;
     postsEl.appendChild(div);
+    
+    // Load replies if any
+    if(replyCount>0){loadReplies(post.id);}
   }
   
   // Event delegation
-  postsEl.addEventListener('click',handleBoardClick);
+  postsEl.onclick=handleTimelineClick;
 }
 
-async function handleBoardClick(e){
-  const btn=e.target.closest('[data-like]');
-  const toggleBtn=e.target.closest('[data-toggle-comments]');
-  const submitBtn=e.target.closest('[data-submit-comment]');
-  const delBtn=e.target.closest('[data-del-post]');
+// Load replies for a post
+async function loadReplies(postId){
+  const threadEl=document.getElementById('thread-'+postId);
+  if(!threadEl)return;
   
-  if(btn){
-    const postId=parseInt(btn.dataset.like);
-    const isLiked=btn.classList.contains('liked');
-    
+  const{data:replies}=await sb.from('board_posts').select('*').eq('reply_to',postId).order('created_at',{ascending:true}).limit(20);
+  if(!replies||replies.length===0){threadEl.innerHTML='';return;}
+  
+  const{data:myLikes}=await sb.from('board_likes').select('post_id').eq('user_code',boardUserCode);
+  const likedSet=new Set((myLikes||[]).map(l=>l.post_id));
+  
+  threadEl.innerHTML=replies.map(r=>{
+    const isLiked=likedSet.has(r.id);
+    const isAuthor=r.author_code===boardUserCode;
+    const isAdmin=boardUserCode.includes('ADMIN');
+    return `<div class="tl-post reply">
+      <div class="tl-post-header">
+        <div class="tl-avatar" style="width:28px;height:28px;font-size:0.6rem;">${r.author_name.charAt(0)}</div>
+        <div class="tl-post-name" style="font-size:0.78rem;">${escHtml(r.author_name)}</div>
+        <div class="tl-post-meta">
+          <span class="tl-post-time">${formatTime(r.created_at)}</span>
+          ${isAuthor||isAdmin?'<button class="tl-post-delete" data-del="'+r.id+'">삭제</button>':''}
+        </div>
+      </div>
+      <div class="tl-post-content" style="font-size:0.84rem;">${renderContent(r.content)}</div>
+      <div class="tl-post-actions">
+        <button class="tl-action ${isLiked?'liked':''}" data-like="${r.id}">
+          ${isLiked?'♥':'♡'} <span>${r.likes||0}</span>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Handle all timeline clicks
+async function handleTimelineClick(e){
+  // Like
+  const likeBtn=e.target.closest('[data-like]');
+  if(likeBtn){
+    const postId=parseInt(likeBtn.dataset.like);
+    const isLiked=likeBtn.classList.contains('liked');
     if(isLiked){
       await sb.from('board_likes').delete().eq('post_id',postId).eq('user_code',boardUserCode);
-      await sb.from('board_posts').update({likes:Math.max(0,(parseInt(btn.querySelector('span').textContent)||0)-1)}).eq('id',postId);
+      await sb.from('board_posts').update({likes:Math.max(0,(parseInt(likeBtn.querySelector('span').textContent)||0)-1)}).eq('id',postId);
     }else{
       await sb.from('board_likes').insert({post_id:postId,user_code:boardUserCode}).single();
-      await sb.from('board_posts').update({likes:(parseInt(btn.querySelector('span').textContent)||0)+1}).eq('id',postId);
-      // Send like notification to post author
+      await sb.from('board_posts').update({likes:(parseInt(likeBtn.querySelector('span').textContent)||0)+1}).eq('id',postId);
+      // Like notification
       const{data:likedPost}=await sb.from('board_posts').select('author_code').eq('id',postId).maybeSingle();
       if(likedPost&&likedPost.author_code!==boardUserCode){
         sendNotification(likedPost.author_code,'like',postId,boardCharName,boardCharName+'님이 회원님의 글을 좋아합니다.');
       }
     }
-    loadPosts();
+    loadPosts();return;
   }
   
-  if(toggleBtn){
-    const postId=toggleBtn.dataset.toggleComments;
-    const commentsDiv=document.getElementById('comments-'+postId);
-    if(commentsDiv.style.display==='none'){
-      commentsDiv.style.display='block';
-      loadComments(postId);
-    }else{
-      commentsDiv.style.display='none';
+  // Reply toggle
+  const replyBtn=e.target.closest('[data-reply]');
+  if(replyBtn&&!e.target.closest('[data-reply-submit]')&&!e.target.closest('[data-reply-cancel]')){
+    const postId=replyBtn.dataset.reply;
+    const composer=document.getElementById('replyComposer-'+postId);
+    if(composer){
+      const isOpen=composer.classList.contains('open');
+      // Close all other reply composers
+      document.querySelectorAll('.tl-reply-composer.open').forEach(c=>c.classList.remove('open'));
+      if(!isOpen){
+        composer.classList.add('open');
+        const input=document.getElementById('replyInput-'+postId);
+        if(input&&!input.value)input.value='@'+replyBtn.dataset.replyName+' ';
+        input.focus();
+      }
     }
+    return;
   }
   
+  // Reply cancel
+  const cancelBtn=e.target.closest('[data-reply-cancel]');
+  if(cancelBtn){
+    const postId=cancelBtn.dataset.replyCancel;
+    document.getElementById('replyComposer-'+postId).classList.remove('open');
+    return;
+  }
+  
+  // Reply submit
+  const submitBtn=e.target.closest('[data-reply-submit]');
   if(submitBtn){
-    const postId=submitBtn.dataset.submitComment;
-    const input=document.getElementById('commentInput-'+postId);
+    const postId=parseInt(submitBtn.dataset.replySubmit);
+    const replyToName=submitBtn.dataset.replyToName;
+    const replyToCode=submitBtn.dataset.replyToCode;
+    const input=document.getElementById('replyInput-'+postId);
     const text=input.value.trim();
     if(!text)return;
     
-    await sb.from('board_comments').insert({post_id:parseInt(postId),author_code:boardUserCode,author_name:boardCharName,content:text});
-    input.value='';
-    loadComments(postId);
-    // Send comment notification to post author
-    const{data:post}=await sb.from('board_posts').select('author_code,author_name').eq('id',parseInt(postId)).maybeSingle();
-    if(post&&post.author_code!==boardUserCode){
-      sendNotification(post.author_code,'comment',parseInt(postId),boardCharName,boardCharName+'님이 회원님의 글에 댓글을 달았습니다.');
+    const mentions=parseMentions(text);
+    
+    await sb.from('board_posts').insert({
+      author_code:boardUserCode,
+      author_name:boardCharName,
+      content:text,
+      reply_to:postId,
+      mentions:mentions,
+      post_type:'reply'
+    });
+    
+    // Notify post author
+    if(replyToCode!==boardUserCode){
+      sendNotification(replyToCode,'comment',postId,boardCharName,boardCharName+'님이 회원님의 글에 답글을 달았습니다.');
     }
+    // Notify mentioned users
+    for(const name of mentions){
+      if(name===replyToName)continue;
+      const{data:target}=await sb.from('invite_codes').select('code').eq('character_name',name).maybeSingle();
+      if(target&&target.code!==boardUserCode){
+        sendNotification(target.code,'comment',postId,boardCharName,boardCharName+'님이 회원님을 멘션했습니다.');
+      }
+    }
+    
+    input.value='';
+    document.getElementById('replyComposer-'+postId).classList.remove('open');
+    loadReplies(postId);
+    return;
   }
   
+  // Delete
+  const delBtn=e.target.closest('[data-del]');
   if(delBtn){
     if(!confirm('정말 삭제하시겠습니까?'))return;
-    const postId=parseInt(delBtn.dataset.delPost);
+    const postId=parseInt(delBtn.dataset.del);
     await sb.from('board_posts').delete().eq('id',postId);
-    loadPosts();
+    loadPosts();return;
   }
-}
-
-async function loadComments(postId){
-  const listEl=document.getElementById('commentsList-'+postId);
-  if(!listEl)return;
   
-  const{data:comments}=await sb.from('board_comments').select('*').eq('post_id',postId).order('created_at',{ascending:true});
-  
-  if(!comments||comments.length===0){listEl.innerHTML='<div style="font-size:0.78rem;color:var(--text-dim);padding:0.5em 0;">댓글이 없습니다.</div>';return;}
-  
-  listEl.innerHTML=comments.map(c=>`
-    <div class="board-comment">
-      <div class="board-comment-header">
-        <div class="board-comment-name">${escHtml(c.author_name)}</div>
-        <div class="board-comment-time">${formatTime(c.created_at)}</div>
-      </div>
-      <div class="board-comment-body">${escHtml(c.content)}</div>
-    </div>
-  `).join('');
+  // Mention click → filter to that person's posts
+  const mentionEl=e.target.closest('.mention');
+  if(mentionEl){
+    const name=mentionEl.dataset.mention;
+    // Could navigate to profile or filter — for now just alert
+    alert(name+'님의 프로필 (준비중)');
+    return;
+  }
 }
 
 function formatTime(ts){
