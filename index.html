@@ -222,6 +222,8 @@
       <li><a data-page="apply">신청</a></li>
       <li><a data-page="board">게시판</a></li>
       <li id="notifNavItem" style="position:relative;display:none;"><a id="notifBell" style="cursor:pointer;font-size:1rem;position:relative;">🔔<span id="notifBadge" style="display:none;position:absolute;top:-6px;right:-8px;background:var(--accent-red);color:#fff;font-size:0.55rem;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:sans-serif;">0</span></a></li>
+      <li id="adminNavItem" style="display:none;"><a data-page="admin" style="color:var(--accent-red);">관리</a></li>
+      <li id="adminNavItem" style="display:none;"><a data-page="admin" style="color:var(--accent-red);">관리</a></li>
     </ul>
   </nav>
 
@@ -503,6 +505,225 @@
   <!-- PAGE: QNA (준비중) -->
   <div class="page" id="page-qna"><div class="preparing"><div class="preparing-title">준비중</div><div class="preparing-desc">Q&A 페이지는 현재 준비중입니다.</div><div class="back-link" data-page="main">← 메인으로 돌아가기</div></div></div>
 
+  <!-- PAGE: ADMIN -->
+  <div class="page" id="page-admin">
+    <style>
+      .admin-wrap{max-width:900px;margin:0 auto;padding:100px 24px 80px;}
+      .admin-header{text-align:center;margin-bottom:2em;}
+      .admin-header-label{font-family:'Cormorant Garamond',serif;font-size:0.75rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--accent-red);margin-bottom:0.8em;}
+      .admin-header-title{font-size:1.8rem;font-weight:700;color:var(--text-bright);letter-spacing:0.1em;}
+      .admin-tabs{display:flex;gap:0;margin-bottom:2em;border:1px solid var(--border);border-radius:2px;overflow:hidden;}
+      .admin-tab{flex:1;padding:12px;background:transparent;border:none;color:var(--text-dim);font-family:'Noto Serif KR',serif;font-size:0.78rem;letter-spacing:0.08em;cursor:pointer;transition:all 0.3s ease;text-align:center;border-right:1px solid var(--border);}
+      .admin-tab:last-child{border-right:none;}
+      .admin-tab:hover{color:var(--text-secondary);background:rgba(138,48,48,0.03);}
+      .admin-tab.active{color:var(--accent-red);background:rgba(138,48,48,0.08);}
+      .admin-panel{display:none;}
+      .admin-panel.active{display:block;}
+      /* Runner table */
+      .admin-table{width:100%;border-collapse:collapse;font-size:0.8rem;}
+      .admin-table th{text-align:left;padding:10px 12px;background:var(--bg-card);color:var(--text-dim);font-weight:500;letter-spacing:0.05em;border-bottom:1px solid var(--border);font-size:0.72rem;}
+      .admin-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text-secondary);vertical-align:middle;}
+      .admin-table tr:hover td{background:rgba(45,90,39,0.03);}
+      .admin-table .banned td{opacity:0.4;text-decoration:line-through;}
+      .admin-btn{padding:4px 10px;background:transparent;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);font-family:'Noto Serif KR',serif;font-size:0.68rem;cursor:pointer;transition:all 0.3s ease;margin:0 2px;}
+      .admin-btn:hover{border-color:var(--green-mid);color:var(--text-secondary);}
+      .admin-btn.danger{border-color:rgba(138,48,48,0.3);}
+      .admin-btn.danger:hover{border-color:var(--accent-red);color:var(--accent-red);}
+      .admin-badge{display:inline-block;padding:2px 8px;border-radius:2px;font-size:0.65rem;letter-spacing:0.05em;}
+      .admin-badge.active{background:rgba(45,90,39,0.15);color:var(--green-light);}
+      .admin-badge.warned{background:rgba(184,134,11,0.15);color:#b8860b;}
+      .admin-badge.banned{background:rgba(138,48,48,0.15);color:var(--accent-red);}
+      /* Edit modal */
+      .admin-modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.7);justify-content:center;align-items:center;}
+      .admin-modal.open{display:flex;}
+      .admin-modal-box{background:var(--bg-card);border:1px solid var(--border);border-radius:4px;padding:2em;max-width:400px;width:90%;}
+      .admin-modal-title{font-size:1rem;font-weight:700;color:var(--text-bright);margin-bottom:1em;}
+      .admin-modal-field{margin-bottom:1em;}
+      .admin-modal-label{font-size:0.75rem;color:var(--text-dim);margin-bottom:0.4em;display:block;}
+      .admin-modal-input{width:100%;padding:10px;background:rgba(10,12,8,0.6);border:1px solid var(--border);border-radius:2px;color:var(--text-bright);font-family:'Noto Serif KR',serif;font-size:0.85rem;outline:none;}
+      .admin-modal-input:focus{border-color:var(--green-mid);}
+      .admin-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:1.5em;}
+      .admin-modal-btn{padding:8px 18px;background:transparent;border:1px solid var(--border);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.78rem;cursor:pointer;transition:all 0.3s ease;}
+      .admin-modal-btn:hover{border-color:var(--green-mid);color:var(--text-bright);}
+      .admin-modal-btn.confirm{border-color:var(--green-dark);background:rgba(45,90,39,0.1);}
+      /* Post management */
+      .admin-post-item{display:flex;gap:1em;padding:0.8em;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;margin-bottom:0.5em;align-items:center;}
+      .admin-post-info{flex:1;min-width:0;}
+      .admin-post-author{font-size:0.78rem;color:var(--green-light);font-weight:500;}
+      .admin-post-preview{font-size:0.75rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:500px;}
+      .admin-post-time{font-size:0.65rem;color:var(--text-dim);}
+      .admin-stats{display:flex;gap:1.5em;margin-bottom:2em;flex-wrap:wrap;}
+      .admin-stat-card{padding:1.2em;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;flex:1;min-width:120px;text-align:center;}
+      .admin-stat-num{font-size:1.5rem;font-weight:700;color:var(--text-bright);margin-bottom:0.2em;}
+      .admin-stat-label{font-size:0.7rem;color:var(--text-dim);letter-spacing:0.1em;}
+    </style>
+
+    <div class="admin-wrap">
+      <div class="admin-header">
+        <div class="admin-header-label">Administration</div>
+        <div class="admin-header-title">총괄 관리</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="admin-stats" id="adminStats"></div>
+
+      <!-- Tabs -->
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-admin-tab="runners">러너 관리</button>
+        <button class="admin-tab" data-admin-tab="posts">게시글 관리</button>
+        <button class="admin-tab" data-admin-tab="codes">초대코드</button>
+      </div>
+
+      <!-- Panel: Runners -->
+      <div class="admin-panel active" id="adminPanel-runners">
+        <div id="adminRunnerTable"></div>
+      </div>
+
+      <!-- Panel: Posts -->
+      <div class="admin-panel" id="adminPanel-posts">
+        <div id="adminPostList"></div>
+      </div>
+
+      <!-- Panel: Codes -->
+      <div class="admin-panel" id="adminPanel-codes">
+        <div style="margin-bottom:1em;">
+          <button class="admin-btn" id="adminGenCode" style="padding:8px 16px;">+ 새 초대코드 생성</button>
+        </div>
+        <div id="adminCodeList"></div>
+      </div>
+    </div>
+
+    <!-- Edit Character Modal -->
+    <div class="admin-modal" id="adminEditModal">
+      <div class="admin-modal-box">
+        <div class="admin-modal-title">캐릭터 정보 수정</div>
+        <div class="admin-modal-field">
+          <label class="admin-modal-label">캐릭터명</label>
+          <input class="admin-modal-input" id="adminEditName" type="text" maxlength="20">
+        </div>
+        <div class="admin-modal-field">
+          <label class="admin-modal-label">메모 (총괄 전용)</label>
+          <input class="admin-modal-input" id="adminEditNotes" type="text" maxlength="100">
+        </div>
+        <input type="hidden" id="adminEditCode">
+        <div class="admin-modal-actions">
+          <button class="admin-modal-btn" id="adminEditCancel">취소</button>
+          <button class="admin-modal-btn confirm" id="adminEditSave">저장</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Warning Modal -->
+    <div class="admin-modal" id="adminWarnModal">
+      <div class="admin-modal-box">
+        <div class="admin-modal-title" id="adminWarnTitle">경고 부여</div>
+        <div class="admin-modal-field">
+          <label class="admin-modal-label">사유</label>
+          <input class="admin-modal-input" id="adminWarnReason" type="text" placeholder="경고 사유를 입력하세요" maxlength="100">
+        </div>
+        <input type="hidden" id="adminWarnCode">
+        <input type="hidden" id="adminWarnAction">
+        <div class="admin-modal-actions">
+          <button class="admin-modal-btn" id="adminWarnCancel">취소</button>
+          <button class="admin-modal-btn confirm" id="adminWarnConfirm">확인</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: ADMIN -->
+  <div class="page" id="page-admin">
+    <style>
+      .adm-wrap{max-width:800px;margin:0 auto;padding:100px 24px 80px;}
+      .adm-header{text-align:center;margin-bottom:2em;}
+      .adm-header-label{font-family:'Cormorant Garamond',serif;font-size:0.75rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--accent-red);margin-bottom:0.8em;}
+      .adm-header-title{font-size:1.8rem;font-weight:700;color:var(--text-bright);letter-spacing:0.1em;}
+      .adm-tabs{display:flex;gap:0;margin-bottom:2em;border:1px solid var(--border);border-radius:2px;overflow:hidden;}
+      .adm-tab{flex:1;padding:12px;background:transparent;border:none;color:var(--text-dim);font-family:'Noto Serif KR',serif;font-size:0.75rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.3s ease;text-align:center;border-right:1px solid var(--border);}
+      .adm-tab:last-child{border-right:none;}
+      .adm-tab:hover{color:var(--text-secondary);}
+      .adm-tab.active{color:var(--accent-red);background:rgba(138,48,48,0.08);}
+      .adm-panel{display:none;}
+      .adm-panel.active{display:block;}
+      .adm-table{width:100%;border-collapse:collapse;margin-bottom:1.5em;}
+      .adm-table th{font-size:0.7rem;font-weight:500;color:var(--text-dim);letter-spacing:0.1em;text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);}
+      .adm-table td{font-size:0.8rem;color:var(--text-secondary);padding:10px 12px;border-bottom:1px solid rgba(30,38,30,0.3);vertical-align:middle;}
+      .adm-table tr:hover td{background:rgba(45,90,39,0.03);}
+      .adm-btn{padding:5px 12px;background:transparent;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);font-family:'Noto Serif KR',serif;font-size:0.7rem;cursor:pointer;transition:all 0.3s ease;margin:2px;}
+      .adm-btn:hover{border-color:var(--green-mid);color:var(--text-secondary);}
+      .adm-btn.danger{border-color:rgba(138,48,48,0.3);color:var(--accent-red);}
+      .adm-btn.danger:hover{background:rgba(138,48,48,0.1);}
+      .adm-input{padding:6px 10px;background:rgba(10,12,8,0.6);border:1px solid var(--border);border-radius:2px;color:var(--text-bright);font-family:'Noto Serif KR',serif;font-size:0.78rem;outline:none;width:120px;}
+      .adm-input:focus{border-color:var(--green-mid);}
+      .adm-input.wide{width:200px;}
+      .adm-status{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.65rem;letter-spacing:0.05em;}
+      .adm-status.active{background:rgba(45,90,39,0.15);color:var(--green-light);}
+      .adm-status.warned{background:rgba(184,134,11,0.15);color:#b8860b;}
+      .adm-status.banned{background:rgba(138,48,48,0.15);color:var(--accent-red);}
+      .adm-status.departed{background:rgba(74,78,72,0.15);color:var(--text-dim);}
+      .adm-section-title{font-size:0.9rem;font-weight:700;color:var(--text-bright);margin-bottom:1em;padding-bottom:0.5em;border-bottom:1px solid var(--border);}
+      .adm-empty{text-align:center;padding:2em;font-size:0.8rem;color:var(--text-dim);font-style:italic;}
+      .adm-stat-row{display:flex;gap:1.5em;margin-bottom:1.5em;flex-wrap:wrap;}
+      .adm-stat-box{padding:1em 1.5em;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;flex:1;min-width:120px;}
+      .adm-stat-num{font-size:1.5rem;font-weight:700;color:var(--text-bright);margin-bottom:0.2em;}
+      .adm-stat-label{font-size:0.7rem;color:var(--text-dim);letter-spacing:0.1em;}
+      .adm-post-item{padding:1em;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;margin-bottom:0.8em;}
+      .adm-post-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5em;}
+      .adm-post-author{font-size:0.8rem;font-weight:500;color:var(--text-bright);}
+      .adm-post-time{font-size:0.65rem;color:var(--text-dim);}
+      .adm-post-body{font-size:0.82rem;color:var(--text-secondary);line-height:1.8;margin-bottom:0.5em;max-height:60px;overflow:hidden;}
+    </style>
+
+    <div class="adm-wrap" id="adminWrap">
+      <div class="adm-header">
+        <div class="adm-header-label">Administration</div>
+        <div class="adm-header-title">총괄 관리</div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="adm-tabs">
+        <button class="adm-tab active" data-adm-tab="runners">러너 관리</button>
+        <button class="adm-tab" data-adm-tab="codes">초대코드</button>
+        <button class="adm-tab" data-adm-tab="posts">게시글 관리</button>
+        <button class="adm-tab" data-adm-tab="stats">통계</button>
+      </div>
+
+      <!-- Panel: Runners -->
+      <div class="adm-panel active" id="admRunners">
+        <div class="adm-section-title">러너 목록</div>
+        <div id="admRunnerList"><div class="adm-empty">불러오는 중...</div></div>
+      </div>
+
+      <!-- Panel: Codes -->
+      <div class="adm-panel" id="admCodes">
+        <div class="adm-section-title">초대코드 관리</div>
+        <div style="margin-bottom:1.5em;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input type="text" class="adm-input" id="admNewCode" placeholder="새 코드 (예: DEER001)">
+          <input type="password" class="adm-input" id="admNewPw" placeholder="초기 비밀번호" value="000000">
+          <button class="adm-btn" id="admAddCode">코드 생성</button>
+        </div>
+        <div id="admCodeList"><div class="adm-empty">불러오는 중...</div></div>
+      </div>
+
+      <!-- Panel: Posts -->
+      <div class="adm-panel" id="admPosts">
+        <div class="adm-section-title">게시글 관리</div>
+        <div style="margin-bottom:1em;display:flex;gap:8px;align-items:center;">
+          <input type="text" class="adm-input wide" id="admPostSearch" placeholder="캐릭터명 또는 내용 검색">
+          <button class="adm-btn" id="admPostSearchBtn">검색</button>
+          <button class="adm-btn" id="admPostLoadAll">전체</button>
+        </div>
+        <div id="admPostList"><div class="adm-empty">불러오는 중...</div></div>
+      </div>
+
+      <!-- Panel: Stats -->
+      <div class="adm-panel" id="admStats">
+        <div class="adm-section-title">커뮤니티 통계</div>
+        <div class="adm-stat-row" id="admStatRow"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- PAGE: TIMELINE (upgraded from board) -->
   <div class="page" id="page-board">
     <style>
@@ -717,7 +938,7 @@ document.getElementById('newPw2').addEventListener('keydown',e=>{if(e.key==='Ent
 function doEnter(){
   bgm.volume=0;bgm.play().then(()=>{let v=0;const fi=setInterval(()=>{v+=0.02;if(v>=0.5){v=0.5;clearInterval(fi);}bgm.volume=v;},100);audioPanel.classList.add('visible');}).catch(()=>{});
   setTimeout(()=>entryPage.classList.add('hidden'),800);
-  setTimeout(()=>{entryPage.style.display='none';siteWrap.classList.add('visible');showPage('main');initParticles();initNotifications();},2300);
+  setTimeout(()=>{entryPage.style.display='none';siteWrap.classList.add('visible');showPage('main');initParticles();initNotifications();initAdmin();},2300);
 }
 
 // === SPA ROUTING ===
@@ -1732,6 +1953,224 @@ function formatTime(ts){
 
 function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+// === ADMIN MANAGEMENT SYSTEM ===
+function initAdmin(){
+  if(!sessionCode||!sessionCode.includes('ADMIN'))return;
+  document.getElementById('adminNavItem').style.display='block';
+}
+
+// Admin tabs
+document.querySelectorAll('.adm-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.adm-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.adm-panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('adm'+tab.dataset.admTab.charAt(0).toUpperCase()+tab.dataset.admTab.slice(1)).classList.add('active');
+    // Load data
+    if(tab.dataset.admTab==='runners')loadAdmRunners();
+    if(tab.dataset.admTab==='codes')loadAdmCodes();
+    if(tab.dataset.admTab==='posts')loadAdmPosts();
+    if(tab.dataset.admTab==='stats')loadAdmStats();
+  });
+});
+
+// Show admin page → load runners
+const origShowPage=showPage;
+showPage=function(name){
+  origShowPage(name);
+  if(name==='admin'&&sessionCode&&sessionCode.includes('ADMIN')){loadAdmRunners();}
+};
+
+// === RUNNERS ===
+async function loadAdmRunners(){
+  const el=document.getElementById('admRunnerList');
+  el.innerHTML='<div class="adm-empty">불러오는 중...</div>';
+  const{data}=await sb.from('invite_codes').select('*').order('code');
+  if(!data||data.length===0){el.innerHTML='<div class="adm-empty">등록된 코드가 없습니다.</div>';return;}
+  const runners=data.filter(d=>d.character_name);
+  if(runners.length===0){el.innerHTML='<div class="adm-empty">등록된 러너가 없습니다.</div>';return;}
+  
+  const statusLabel={active:'활동중',warned:'경고',banned:'제명',departed:'하차'};
+  el.innerHTML='<table class="adm-table"><thead><tr><th>코드</th><th>캐릭터명</th><th>경고</th><th>상태</th><th>관리</th></tr></thead><tbody>'+
+    runners.map(r=>`<tr>
+      <td style="font-family:'Cormorant Garamond',serif;letter-spacing:0.1em;font-size:0.75rem;">${escHtml(r.code)}</td>
+      <td><input class="adm-input" value="${escHtml(r.character_name||'')}" data-code="${r.code}" data-field="name" style="width:100px;"></td>
+      <td>${r.warnings||0}/2</td>
+      <td><span class="adm-status ${r.status||'active'}">${statusLabel[r.status||'active']}</span></td>
+      <td>
+        <button class="adm-btn" data-adm-warn="${r.code}" title="경고 부여">⚠ 경고</button>
+        <button class="adm-btn danger" data-adm-ban="${r.code}" title="제명">✕ 제명</button>
+        <button class="adm-btn" data-adm-save-name="${r.code}" title="이름 저장">저장</button>
+      </td>
+    </tr>`).join('')+'</tbody></table>';
+  
+  // Event handlers
+  el.querySelectorAll('[data-adm-warn]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const code=btn.dataset.admWarn;
+      const reason=prompt('경고 사유를 입력하세요:');
+      if(!reason)return;
+      const{data:user}=await sb.from('invite_codes').select('warnings').eq('code',code).maybeSingle();
+      const newWarnings=(user?.warnings||0)+1;
+      const newStatus=newWarnings>=2?'banned':'warned';
+      await sb.from('invite_codes').update({warnings:newWarnings,status:newStatus,warning_reason:reason}).eq('code',code);
+      if(newWarnings>=2){
+        await sb.from('invite_codes').update({banned_at:new Date().toISOString()}).eq('code',code);
+        alert(code+' — 경고 2회 누적으로 제명 처리되었습니다.');
+      }else{
+        alert(code+' — 경고 '+newWarnings+'회 부여 (사유: '+reason+')');
+      }
+      loadAdmRunners();
+    });
+  });
+  
+  el.querySelectorAll('[data-adm-ban]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const code=btn.dataset.admBan;
+      if(!confirm(code+'을(를) 즉시 제명하시겠습니까?'))return;
+      await sb.from('invite_codes').update({status:'banned',banned_at:new Date().toISOString()}).eq('code',code);
+      alert(code+' — 제명 처리되었습니다.');
+      loadAdmRunners();
+    });
+  });
+  
+  el.querySelectorAll('[data-adm-save-name]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const code=btn.dataset.admSaveName;
+      const input=el.querySelector('input[data-code="'+code+'"][data-field="name"]');
+      if(!input)return;
+      const name=input.value.trim();
+      if(!name){alert('캐릭터명을 입력하세요.');return;}
+      await sb.from('invite_codes').update({character_name:name}).eq('code',code);
+      alert(code+' → '+name+' 저장 완료');
+      loadAdmRunners();
+    });
+  });
+}
+
+// === CODES ===
+async function loadAdmCodes(){
+  const el=document.getElementById('admCodeList');
+  el.innerHTML='<div class="adm-empty">불러오는 중...</div>';
+  const{data}=await sb.from('invite_codes').select('*').order('code');
+  if(!data||data.length===0){el.innerHTML='<div class="adm-empty">등록된 코드가 없습니다.</div>';return;}
+  
+  el.innerHTML='<table class="adm-table"><thead><tr><th>코드</th><th>캐릭터명</th><th>비밀번호 변경</th><th>상태</th><th>관리</th></tr></thead><tbody>'+
+    data.map(r=>`<tr>
+      <td style="font-family:'Cormorant Garamond',serif;letter-spacing:0.1em;font-size:0.75rem;">${escHtml(r.code)}</td>
+      <td>${escHtml(r.character_name||'미등록')}</td>
+      <td>${r.password_changed?'✓':'✕ (초기)'}</td>
+      <td><span class="adm-status ${r.status||'active'}">${r.status||'active'}</span></td>
+      <td>
+        <button class="adm-btn" data-adm-reset-pw="${r.code}" title="비밀번호 초기화">PW 초기화</button>
+        <button class="adm-btn danger" data-adm-delete-code="${r.code}" title="코드 삭제">삭제</button>
+      </td>
+    </tr>`).join('')+'</tbody></table>';
+  
+  el.querySelectorAll('[data-adm-reset-pw]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const code=btn.dataset.admResetPw;
+      if(!confirm(code+'의 비밀번호를 000000으로 초기화하시겠습니까?'))return;
+      await sb.from('invite_codes').update({password:'000000',password_changed:false}).eq('code',code);
+      alert(code+' — 비밀번호 초기화 완료');
+      loadAdmCodes();
+    });
+  });
+  
+  el.querySelectorAll('[data-adm-delete-code]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const code=btn.dataset.admDeleteCode;
+      if(!confirm(code+'를 완전히 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'))return;
+      await sb.from('invite_codes').delete().eq('code',code);
+      alert(code+' — 삭제 완료');
+      loadAdmCodes();
+    });
+  });
+}
+
+// Add new code
+document.getElementById('admAddCode').addEventListener('click',async()=>{
+  const code=document.getElementById('admNewCode').value.trim().toUpperCase();
+  const pw=document.getElementById('admNewPw').value||'000000';
+  if(!code){alert('코드를 입력하세요.');return;}
+  const{data:existing}=await sb.from('invite_codes').select('code').eq('code',code).maybeSingle();
+  if(existing){alert('이미 존재하는 코드입니다.');return;}
+  await sb.from('invite_codes').insert({code:code,password:pw,password_changed:false});
+  document.getElementById('admNewCode').value='';
+  alert(code+' — 생성 완료');
+  loadAdmCodes();
+});
+
+// === POSTS ===
+async function loadAdmPosts(search){
+  const el=document.getElementById('admPostList');
+  el.innerHTML='<div class="adm-empty">불러오는 중...</div>';
+  
+  let query=sb.from('board_posts').select('*').order('created_at',{ascending:false}).limit(50);
+  // Search is client-side filter for simplicity
+  const{data:posts}=await query;
+  if(!posts||posts.length===0){el.innerHTML='<div class="adm-empty">게시글이 없습니다.</div>';return;}
+  
+  let filtered=posts;
+  if(search){
+    const s=search.toLowerCase();
+    filtered=posts.filter(p=>p.author_name.toLowerCase().includes(s)||p.content.toLowerCase().includes(s));
+  }
+  if(filtered.length===0){el.innerHTML='<div class="adm-empty">검색 결과가 없습니다.</div>';return;}
+  
+  el.innerHTML=filtered.map(p=>`
+    <div class="adm-post-item">
+      <div class="adm-post-header">
+        <div class="adm-post-author">${escHtml(p.author_name)} <span style="font-size:0.65rem;color:var(--text-dim);">${escHtml(p.author_code)}</span></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="adm-post-time">${formatTime(p.created_at)}</span>
+          <button class="adm-btn danger" data-adm-del-post="${p.id}">삭제</button>
+        </div>
+      </div>
+      <div class="adm-post-body">${escHtml(p.content)}</div>
+      <div style="font-size:0.65rem;color:var(--text-dim);">♡ ${p.likes||0} · ${p.post_type||'normal'}${p.reply_to?' · 답글':''}${p.mentions&&p.mentions.length>0?' · 멘션: '+p.mentions.join(', '):''}</div>
+    </div>
+  `).join('');
+  
+  el.querySelectorAll('[data-adm-del-post]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      if(!confirm('이 게시글을 삭제하시겠습니까?'))return;
+      await sb.from('board_posts').delete().eq('id',parseInt(btn.dataset.admDelPost));
+      alert('삭제 완료');
+      loadAdmPosts(search);
+    });
+  });
+}
+
+document.getElementById('admPostSearchBtn').addEventListener('click',()=>{
+  loadAdmPosts(document.getElementById('admPostSearch').value.trim());
+});
+document.getElementById('admPostLoadAll').addEventListener('click',()=>{
+  document.getElementById('admPostSearch').value='';
+  loadAdmPosts();
+});
+
+// === STATS ===
+async function loadAdmStats(){
+  const el=document.getElementById('admStatRow');
+  
+  const{count:totalCodes}=await sb.from('invite_codes').select('*',{count:'exact',head:true});
+  const{count:activeCodes}=await sb.from('invite_codes').select('*',{count:'exact',head:true}).eq('status','active');
+  const{count:registeredRunners}=await sb.from('invite_codes').select('*',{count:'exact',head:true}).not('character_name','is',null);
+  const{count:totalPosts}=await sb.from('board_posts').select('*',{count:'exact',head:true});
+  const{count:totalLikes}=await sb.from('board_likes').select('*',{count:'exact',head:true});
+  const{count:bannedCount}=await sb.from('invite_codes').select('*',{count:'exact',head:true}).eq('status','banned');
+  
+  el.innerHTML=`
+    <div class="adm-stat-box"><div class="adm-stat-num">${totalCodes||0}</div><div class="adm-stat-label">전체 코드</div></div>
+    <div class="adm-stat-box"><div class="adm-stat-num">${registeredRunners||0}</div><div class="adm-stat-label">등록된 러너</div></div>
+    <div class="adm-stat-box"><div class="adm-stat-num">${activeCodes||0}</div><div class="adm-stat-label">활동중</div></div>
+    <div class="adm-stat-box"><div class="adm-stat-num">${bannedCount||0}</div><div class="adm-stat-label">제명</div></div>
+    <div class="adm-stat-box"><div class="adm-stat-num">${totalPosts||0}</div><div class="adm-stat-label">총 게시글</div></div>
+    <div class="adm-stat-box"><div class="adm-stat-num">${totalLikes||0}</div><div class="adm-stat-label">총 좋아요</div></div>
+  `;
+}
+
 // === NOTIFICATION SYSTEM ===
 let notifSettings={notify_comment:true,notify_like:true,notify_notice:true,notify_new_post:false};
 let notifPanelOpen=false;
@@ -1742,6 +2181,8 @@ let realtimeChannel=null;
 function initNotifications(){
   if(!sessionCode)return;
   document.getElementById('notifNavItem').style.display='block';
+  // Show admin nav for ADMIN users
+  if(sessionCode.includes('ADMIN')){document.getElementById('adminNavItem').style.display='block';}
   loadNotifSettings();
   loadNotifCount();
   loadNotifList();
@@ -1904,6 +2345,204 @@ async function sendNewPostNotifToAll(postId,authorCode,authorName){
     await sb.from('notifications').insert({recipient_code:s.user_code,type:'new_post',post_id:postId,actor_name:authorName,message:authorName+'님이 새 글을 작성했습니다.'});
   }
 }
+
+// === ADMIN PANEL ===
+// Tab switching
+document.querySelectorAll('.admin-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('adminPanel-'+tab.dataset.adminTab).classList.add('active');
+    if(tab.dataset.adminTab==='runners')loadAdminRunners();
+    if(tab.dataset.adminTab==='posts')loadAdminPosts();
+    if(tab.dataset.adminTab==='codes')loadAdminCodes();
+  });
+});
+
+// Load admin on page show
+const _origShowPage=showPage;
+showPage=function(name){
+  _origShowPage(name);
+  if(name==='admin'&&sessionCode&&sessionCode.includes('ADMIN')){loadAdminStats();loadAdminRunners();}
+};
+
+// Stats
+async function loadAdminStats(){
+  const{count:totalRunners}=await sb.from('invite_codes').select('*',{count:'exact',head:true}).not('code','like','%ADMIN%');
+  const{count:activeRunners}=await sb.from('invite_codes').select('*',{count:'exact',head:true}).not('code','like','%ADMIN%').eq('is_banned',false);
+  const{count:totalPosts}=await sb.from('board_posts').select('*',{count:'exact',head:true});
+  const{count:bannedCount}=await sb.from('invite_codes').select('*',{count:'exact',head:true}).eq('is_banned',true);
+  document.getElementById('adminStats').innerHTML=`
+    <div class="admin-stat-card"><div class="admin-stat-num">${totalRunners||0}</div><div class="admin-stat-label">전체 러너</div></div>
+    <div class="admin-stat-card"><div class="admin-stat-num">${activeRunners||0}</div><div class="admin-stat-label">활동 중</div></div>
+    <div class="admin-stat-card"><div class="admin-stat-num">${totalPosts||0}</div><div class="admin-stat-label">총 게시글</div></div>
+    <div class="admin-stat-card"><div class="admin-stat-num">${bannedCount||0}</div><div class="admin-stat-label">제명</div></div>
+  `;
+}
+
+// Runners
+async function loadAdminRunners(){
+  const{data:runners}=await sb.from('invite_codes').select('*').not('code','like','%ADMIN%').order('code',{ascending:true});
+  if(!runners){document.getElementById('adminRunnerTable').innerHTML='<div class="tl-empty">러너가 없습니다.</div>';return;}
+  let html='<table class="admin-table"><thead><tr><th>코드</th><th>캐릭터명</th><th>상태</th><th>경고</th><th>관리</th></tr></thead><tbody>';
+  for(const r of runners){
+    const status=r.is_banned?'banned':r.warnings>=2?'warned':'active';
+    const statusLabel=r.is_banned?'제명':r.warnings>=1?'경고 '+r.warnings+'회':'활동';
+    const cls=r.is_banned?'banned':'';
+    html+=`<tr class="${cls}">
+      <td style="font-family:'Cormorant Garamond',serif;letter-spacing:0.1em;font-size:0.78rem;">${r.code}</td>
+      <td>${r.character_name?escHtml(r.character_name):'<span style="color:var(--text-dim);font-style:italic;">미등록</span>'}</td>
+      <td><span class="admin-badge ${status}">${statusLabel}</span></td>
+      <td style="text-align:center;">${r.warnings||0}/2</td>
+      <td>
+        <button class="admin-btn" data-admin-edit="${r.code}">수정</button>
+        ${!r.is_banned?'<button class="admin-btn danger" data-admin-warn="'+r.code+'">경고</button>':''}
+        ${!r.is_banned?'<button class="admin-btn danger" data-admin-ban="'+r.code+'">제명</button>':'<button class="admin-btn" data-admin-unban="'+r.code+'">복구</button>'}
+      </td>
+    </tr>`;
+  }
+  html+='</tbody></table>';
+  const el=document.getElementById('adminRunnerTable');
+  el.innerHTML=html;
+  el.onclick=handleAdminRunnerClick;
+}
+
+async function handleAdminRunnerClick(e){
+  // Edit
+  const editBtn=e.target.closest('[data-admin-edit]');
+  if(editBtn){
+    const code=editBtn.dataset.adminEdit;
+    const{data}=await sb.from('invite_codes').select('*').eq('code',code).maybeSingle();
+    if(!data)return;
+    document.getElementById('adminEditCode').value=code;
+    document.getElementById('adminEditName').value=data.character_name||'';
+    document.getElementById('adminEditNotes').value=data.notes||'';
+    document.getElementById('adminEditModal').classList.add('open');
+    return;
+  }
+  // Warn
+  const warnBtn=e.target.closest('[data-admin-warn]');
+  if(warnBtn){
+    document.getElementById('adminWarnCode').value=warnBtn.dataset.adminWarn;
+    document.getElementById('adminWarnAction').value='warn';
+    document.getElementById('adminWarnTitle').textContent='경고 부여 — '+warnBtn.dataset.adminWarn;
+    document.getElementById('adminWarnReason').value='';
+    document.getElementById('adminWarnModal').classList.add('open');
+    return;
+  }
+  // Ban
+  const banBtn=e.target.closest('[data-admin-ban]');
+  if(banBtn){
+    document.getElementById('adminWarnCode').value=banBtn.dataset.adminBan;
+    document.getElementById('adminWarnAction').value='ban';
+    document.getElementById('adminWarnTitle').textContent='제명 처리 — '+banBtn.dataset.adminBan;
+    document.getElementById('adminWarnReason').value='';
+    document.getElementById('adminWarnModal').classList.add('open');
+    return;
+  }
+  // Unban
+  const unbanBtn=e.target.closest('[data-admin-unban]');
+  if(unbanBtn){
+    if(!confirm('정말 복구하시겠습니까?'))return;
+    await sb.from('invite_codes').update({is_banned:false,ban_reason:null,warnings:0}).eq('code',unbanBtn.dataset.adminUnban);
+    loadAdminRunners();loadAdminStats();
+    return;
+  }
+}
+
+// Edit modal
+document.getElementById('adminEditCancel').addEventListener('click',()=>document.getElementById('adminEditModal').classList.remove('open'));
+document.getElementById('adminEditSave').addEventListener('click',async()=>{
+  const code=document.getElementById('adminEditCode').value;
+  const name=document.getElementById('adminEditName').value.trim();
+  const notes=document.getElementById('adminEditNotes').value.trim();
+  await sb.from('invite_codes').update({character_name:name||null,notes:notes||null}).eq('code',code);
+  document.getElementById('adminEditModal').classList.remove('open');
+  loadAdminRunners();
+});
+
+// Warn/Ban modal
+document.getElementById('adminWarnCancel').addEventListener('click',()=>document.getElementById('adminWarnModal').classList.remove('open'));
+document.getElementById('adminWarnConfirm').addEventListener('click',async()=>{
+  const code=document.getElementById('adminWarnCode').value;
+  const action=document.getElementById('adminWarnAction').value;
+  const reason=document.getElementById('adminWarnReason').value.trim();
+  if(!reason){alert('사유를 입력해주세요.');return;}
+  
+  if(action==='warn'){
+    const{data}=await sb.from('invite_codes').select('warnings').eq('code',code).maybeSingle();
+    const newWarnings=(data?data.warnings||0:0)+1;
+    if(newWarnings>=2){
+      await sb.from('invite_codes').update({warnings:newWarnings,is_banned:true,ban_reason:'경고 2회 누적: '+reason}).eq('code',code);
+    }else{
+      await sb.from('invite_codes').update({warnings:newWarnings}).eq('code',code);
+    }
+    // Send notification to the warned user
+    await sb.from('notifications').insert({recipient_code:code,type:'notice',post_id:null,actor_name:'총괄',message:'경고가 부여되었습니다: '+reason});
+  }
+  
+  if(action==='ban'){
+    await sb.from('invite_codes').update({is_banned:true,ban_reason:reason}).eq('code',code);
+    await sb.from('notifications').insert({recipient_code:code,type:'notice',post_id:null,actor_name:'총괄',message:'제명 처리되었습니다: '+reason});
+  }
+  
+  document.getElementById('adminWarnModal').classList.remove('open');
+  loadAdminRunners();loadAdminStats();
+});
+
+// Posts management
+async function loadAdminPosts(){
+  const{data:posts}=await sb.from('board_posts').select('*').order('created_at',{ascending:false}).limit(50);
+  if(!posts||posts.length===0){document.getElementById('adminPostList').innerHTML='<div class="tl-empty">게시글이 없습니다.</div>';return;}
+  const el=document.getElementById('adminPostList');
+  el.innerHTML=posts.map(p=>`
+    <div class="admin-post-item">
+      <div class="admin-post-info">
+        <span class="admin-post-author">${escHtml(p.author_name)}</span>
+        <span class="admin-post-time" style="margin-left:0.5em;">${formatTime(p.created_at)}</span>
+        <div class="admin-post-preview">${escHtml(p.content)}</div>
+      </div>
+      <button class="admin-btn danger" data-admin-del-post="${p.id}">삭제</button>
+    </div>
+  `).join('');
+  el.onclick=async(e)=>{
+    const delBtn=e.target.closest('[data-admin-del-post]');
+    if(delBtn){
+      if(!confirm('이 게시글을 삭제하시겠습니까?'))return;
+      await sb.from('board_posts').delete().eq('id',parseInt(delBtn.dataset.adminDelPost));
+      loadAdminPosts();loadAdminStats();
+    }
+  };
+}
+
+// Codes management
+async function loadAdminCodes(){
+  const{data:codes}=await sb.from('invite_codes').select('code,character_name,password_changed,is_banned').order('code',{ascending:true});
+  if(!codes){document.getElementById('adminCodeList').innerHTML='';return;}
+  let html='<table class="admin-table"><thead><tr><th>코드</th><th>캐릭터명</th><th>비밀번호 변경</th><th>상태</th></tr></thead><tbody>';
+  for(const c of codes){
+    html+=`<tr>
+      <td style="font-family:'Cormorant Garamond',serif;letter-spacing:0.1em;">${c.code}</td>
+      <td>${c.character_name||'—'}</td>
+      <td>${c.password_changed?'✓':'—'}</td>
+      <td>${c.is_banned?'<span class="admin-badge banned">제명</span>':'<span class="admin-badge active">활동</span>'}</td>
+    </tr>`;
+  }
+  html+='</tbody></table>';
+  document.getElementById('adminCodeList').innerHTML=html;
+}
+
+// Generate new invite code
+document.getElementById('adminGenCode').addEventListener('click',async()=>{
+  const prefix='DEER';
+  const num=String(Math.floor(Math.random()*900)+100);
+  const code=prefix+num;
+  const{error}=await sb.from('invite_codes').insert({code:code,password:'000000',password_changed:false});
+  if(error){alert('코드 생성 실패: '+error.message);return;}
+  alert('새 초대코드: '+code+'\n초기 비밀번호: 000000');
+  loadAdminCodes();loadAdminStats();
+});
 </script>
 </body>
 </html>
