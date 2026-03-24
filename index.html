@@ -221,9 +221,49 @@
       <li><a data-page="worldguide">세계관</a></li>
       <li><a data-page="apply">신청</a></li>
       <li><a data-page="board">게시판</a></li>
-      <li><a data-page="board">게시판</a></li>
+      <li id="notifNavItem" style="position:relative;display:none;"><a id="notifBell" style="cursor:pointer;font-size:1rem;position:relative;">🔔<span id="notifBadge" style="display:none;position:absolute;top:-6px;right:-8px;background:var(--accent-red);color:#fff;font-size:0.55rem;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:sans-serif;">0</span></a></li>
     </ul>
   </nav>
+
+  <!-- NOTIFICATION PANEL -->
+  <div id="notifPanel" style="display:none;position:fixed;top:60px;right:20px;z-index:300;width:340px;max-height:480px;background:var(--bg-card);border:1px solid var(--border);border-radius:4px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);">
+      <span style="font-size:0.85rem;font-weight:700;color:var(--text-bright);letter-spacing:0.05em;">알림</span>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <button id="notifSettingsBtn" style="background:none;border:none;color:var(--text-dim);font-size:0.85rem;cursor:pointer;" title="알림 설정">⚙</button>
+        <button id="notifReadAllBtn" style="background:none;border:none;color:var(--text-dim);font-size:0.7rem;cursor:pointer;letter-spacing:0.05em;font-family:'Noto Serif KR',serif;">모두 읽음</button>
+      </div>
+    </div>
+    <div id="notifList" style="overflow-y:auto;max-height:380px;"></div>
+  </div>
+
+  <!-- NOTIFICATION SETTINGS PANEL -->
+  <div id="notifSettingsPanel" style="display:none;position:fixed;top:60px;right:20px;z-index:301;width:340px;background:var(--bg-card);border:1px solid var(--border);border-radius:4px;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);">
+      <span style="font-size:0.85rem;font-weight:700;color:var(--text-bright);letter-spacing:0.05em;">알림 설정</span>
+      <button id="notifSettingsBack" style="background:none;border:none;color:var(--text-dim);font-size:0.7rem;cursor:pointer;font-family:'Noto Serif KR',serif;">← 돌아가기</button>
+    </div>
+    <div style="padding:16px;">
+      <label style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.82rem;color:var(--text-secondary);cursor:pointer;">
+        내 글 댓글 알림<input type="checkbox" id="setComment" checked style="accent-color:var(--green-mid);width:16px;height:16px;">
+      </label>
+      <label style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.82rem;color:var(--text-secondary);cursor:pointer;">
+        내 글 좋아요 알림<input type="checkbox" id="setLike" checked style="accent-color:var(--green-mid);width:16px;height:16px;">
+      </label>
+      <label style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.82rem;color:var(--text-secondary);cursor:pointer;">
+        새 공지 알림<input type="checkbox" id="setNotice" checked style="accent-color:var(--green-mid);width:16px;height:16px;">
+      </label>
+      <label style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;font-size:0.82rem;color:var(--text-secondary);cursor:pointer;">
+        전체 새 글 알림<input type="checkbox" id="setNewPost" style="accent-color:var(--green-mid);width:16px;height:16px;">
+      </label>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="notifToast" style="display:none;position:fixed;top:80px;right:20px;z-index:400;background:var(--bg-card);border:1px solid var(--green-mid);border-radius:4px;padding:12px 18px;box-shadow:0 4px 20px rgba(45,90,39,0.2);max-width:320px;animation:fadeInUp 0.4s ease-out;">
+    <div style="font-size:0.78rem;color:var(--text-bright);margin-bottom:2px;" id="toastTitle"></div>
+    <div style="font-size:0.72rem;color:var(--text-secondary);" id="toastMsg"></div>
+  </div>
 
   <!-- PAGE: MAIN -->
   <div class="page" id="page-main">
@@ -289,7 +329,6 @@
         <div class="nav-card" data-page="characters"><div class="nav-card-title">캐릭터 도감</div><div class="nav-card-desc">합격 캐릭터 목록</div></div>
         <div class="nav-card" data-page="qna"><div class="nav-card-title">Q&A</div><div class="nav-card-desc">자주 묻는 질문</div></div>
         <div class="nav-card" data-page="board"><div class="nav-card-title">게시판</div><div class="nav-card-desc">숲에서의 이야기</div></div>
-        <div class="nav-card" data-page="board"><div class="nav-card-title">게시판</div><div class="nav-card-desc">숲 속의 이야기</div></div>
       </div>
     </section>
     <footer class="footer"><p>녹염 — 鹿魘</p><p>본 커뮤니티의 모든 배경, 설정, 등장인물은 전부 허구이며</p><p>실제 사건, 단체, 인물과는 무관합니다.</p></footer>
@@ -420,90 +459,89 @@
   <!-- PAGE: CHARACTERS (준비중) -->
   <div class="page" id="page-characters"><div class="preparing"><div class="preparing-title">준비중</div><div class="preparing-desc">캐릭터 도감 페이지는 현재 준비중입니다.</div><div class="back-link" data-page="main">← 메인으로 돌아가기</div></div></div>
 
+  <!-- PAGE: QNA (준비중) -->
+  <div class="page" id="page-qna"><div class="preparing"><div class="preparing-title">준비중</div><div class="preparing-desc">Q&A 페이지는 현재 준비중입니다.</div><div class="back-link" data-page="main">← 메인으로 돌아가기</div></div></div>
+
   <!-- PAGE: BOARD -->
   <div class="page" id="page-board">
     <style>
-      .board-wrap{max-width:640px;margin:0 auto;padding:100px 24px 80px;}
+      .board-wrap{max-width:650px;margin:0 auto;padding:100px 24px 80px;}
       .board-header{text-align:center;margin-bottom:2em;}
-      .board-header-label{font-family:'Cormorant Garamond',serif;font-size:0.75rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--green-mid);margin-bottom:0.5em;}
-      .board-header-title{font-size:1.8rem;font-weight:700;color:var(--text-bright);letter-spacing:0.1em;}
+      .board-header-label{font-family:'Cormorant Garamond',serif;font-size:0.75rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--green-mid);margin-bottom:0.8em;}
+      .board-header-title{font-size:1.8rem;font-weight:700;color:var(--text-bright);letter-spacing:0.1em;margin-bottom:0.5em;}
+      .board-header-line{width:40px;height:1px;background:var(--green-mid);margin:0 auto;}
 
+      /* Auth */
       .board-auth{text-align:center;padding:3em 0;}
-      .board-auth input{width:220px;padding:12px 16px;background:rgba(20,26,20,0.8);border:1px solid var(--border);border-radius:2px;color:var(--text-bright);font-family:'Cormorant Garamond',serif;font-size:1rem;letter-spacing:0.3em;text-align:center;outline:none;}
-      .board-auth button{margin-top:1em;padding:10px 24px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.8rem;letter-spacing:0.15em;cursor:pointer;transition:all 0.3s ease;}
-      .board-auth button:hover{border-color:var(--green-mid);color:var(--text-bright);}
+      .board-auth-input{width:220px;padding:12px 16px;background:rgba(20,26,20,0.8);border:1px solid var(--border);border-radius:2px;color:var(--text-bright);font-family:'Cormorant Garamond',serif;font-size:1rem;letter-spacing:0.3em;text-align:center;outline:none;}
+      .board-auth-btn{margin-top:1em;padding:10px 24px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.8rem;letter-spacing:0.15em;cursor:pointer;transition:all 0.3s ease;}
+      .board-auth-btn:hover{border-color:var(--green-mid);color:var(--text-bright);}
 
-      .board-compose{background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:1.2em;margin-bottom:1.5em;}
-      .board-compose-top{display:flex;align-items:center;gap:0.8em;margin-bottom:0.8em;}
-      .board-avatar{width:36px;height:36px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--green-light);font-weight:700;flex-shrink:0;}
-      .board-compose-name{font-size:0.85rem;font-weight:500;color:var(--text-bright);}
-      .board-compose textarea{width:100%;min-height:80px;padding:12px;background:rgba(10,12,8,0.5);border:1px solid var(--border);border-radius:2px;color:var(--text-primary);font-family:'Noto Serif KR',serif;font-size:0.85rem;line-height:1.8;resize:vertical;outline:none;}
-      .board-compose textarea:focus{border-color:var(--green-mid);}
-      .board-compose textarea::placeholder{color:var(--text-dim);}
-      .board-compose-actions{display:flex;justify-content:flex-end;margin-top:0.8em;}
-      .board-compose-btn{padding:8px 20px;background:var(--green-dark);border:1px solid var(--green-mid);border-radius:2px;color:var(--text-bright);font-family:'Noto Serif KR',serif;font-size:0.78rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.3s ease;}
-      .board-compose-btn:hover{background:var(--green-mid);}
-      .board-compose-btn:disabled{opacity:0.3;cursor:not-allowed;}
+      /* Composer */
+      .board-composer{background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:1.2em;margin-bottom:2em;}
+      .board-composer-name{font-size:0.8rem;font-weight:500;color:var(--green-light);margin-bottom:0.8em;letter-spacing:0.05em;}
+      .board-composer textarea{width:100%;min-height:80px;padding:12px;background:rgba(10,12,8,0.6);border:1px solid var(--border);border-radius:2px;color:var(--text-bright);font-family:'Noto Serif KR',serif;font-size:0.85rem;line-height:1.8;outline:none;resize:vertical;}
+      .board-composer textarea::placeholder{color:var(--text-dim);}
+      .board-composer textarea:focus{border-color:var(--green-mid);}
+      .board-composer-footer{display:flex;justify-content:space-between;align-items:center;margin-top:0.8em;}
+      .board-composer-count{font-size:0.7rem;color:var(--text-dim);}
+      .board-composer-submit{padding:8px 20px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.78rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.3s ease;}
+      .board-composer-submit:hover{border-color:var(--green-mid);color:var(--text-bright);}
 
+      /* Posts */
       .board-post{background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:1.2em;margin-bottom:1em;transition:border-color 0.3s ease;}
       .board-post:hover{border-color:var(--green-dark);}
-      .board-post-header{display:flex;align-items:center;gap:0.8em;margin-bottom:0.8em;}
-      .board-post-name{font-size:0.85rem;font-weight:500;color:var(--text-bright);}
-      .board-post-time{font-size:0.7rem;color:var(--text-dim);margin-left:auto;}
-      .board-post-body{font-size:0.88rem;color:var(--text-secondary);line-height:2;white-space:pre-wrap;word-break:break-word;}
-      .board-post-actions{display:flex;gap:1.5em;margin-top:1em;padding-top:0.8em;border-top:1px solid var(--border);}
-      .board-action-btn{background:none;border:none;color:var(--text-dim);font-family:'Noto Serif KR',serif;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:4px;transition:color 0.3s ease;}
-      .board-action-btn:hover{color:var(--green-light);}
-      .board-action-btn.liked{color:var(--accent-red);}
+      .board-post-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8em;}
+      .board-post-author{font-size:0.85rem;font-weight:500;color:var(--text-bright);letter-spacing:0.03em;}
+      .board-post-time{font-size:0.65rem;color:var(--text-dim);letter-spacing:0.05em;}
+      .board-post-content{font-size:0.88rem;font-weight:300;color:var(--text-secondary);line-height:2;white-space:pre-wrap;word-break:break-word;}
+      .board-post-actions{display:flex;gap:1.5em;margin-top:1em;padding-top:0.8em;border-top:1px solid rgba(30,38,30,0.5);}
+      .board-action{display:flex;align-items:center;gap:0.4em;font-size:0.75rem;color:var(--text-dim);cursor:pointer;transition:color 0.3s ease;background:none;border:none;font-family:'Noto Serif KR',serif;}
+      .board-action:hover{color:var(--green-light);}
+      .board-action.liked{color:var(--accent-red);}
 
-      .board-comments{margin-top:0.8em;padding-left:1em;border-left:1px solid var(--border);}
-      .board-comment{padding:0.6em 0;border-bottom:1px solid rgba(30,38,30,0.3);}
+      /* Comments */
+      .board-comments{margin-top:0.8em;padding-top:0.8em;}
+      .board-comment{display:flex;gap:0.8em;padding:0.6em 0;border-bottom:1px solid rgba(30,38,30,0.3);}
       .board-comment:last-child{border-bottom:none;}
-      .board-comment-header{display:flex;align-items:center;gap:0.5em;margin-bottom:0.3em;}
-      .board-comment-name{font-size:0.78rem;font-weight:500;color:var(--text-bright);}
-      .board-comment-time{font-size:0.65rem;color:var(--text-dim);margin-left:auto;}
-      .board-comment-body{font-size:0.82rem;color:var(--text-secondary);line-height:1.8;}
-      .board-comment-input{display:flex;gap:8px;margin-top:0.6em;}
-      .board-comment-input input{flex:1;padding:8px 12px;background:rgba(10,12,8,0.5);border:1px solid var(--border);border-radius:2px;color:var(--text-primary);font-family:'Noto Serif KR',serif;font-size:0.8rem;outline:none;}
+      .board-comment-author{font-size:0.78rem;font-weight:500;color:var(--green-light);white-space:nowrap;min-width:60px;}
+      .board-comment-text{font-size:0.8rem;color:var(--text-secondary);line-height:1.7;flex:1;}
+      .board-comment-time{font-size:0.6rem;color:var(--text-dim);white-space:nowrap;}
+
+      /* Comment input */
+      .board-comment-input{display:flex;gap:0.5em;margin-top:0.6em;}
+      .board-comment-input input{flex:1;padding:8px 12px;background:rgba(10,12,8,0.6);border:1px solid var(--border);border-radius:2px;color:var(--text-bright);font-family:'Noto Serif KR',serif;font-size:0.8rem;outline:none;}
       .board-comment-input input:focus{border-color:var(--green-mid);}
-      .board-comment-input button{padding:8px 14px;background:transparent;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);font-size:0.75rem;cursor:pointer;transition:all 0.3s ease;}
-      .board-comment-input button:hover{border-color:var(--green-mid);color:var(--text-bright);}
+      .board-comment-input button{padding:8px 14px;background:transparent;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);font-size:0.75rem;cursor:pointer;font-family:'Noto Serif KR',serif;transition:all 0.3s ease;}
+      .board-comment-input button:hover{border-color:var(--green-mid);color:var(--text-secondary);}
 
-      .board-empty{text-align:center;padding:3em 0;font-size:0.85rem;color:var(--text-dim);font-style:italic;}
-      .board-loading{text-align:center;padding:2em 0;font-size:0.8rem;color:var(--text-dim);}
-
-      .board-delete{background:none;border:none;color:var(--text-dim);font-size:0.65rem;cursor:pointer;margin-left:0.5em;transition:color 0.3s ease;}
-      .board-delete:hover{color:var(--accent-red);}
+      .board-empty{text-align:center;padding:3em;font-size:0.85rem;color:var(--text-dim);font-style:italic;}
+      .board-loading{text-align:center;padding:2em;font-size:0.8rem;color:var(--text-dim);}
     </style>
 
     <div class="board-wrap">
-      <!-- Auth (auto from session) -->
+      <div class="board-header">
+        <div class="board-header-label">Board</div>
+        <div class="board-header-title">게시판</div>
+        <div class="board-header-line"></div>
+      </div>
+
+      <!-- Board Auth -->
       <div id="boardAuth" class="board-auth">
-        <div class="board-header">
-          <div class="board-header-label">Board</div>
-          <div class="board-header-title">게시판</div>
-        </div>
-        <button id="boardAuthBtn" class="board-auth-btn" style="padding:12px 30px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.85rem;letter-spacing:0.15em;cursor:pointer;">게시판 입장</button>
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1.5em;">게시판에 입장합니다.</p>
+        <button id="boardAuthBtn" class="board-auth-btn">게시판 입장</button>
         <div id="boardAuthErr" style="font-size:0.75rem;color:var(--accent-red);margin-top:0.8em;height:1.2em;"></div>
       </div>
 
-      <!-- Board Content -->
+      <!-- Board Content (hidden until auth) -->
       <div id="boardContent" style="display:none;">
-        <div class="board-header">
-          <div class="board-header-label">Board</div>
-          <div class="board-header-title">게시판</div>
-        </div>
-        <div style="font-size:0.75rem;color:var(--text-dim);text-align:right;margin-bottom:1em;" id="boardUser"></div>
-
-        <!-- Compose -->
-        <div class="board-compose">
-          <div class="board-compose-top">
-            <div class="board-avatar" id="composeAvatar"></div>
-            <div class="board-compose-name" id="composeName"></div>
-          </div>
-          <textarea id="composeText" placeholder="숲에서의 이야기를 남겨주세요." maxlength="500"></textarea>
-          <div class="board-compose-actions">
-            <button class="board-compose-btn" id="composeBtn">작성</button>
+        <!-- Composer -->
+        <div class="board-composer">
+          <div class="board-composer-name" id="boardUserName">캐릭터명</div>
+          <textarea id="boardTextarea" placeholder="숲 속에서의 이야기를 남겨주세요..." maxlength="500"></textarea>
+          <div class="board-composer-footer">
+            <span class="board-composer-count"><span id="boardCharCount">0</span>/500</span>
+            <button class="board-composer-submit" id="boardSubmit">작성</button>
           </div>
         </div>
 
@@ -514,9 +552,6 @@
       </div>
     </div>
   </div>
-
-  <!-- PAGE: QNA (준비중) -->
-  <div class="page" id="page-qna"><div class="preparing"><div class="preparing-title">준비중</div><div class="preparing-desc">Q&A 페이지는 현재 준비중입니다.</div><div class="back-link" data-page="main">← 메인으로 돌아가기</div></div></div>
 
 </div>
 
@@ -610,7 +645,7 @@ document.getElementById('newPw2').addEventListener('keydown',e=>{if(e.key==='Ent
 function doEnter(){
   bgm.volume=0;bgm.play().then(()=>{let v=0;const fi=setInterval(()=>{v+=0.02;if(v>=0.5){v=0.5;clearInterval(fi);}bgm.volume=v;},100);audioPanel.classList.add('visible');}).catch(()=>{});
   setTimeout(()=>entryPage.classList.add('hidden'),800);
-  setTimeout(()=>{entryPage.style.display='none';siteWrap.classList.add('visible');showPage('main');initParticles();},2300);
+  setTimeout(()=>{entryPage.style.display='none';siteWrap.classList.add('visible');showPage('main');initParticles();initNotifications();},2300);
 }
 
 // === SPA ROUTING ===
@@ -800,24 +835,32 @@ document.getElementById('boardAuthBtn').addEventListener('click',async()=>{
 function showBoard(){
   document.getElementById('boardAuth').style.display='none';
   document.getElementById('boardContent').style.display='block';
-  document.getElementById('boardUser').textContent=boardCharName+' 으로 로그인됨';
-  document.getElementById('composeName').textContent=boardCharName;
-  document.getElementById('composeAvatar').textContent=boardCharName.charAt(0);
+  document.getElementById('boardUserName').textContent=boardCharName;
   loadPosts();
 }
 
 // Post
-document.getElementById('composeBtn').addEventListener('click',async()=>{
-  const text=document.getElementById('composeText').value.trim();
+document.getElementById('boardSubmit').addEventListener('click',async()=>{
+  const text=document.getElementById('boardTextarea').value.trim();
   if(!text)return;
-  const btn=document.getElementById('composeBtn');
+  const btn=document.getElementById('boardSubmit');
   btn.disabled=true;btn.textContent='작성 중...';
   
   await sb.from('board_posts').insert({author_code:boardUserCode,author_name:boardCharName,content:text});
   
-  document.getElementById('composeText').value='';
+  // Send new_post notifications
+  const{data:newPost}=await sb.from('board_posts').select('id').eq('author_code',boardUserCode).order('created_at',{ascending:false}).limit(1).maybeSingle();
+  if(newPost){sendNewPostNotifToAll(newPost.id,boardUserCode,boardCharName);}
+  
+  document.getElementById('boardTextarea').value='';
+  document.getElementById('boardCharCount').textContent='0';
   btn.disabled=false;btn.textContent='작성';
   loadPosts();
+});
+
+// Char counter
+document.getElementById('boardTextarea').addEventListener('input',()=>{
+  document.getElementById('boardCharCount').textContent=document.getElementById('boardTextarea').value.length;
 });
 
 // Load posts
@@ -888,6 +931,11 @@ async function handleBoardClick(e){
     }else{
       await sb.from('board_likes').insert({post_id:postId,user_code:boardUserCode}).single();
       await sb.from('board_posts').update({likes:(parseInt(btn.querySelector('span').textContent)||0)+1}).eq('id',postId);
+      // Send like notification to post author
+      const{data:likedPost}=await sb.from('board_posts').select('author_code').eq('id',postId).maybeSingle();
+      if(likedPost&&likedPost.author_code!==boardUserCode){
+        sendNotification(likedPost.author_code,'like',postId,boardCharName,boardCharName+'님이 회원님의 글을 좋아합니다.');
+      }
     }
     loadPosts();
   }
@@ -912,6 +960,11 @@ async function handleBoardClick(e){
     await sb.from('board_comments').insert({post_id:parseInt(postId),author_code:boardUserCode,author_name:boardCharName,content:text});
     input.value='';
     loadComments(postId);
+    // Send comment notification to post author
+    const{data:post}=await sb.from('board_posts').select('author_code,author_name').eq('id',parseInt(postId)).maybeSingle();
+    if(post&&post.author_code!==boardUserCode){
+      sendNotification(post.author_code,'comment',parseInt(postId),boardCharName,boardCharName+'님이 회원님의 글에 댓글을 달았습니다.');
+    }
   }
   
   if(delBtn){
@@ -952,7 +1005,179 @@ function formatTime(ts){
 }
 
 function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-</script>
-</html>
 
+// === NOTIFICATION SYSTEM ===
+let notifSettings={notify_comment:true,notify_like:true,notify_notice:true,notify_new_post:false};
+let notifPanelOpen=false;
+let notifSettingsPanelOpen=false;
+let realtimeChannel=null;
+
+// Show notification bell after login
+function initNotifications(){
+  if(!sessionCode)return;
+  document.getElementById('notifNavItem').style.display='block';
+  loadNotifSettings();
+  loadNotifCount();
+  loadNotifList();
+  subscribeRealtime();
+}
+
+// Realtime subscription
+function subscribeRealtime(){
+  if(realtimeChannel)realtimeChannel.unsubscribe();
+  realtimeChannel=sb.channel('notif-'+sessionCode)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'recipient_code=eq.'+sessionCode},payload=>{
+      const n=payload.new;
+      // Show toast
+      showToast(n);
+      // Update badge
+      loadNotifCount();
+      // If panel is open, refresh list
+      if(notifPanelOpen)loadNotifList();
+    })
+    .subscribe();
+}
+
+// Load unread count
+async function loadNotifCount(){
+  const{count}=await sb.from('notifications').select('*',{count:'exact',head:true}).eq('recipient_code',sessionCode).eq('is_read',false);
+  const badge=document.getElementById('notifBadge');
+  if(count>0){badge.style.display='flex';badge.textContent=count>99?'99+':count;}
+  else{badge.style.display='none';}
+}
+
+// Load notification list
+async function loadNotifList(){
+  const listEl=document.getElementById('notifList');
+  const{data}=await sb.from('notifications').select('*').eq('recipient_code',sessionCode).order('created_at',{ascending:false}).limit(30);
+  if(!data||data.length===0){listEl.innerHTML='<div style="text-align:center;padding:2em;font-size:0.8rem;color:var(--text-dim);">알림이 없습니다.</div>';return;}
+  const typeIcons={comment:'💬',like:'♥',notice:'📢',new_post:'📝'};
+  listEl.innerHTML=data.map(n=>{
+    const icon=typeIcons[n.type]||'🔔';
+    const time=formatTime(n.created_at);
+    const readClass=n.is_read?'opacity:0.5;':'';
+    return '<div class="notif-item" data-notif-id="'+n.id+'" data-post-id="'+(n.post_id||'')+'" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s ease;'+readClass+'" onmouseover="this.style.background=\'rgba(45,90,39,0.05)\'" onmouseout="this.style.background=\'transparent\'"><div style="display:flex;gap:8px;align-items:flex-start;"><span style="font-size:0.9rem;">'+icon+'</span><div style="flex:1;min-width:0;"><div style="font-size:0.8rem;color:var(--text-bright);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escHtml(n.message)+'</div><div style="font-size:0.65rem;color:var(--text-dim);">'+time+'</div></div></div></div>';
+  }).join('');
+  
+  // Click to read + navigate
+  listEl.querySelectorAll('.notif-item').forEach(el=>{
+    el.addEventListener('click',async()=>{
+      const nid=el.dataset.notifId;
+      const pid=el.dataset.postId;
+      await sb.from('notifications').update({is_read:true}).eq('id',parseInt(nid));
+      el.style.opacity='0.5';
+      loadNotifCount();
+      if(pid){showPage('board');notifPanelOpen=false;document.getElementById('notifPanel').style.display='none';}
+    });
+  });
+}
+
+// Load user's notification settings
+async function loadNotifSettings(){
+  const{data}=await sb.from('notification_settings').select('*').eq('user_code',sessionCode).maybeSingle();
+  if(data){
+    notifSettings=data;
+  }else{
+    // Create default settings
+    await sb.from('notification_settings').insert({user_code:sessionCode});
+  }
+  document.getElementById('setComment').checked=notifSettings.notify_comment!==false;
+  document.getElementById('setLike').checked=notifSettings.notify_like!==false;
+  document.getElementById('setNotice').checked=notifSettings.notify_notice!==false;
+  document.getElementById('setNewPost').checked=notifSettings.notify_new_post===true;
+}
+
+// Save settings on toggle
+['setComment','setLike','setNotice','setNewPost'].forEach(id=>{
+  document.getElementById(id).addEventListener('change',async()=>{
+    const update={
+      notify_comment:document.getElementById('setComment').checked,
+      notify_like:document.getElementById('setLike').checked,
+      notify_notice:document.getElementById('setNotice').checked,
+      notify_new_post:document.getElementById('setNewPost').checked,
+      updated_at:new Date().toISOString()
+    };
+    notifSettings=Object.assign(notifSettings,update);
+    await sb.from('notification_settings').update(update).eq('user_code',sessionCode);
+  });
+});
+
+// Bell click
+document.getElementById('notifBell').addEventListener('click',()=>{
+  notifSettingsPanelOpen=false;
+  document.getElementById('notifSettingsPanel').style.display='none';
+  notifPanelOpen=!notifPanelOpen;
+  document.getElementById('notifPanel').style.display=notifPanelOpen?'block':'none';
+  if(notifPanelOpen)loadNotifList();
+});
+
+// Settings button
+document.getElementById('notifSettingsBtn').addEventListener('click',()=>{
+  notifPanelOpen=false;
+  document.getElementById('notifPanel').style.display='none';
+  notifSettingsPanelOpen=true;
+  document.getElementById('notifSettingsPanel').style.display='block';
+});
+document.getElementById('notifSettingsBack').addEventListener('click',()=>{
+  notifSettingsPanelOpen=false;
+  document.getElementById('notifSettingsPanel').style.display='none';
+  notifPanelOpen=true;
+  document.getElementById('notifPanel').style.display='block';
+});
+
+// Read all
+document.getElementById('notifReadAllBtn').addEventListener('click',async()=>{
+  await sb.from('notifications').update({is_read:true}).eq('recipient_code',sessionCode).eq('is_read',false);
+  loadNotifCount();
+  loadNotifList();
+});
+
+// Close panels on outside click
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#notifPanel')&&!e.target.closest('#notifSettingsPanel')&&!e.target.closest('#notifBell')&&!e.target.closest('#notifSettingsBtn')){
+    notifPanelOpen=false;notifSettingsPanelOpen=false;
+    document.getElementById('notifPanel').style.display='none';
+    document.getElementById('notifSettingsPanel').style.display='none';
+  }
+});
+
+// Toast notification
+function showToast(n){
+  const typeNames={comment:'새 댓글',like:'좋아요',notice:'새 공지',new_post:'새 글'};
+  document.getElementById('toastTitle').textContent=typeNames[n.type]||'알림';
+  document.getElementById('toastMsg').textContent=n.message;
+  const toast=document.getElementById('notifToast');
+  toast.style.display='block';
+  toast.style.animation='none';
+  toast.offsetHeight;// trigger reflow
+  toast.style.animation='fadeInUp 0.4s ease-out';
+  setTimeout(()=>{toast.style.display='none';},3500);
+}
+
+// === NOTIFICATION CREATORS ===
+// Send notification to a specific user (respecting their settings)
+async function sendNotification(recipientCode,type,postId,actorName,message){
+  if(recipientCode===sessionCode)return; // Don't notify yourself
+  // Check recipient's settings
+  const{data:settings}=await sb.from('notification_settings').select('*').eq('user_code',recipientCode).maybeSingle();
+  if(settings){
+    if(type==='comment'&&!settings.notify_comment)return;
+    if(type==='like'&&!settings.notify_like)return;
+    if(type==='notice'&&!settings.notify_notice)return;
+    if(type==='new_post'&&!settings.notify_new_post)return;
+  }
+  await sb.from('notifications').insert({recipient_code:recipientCode,type:type,post_id:postId,actor_name:actorName,message:message});
+}
+
+// Send new_post notification to all users who enabled it
+async function sendNewPostNotifToAll(postId,authorCode,authorName){
+  const{data:allSettings}=await sb.from('notification_settings').select('user_code').eq('notify_new_post',true);
+  if(!allSettings)return;
+  for(const s of allSettings){
+    if(s.user_code===authorCode)continue;
+    await sb.from('notifications').insert({recipient_code:s.user_code,type:'new_post',post_id:postId,actor_name:authorName,message:authorName+'님이 새 글을 작성했습니다.'});
+  }
+}
+</script>
 </body>
+</html>
