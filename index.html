@@ -835,16 +835,6 @@ document.getElementById('gAuthBtn').addEventListener('click',async()=>{
   document.getElementById('gameArea').style.display='block';
   updateInv();startTimer();goScene('start');
 });
-  gUser=code;
-  const{data:claimed}=await sb.from('farming_items').select('*').eq('claimed_by',gUser).eq('is_active',true);
-  gCount=claimed?claimed.length:0;
-  gItems=claimed||[];
-  document.getElementById('gameAuth').style.display='none';
-  document.getElementById('gameArea').style.display='block';
-  updateInv();
-  startTimer();
-  goScene('start');
-});
 
 
 function startTimer(){
