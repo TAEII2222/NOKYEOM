@@ -669,19 +669,25 @@
   <!-- PAGE: DM -->
   <div class="page" id="page-dm">
     <style>
-      .dm-wrap{max-width:650px;margin:0 auto;padding:100px 24px 80px;}
+      .dm-wrap{max-width:700px;margin:0 auto;padding:100px 24px 80px;}
       .dm-header{text-align:center;margin-bottom:1.5em;}
       .dm-header-label{font-family:'Cormorant Garamond',serif;font-size:0.75rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--green-mid);margin-bottom:0.8em;}
       .dm-header-title{font-size:1.8rem;font-weight:700;color:var(--text-bright);letter-spacing:0.1em;margin-bottom:0.5em;}
       .dm-header-line{width:40px;height:1px;background:var(--green-mid);margin:0 auto;}
+      .dm-header-sub{font-size:0.75rem;color:var(--text-dim);margin-top:0.8em;letter-spacing:0.03em;}
       .dm-layout{display:flex;gap:1em;min-height:60vh;}
-      .dm-sidebar{width:180px;flex-shrink:0;border-right:1px solid var(--border);padding-right:1em;}
+      .dm-sidebar{width:200px;flex-shrink:0;border-right:1px solid var(--border);padding-right:1em;overflow-y:auto;}
+      .dm-sidebar-section{font-size:0.65rem;color:var(--text-dim);letter-spacing:0.1em;padding:8px 10px 4px;text-transform:uppercase;}
       .dm-contact{padding:10px;cursor:pointer;border-radius:2px;transition:all 0.3s ease;display:flex;align-items:center;gap:8px;margin-bottom:4px;}
       .dm-contact:hover{background:rgba(45,90,39,0.05);}
       .dm-contact.active{background:rgba(45,90,39,0.1);border-left:2px solid var(--green-mid);}
+      .dm-contact.pending{opacity:0.5;}
       .dm-contact-avatar{width:28px;height:28px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:var(--green-light);font-weight:700;flex-shrink:0;overflow:hidden;}
       .dm-contact-avatar img{width:100%;height:100%;object-fit:cover;}
       .dm-contact-name{font-size:0.78rem;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+      .dm-contact-status{font-size:0.55rem;letter-spacing:0.05em;padding:2px 6px;border-radius:2px;flex-shrink:0;}
+      .dm-contact-status.wait{color:#b8860b;background:rgba(184,134,11,0.1);}
+      .dm-contact-status.rejected{color:var(--accent-red);background:rgba(138,48,48,0.1);}
       .dm-contact-unread{width:8px;height:8px;border-radius:50%;background:var(--accent-red);flex-shrink:0;}
       .dm-chat{flex:1;display:flex;flex-direction:column;}
       .dm-chat-empty{display:flex;align-items:center;justify-content:center;flex:1;font-size:0.85rem;color:var(--text-dim);font-style:italic;}
@@ -696,18 +702,49 @@
       .dm-send{padding:10px 18px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.78rem;cursor:pointer;transition:all 0.3s ease;flex-shrink:0;}
       .dm-send:hover{border-color:var(--green-mid);color:var(--text-bright);}
       .dm-auth{text-align:center;padding:3em 0;}
-      @media(max-width:600px){.dm-layout{flex-direction:column;}.dm-sidebar{width:100%;border-right:none;border-bottom:1px solid var(--border);padding-right:0;padding-bottom:1em;display:flex;gap:4px;overflow-x:auto;}.dm-messages{max-height:40vh;}}
+
+      /* Request UI */
+      .dm-request-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:1em;text-align:center;padding:2em;}
+      .dm-request-panel .dm-req-name{font-size:1rem;font-weight:500;color:var(--text-bright);}
+      .dm-request-panel .dm-req-desc{font-size:0.8rem;color:var(--text-dim);line-height:1.8;}
+      .dm-request-panel textarea{width:100%;max-width:300px;padding:10px;background:rgba(10,12,8,0.6);border:1px solid var(--border);border-radius:2px;color:var(--text-bright);font-family:'Noto Serif KR',serif;font-size:0.82rem;outline:none;resize:vertical;min-height:50px;}
+      .dm-request-panel textarea:focus{border-color:var(--green-mid);}
+      .dm-req-btn{padding:10px 24px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.8rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.3s ease;}
+      .dm-req-btn:hover{border-color:var(--green-mid);color:var(--text-bright);}
+      .dm-req-btn:disabled{opacity:0.3;cursor:not-allowed;}
+      .dm-req-status{font-size:0.78rem;color:#b8860b;font-style:italic;}
+
+      /* Admin approval */
+      .dm-admin-section{margin-bottom:1.5em;}
+      .dm-admin-title{font-size:0.8rem;font-weight:700;color:var(--text-bright);margin-bottom:0.8em;padding-bottom:0.5em;border-bottom:1px solid var(--border);}
+      .dm-approval-card{display:flex;align-items:center;padding:10px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;margin-bottom:6px;gap:10px;}
+      .dm-approval-info{flex:1;}
+      .dm-approval-names{font-size:0.82rem;color:var(--text-bright);}
+      .dm-approval-reason{font-size:0.72rem;color:var(--text-dim);margin-top:2px;}
+      .dm-approval-actions{display:flex;gap:6px;}
+      .dm-apv-btn{padding:5px 12px;border-radius:2px;font-size:0.7rem;cursor:pointer;font-family:'Noto Serif KR',serif;transition:all 0.3s ease;}
+      .dm-apv-ok{background:rgba(45,90,39,0.15);border:1px solid var(--green-mid);color:var(--green-light);}
+      .dm-apv-ok:hover{background:rgba(45,90,39,0.3);}
+      .dm-apv-no{background:rgba(138,48,48,0.1);border:1px solid rgba(138,48,48,0.3);color:var(--accent-red);}
+      .dm-apv-no:hover{background:rgba(138,48,48,0.2);}
+      .dm-empty{text-align:center;padding:2em;font-size:0.8rem;color:var(--text-dim);font-style:italic;}
+      .dm-admin-badge{font-size:0.55rem;color:var(--green-light);letter-spacing:0.08em;padding:2px 8px;border:1px solid var(--green-dark);border-radius:2px;}
+
+      @media(max-width:600px){.dm-layout{flex-direction:column;}.dm-sidebar{width:100%;border-right:none;border-bottom:1px solid var(--border);padding-right:0;padding-bottom:1em;max-height:150px;overflow-y:auto;}.dm-messages{max-height:40vh;}}
     </style>
     <div class="dm-wrap">
       <div class="dm-header">
         <div class="dm-header-label">Direct Message</div>
         <div class="dm-header-title">DM</div>
         <div class="dm-header-line"></div>
+        <div class="dm-header-sub">총괄 승인 후 대화가 가능합니다 · 모든 DM은 총괄이 열람할 수 있습니다</div>
       </div>
       <div id="dmAuth" class="dm-auth">
         <button id="dmAuthBtn" style="padding:12px 30px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.85rem;letter-spacing:0.15em;cursor:pointer;">DM 입장</button>
       </div>
       <div id="dmContent" style="display:none;">
+        <!-- Admin: pending approvals -->
+        <div id="dmAdminArea" style="display:none;"></div>
         <div class="dm-layout">
           <div class="dm-sidebar" id="dmSidebar"></div>
           <div class="dm-chat" id="dmChat">
@@ -2190,116 +2227,191 @@ function formatTime(ts){
 
 function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-// === DM SYSTEM ===
+// === DM SYSTEM (총괄 승인제) ===
 let dmCurrentPartner=null;
 let dmPartnerCode=null;
+let dmPollInterval=null;
+let dmIsAdmin=false;
+let dmApprovedPairs=new Map();
 
 document.getElementById('dmAuthBtn').addEventListener('click',async()=>{
   if(!sessionCode){alert('먼저 사이트에 로그인해주세요.');return;}
+  dmIsAdmin=sessionCode.includes('ADMIN');
   document.getElementById('dmAuth').style.display='none';
   document.getElementById('dmContent').style.display='block';
-  loadDmContacts();
+  if(dmIsAdmin)document.getElementById('dmAdminArea').style.display='block';
+  await loadDmApprovals();
+  await loadDmContacts();
 });
+
+function dmPairKey(a,b){return [a,b].sort().join('|');}
+
+async function loadDmRoomStatuses(){
+  dmApprovedPairs.clear();
+  const{data:rooms}=await sb.from('dm_rooms').select('*')
+    .or('created_by.eq.'+sessionCode+',target_code.eq.'+sessionCode);
+  if(!rooms)return;
+  rooms.forEach(r=>{dmApprovedPairs.set(dmPairKey(r.created_by,r.target_code),r);});
+}
 
 async function loadDmContacts(){
   const sidebar=document.getElementById('dmSidebar');
   sidebar.innerHTML='';
+  await loadDmRoomStatuses();
   
-  // Get all registered runners
   const{data:users}=await sb.from('invite_codes').select('code,character_name,avatar_url').not('character_name','is',null).order('character_name');
   if(!users)return;
   
-  // Check unread messages per user
   const{data:unreadMsgs}=await sb.from('direct_messages').select('sender_code').eq('receiver_code',sessionCode).eq('is_read',false);
   const unreadSet=new Set((unreadMsgs||[]).map(m=>m.sender_code));
-  
   const contacts=users.filter(u=>u.code!==sessionCode);
   
+  if(dmIsAdmin){
+    contacts.forEach(u=>{sidebar.appendChild(makeContactEl(u,unreadSet.has(u.code),null));});
+    return;
+  }
+  
+  const approved=[],pending=[],others=[];
   contacts.forEach(u=>{
-    const div=document.createElement('div');
-    div.className='dm-contact';
-    div.dataset.code=u.code;
-    div.dataset.name=u.character_name;
-    const av=u.avatar_url?`<img src="${u.avatar_url}" alt="">`:u.character_name.charAt(0);
-    div.innerHTML=`
-      <div class="dm-contact-avatar">${av}</div>
-      <div class="dm-contact-name">${escHtml(u.character_name)}</div>
-      ${unreadSet.has(u.code)?'<div class="dm-contact-unread"></div>':''}
-    `;
-    div.addEventListener('click',()=>openDmChat(u.code,u.character_name));
-    sidebar.appendChild(div);
+    const room=dmApprovedPairs.get(dmPairKey(sessionCode,u.code));
+    if(room&&room.status==='approved')approved.push(u);
+    else if(room&&room.status==='pending')pending.push(u);
+    else others.push(u);
   });
+  
+  if(approved.length>0){
+    const lbl=document.createElement('div');lbl.className='dm-sidebar-section';lbl.textContent='대화 가능';sidebar.appendChild(lbl);
+    approved.forEach(u=>{sidebar.appendChild(makeContactEl(u,unreadSet.has(u.code),null));});
+  }
+  if(pending.length>0){
+    const lbl=document.createElement('div');lbl.className='dm-sidebar-section';lbl.textContent='승인 대기';sidebar.appendChild(lbl);
+    pending.forEach(u=>{sidebar.appendChild(makeContactEl(u,false,'pending'));});
+  }
+  if(others.length>0){
+    const lbl=document.createElement('div');lbl.className='dm-sidebar-section';lbl.textContent='대화 신청';sidebar.appendChild(lbl);
+    others.forEach(u=>{sidebar.appendChild(makeContactEl(u,false,'new'));});
+  }
+}
+
+function makeContactEl(u,hasUnread,status){
+  const div=document.createElement('div');
+  div.className='dm-contact'+(status==='pending'?' pending':'');
+  div.dataset.code=u.code;div.dataset.name=u.character_name;
+  const av=u.avatar_url?'<img src="'+u.avatar_url+'" alt="">':u.character_name.charAt(0);
+  let badge='';
+  if(status==='pending')badge='<span class="dm-contact-status wait">대기</span>';
+  else if(hasUnread)badge='<div class="dm-contact-unread"></div>';
+  div.innerHTML='<div class="dm-contact-avatar">'+av+'</div><div class="dm-contact-name">'+escHtml(u.character_name)+'</div>'+badge;
+  div.addEventListener('click',()=>openDmChat(u.code,u.character_name));
+  return div;
 }
 
 async function openDmChat(code,name){
-  dmCurrentPartner=name;
-  dmPartnerCode=code;
+  dmCurrentPartner=name;dmPartnerCode=code;
+  if(dmPollInterval)clearInterval(dmPollInterval);
   
-  // Highlight active contact
   document.querySelectorAll('.dm-contact').forEach(c=>c.classList.remove('active'));
-  const active=document.querySelector(`.dm-contact[data-code="${code}"]`);
-  if(active)active.classList.add('active');
-  
-  // Mark as read
-  await sb.from('direct_messages').update({is_read:true}).eq('sender_code',code).eq('receiver_code',sessionCode).eq('is_read',false);
+  const active=document.querySelector('.dm-contact[data-code="'+code+'"]');
+  if(active){active.classList.add('active');const dot=active.querySelector('.dm-contact-unread');if(dot)dot.remove();}
   
   const chatEl=document.getElementById('dmChat');
-  chatEl.innerHTML=`
-    <div class="dm-messages" id="dmMessages"></div>
-    <div class="dm-input-area">
-      <textarea class="dm-input" id="dmInput" placeholder="${escHtml(name)}에게 메시지..." maxlength="2000"></textarea>
-      <button class="dm-send" id="dmSendBtn">전송</button>
-    </div>
-  `;
+  const key=dmPairKey(sessionCode,code);
+  const room=dmApprovedPairs.get(key);
   
+  // Admin: auto-approve
+  if(dmIsAdmin){
+    if(!room){
+      await sb.from('dm_rooms').insert({created_by:sessionCode,created_by_name:sessionCharName,target_code:code,target_name:name,status:'approved',approved_by:sessionCode,approved_at:new Date().toISOString()});
+      await loadDmRoomStatuses();
+    }else if(room.status!=='approved'){
+      await sb.from('dm_rooms').update({status:'approved',approved_by:sessionCode,approved_at:new Date().toISOString()}).eq('id',room.id);
+      await loadDmRoomStatuses();
+    }
+    showChatUI(code,name);return;
+  }
+  
+  // No room yet — show request form
+  if(!room){
+    chatEl.innerHTML='<div class="dm-request-panel"><div class="dm-req-name">'+escHtml(name)+'</div><div class="dm-req-desc">이 러너와 대화하려면 총괄 승인이 필요합니다.</div><textarea id="dmReqReason" placeholder="신청 사유 (선택)"></textarea><button class="dm-req-btn" id="dmReqBtn">대화 신청</button><div id="dmReqMsg"></div></div>';
+    document.getElementById('dmReqBtn').addEventListener('click',async()=>{
+      const reason=document.getElementById('dmReqReason').value.trim();
+      const btn=document.getElementById('dmReqBtn');btn.disabled=true;btn.textContent='신청 중...';
+      await sb.from('dm_rooms').insert({created_by:sessionCode,created_by_name:sessionCharName,target_code:code,target_name:name,reason:reason});
+      const{data:admins}=await sb.from('invite_codes').select('code').like('code','%ADMIN%');
+      if(admins)admins.forEach(a=>sendNotification(a.code,'comment',null,sessionCharName,sessionCharName+'님이 '+name+'에게 DM 신청을 보냈습니다.'));
+      btn.textContent='신청 완료';
+      document.getElementById('dmReqMsg').textContent='총괄 승인을 기다려주세요.';
+      document.getElementById('dmReqMsg').style.color='var(--green-light)';
+      await loadDmRoomStatuses();await loadDmContacts();
+    });
+    return;
+  }
+  
+  if(room.status==='pending'){
+    chatEl.innerHTML='<div class="dm-request-panel"><div class="dm-req-name">'+escHtml(name)+'</div><div class="dm-req-status">승인 대기 중입니다. 총괄이 승인하면 대화를 시작할 수 있습니다.</div></div>';return;
+  }
+  if(room.status==='rejected'){
+    chatEl.innerHTML='<div class="dm-request-panel"><div class="dm-req-name">'+escHtml(name)+'</div><div class="dm-req-status" style="color:var(--accent-red);">대화 신청이 거절되었습니다.</div></div>';return;
+  }
+  
+  showChatUI(code,name);
+}
+
+function showChatUI(code,name){
+  const chatEl=document.getElementById('dmChat');
+  chatEl.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;padding:0 0 8px;border-bottom:1px solid var(--border);margin-bottom:8px;"><span style="font-size:0.85rem;font-weight:500;color:var(--text-bright);">'+escHtml(name)+'</span><span class="dm-admin-badge">총괄 열람 가능</span></div><div class="dm-messages" id="dmMessages"></div><div class="dm-input-area"><textarea class="dm-input" id="dmInput" placeholder="'+escHtml(name)+'에게 메시지..." maxlength="2000"></textarea><button class="dm-send" id="dmSendBtn">전송</button></div>';
   document.getElementById('dmSendBtn').addEventListener('click',sendDm);
-  document.getElementById('dmInput').addEventListener('keydown',e=>{
-    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendDm();}
-  });
-  
+  document.getElementById('dmInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendDm();}});
   loadDmMessages();
+  dmPollInterval=setInterval(loadDmMessages,4000);
 }
 
 async function loadDmMessages(){
   if(!dmPartnerCode)return;
-  const msgEl=document.getElementById('dmMessages');
-  if(!msgEl)return;
-  
-  const{data:msgs}=await sb.from('direct_messages').select('*')
-    .or(`and(sender_code.eq.${sessionCode},receiver_code.eq.${dmPartnerCode}),and(sender_code.eq.${dmPartnerCode},receiver_code.eq.${sessionCode})`)
+  const msgEl=document.getElementById('dmMessages');if(!msgEl)return;
+  const{data:msgs,error:msgErr}=await sb.from('direct_messages').select('*')
+    .or('and(sender_code.eq.'+sessionCode+',receiver_code.eq.'+dmPartnerCode+'),and(sender_code.eq.'+dmPartnerCode+',receiver_code.eq.'+sessionCode+')')
     .order('created_at',{ascending:true}).limit(100);
-  
-  if(!msgs||msgs.length===0){msgEl.innerHTML='<div style="text-align:center;padding:2em;font-size:0.8rem;color:var(--text-dim);font-style:italic;">대화를 시작하세요.</div>';return;}
-  
-  msgEl.innerHTML=msgs.map(m=>{
-    const isSent=m.sender_code===sessionCode;
-    return `<div class="dm-msg ${isSent?'sent':'received'}">
-      ${escHtml(m.content)}
-      <div class="dm-msg-time">${formatTime(m.created_at)}</div>
-    </div>`;
-  }).join('');
-  
-  msgEl.scrollTop=msgEl.scrollHeight;
+  if(msgErr){console.error('DM error:',msgErr);msgEl.innerHTML='<div class="dm-empty">메시지를 불러올 수 없습니다.</div>';return;}
+  if(!msgs||msgs.length===0){msgEl.innerHTML='<div class="dm-empty">대화를 시작하세요.</div>';return;}
+  const wasAtBottom=msgEl.scrollTop+msgEl.clientHeight>=msgEl.scrollHeight-30;
+  msgEl.innerHTML=msgs.map(m=>{const s=m.sender_code===sessionCode;return '<div class="dm-msg '+(s?'sent':'received')+'">'+escHtml(m.content)+'<div class="dm-msg-time">'+formatTime(m.created_at)+'</div></div>';}).join('');
+  if(wasAtBottom)msgEl.scrollTop=msgEl.scrollHeight;
+  await sb.from('direct_messages').update({is_read:true}).eq('sender_code',dmPartnerCode).eq('receiver_code',sessionCode).eq('is_read',false);
 }
 
 async function sendDm(){
-  const input=document.getElementById('dmInput');
-  const text=input.value.trim();
-  if(!text||!dmPartnerCode)return;
-  
-  await sb.from('direct_messages').insert({
-    sender_code:sessionCode,
-    sender_name:sessionCharName,
-    receiver_code:dmPartnerCode,
-    receiver_name:dmCurrentPartner,
-    content:text
-  });
-  
-  // Send notification
+  const input=document.getElementById('dmInput');const text=input.value.trim();
+  if(!text||!dmPartnerCode)return;input.value='';
+  const{error}=await sb.from('direct_messages').insert({sender_code:sessionCode,sender_name:sessionCharName,receiver_code:dmPartnerCode,receiver_name:dmCurrentPartner,content:text});
+  if(error){console.error('DM send error:',error);alert('메시지 전송 실패');input.value=text;return;}
   sendNotification(dmPartnerCode,'comment',null,sessionCharName,sessionCharName+'님이 DM을 보냈습니다.');
-  
-  input.value='';
-  loadDmMessages();
+  await loadDmMessages();
+  const msgEl=document.getElementById('dmMessages');if(msgEl)msgEl.scrollTop=msgEl.scrollHeight;
+}
+
+async function loadDmApprovals(){
+  if(!dmIsAdmin)return;
+  const area=document.getElementById('dmAdminArea');
+  const{data:pending}=await sb.from('dm_rooms').select('*').eq('status','pending').order('created_at',{ascending:true});
+  if(!pending||pending.length===0){area.innerHTML='';return;}
+  area.innerHTML='<div class="dm-admin-section"><div class="dm-admin-title">DM 승인 대기 ('+pending.length+'건)</div>'+pending.map(r=>'<div class="dm-approval-card" data-room-id="'+r.id+'"><div class="dm-approval-info"><div class="dm-approval-names">'+escHtml(r.created_by_name)+' → '+escHtml(r.target_name)+'</div><div class="dm-approval-reason">'+(r.reason?escHtml(r.reason):'사유 없음')+'</div></div><div class="dm-approval-actions"><button class="dm-apv-btn dm-apv-ok" data-apv-id="'+r.id+'">승인</button><button class="dm-apv-btn dm-apv-no" data-rej-id="'+r.id+'">거절</button></div></div>').join('')+'</div>';
+  area.querySelectorAll('[data-apv-id]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const id=parseInt(btn.dataset.apvId);
+      await sb.from('dm_rooms').update({status:'approved',approved_by:sessionCode,approved_at:new Date().toISOString()}).eq('id',id);
+      const room=pending.find(r=>r.id===id);
+      if(room){sendNotification(room.created_by,'comment',null,'총괄',room.target_name+'과(와)의 DM이 승인되었습니다.');sendNotification(room.target_code,'comment',null,'총괄',room.created_by_name+'과(와)의 DM이 승인되었습니다.');}
+      await loadDmApprovals();await loadDmRoomStatuses();await loadDmContacts();
+    });
+  });
+  area.querySelectorAll('[data-rej-id]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      if(!confirm('정말 거절하시겠습니까?'))return;
+      await sb.from('dm_rooms').update({status:'rejected',approved_by:sessionCode,approved_at:new Date().toISOString()}).eq('id',parseInt(btn.dataset.rejId));
+      await loadDmApprovals();await loadDmRoomStatuses();
+    });
+  });
 }
 
 // === SHOP SYSTEM ===
