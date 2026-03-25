@@ -152,6 +152,26 @@
 
   /* AUDIO CONTROL */
   .audio-panel{position:fixed;bottom:30px;right:30px;z-index:200;display:none;align-items:center;gap:10px;background:rgba(20,26,20,0.9);border:1px solid var(--border);border-radius:20px;padding:8px 14px;transition:all 0.3s ease;backdrop-filter:blur(8px);}
+
+  /* SIDEBAR */
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:200px;background:rgba(14,18,14,0.95);border-right:1px solid var(--border);z-index:150;padding:80px 16px 24px;display:none;flex-direction:column;backdrop-filter:blur(10px);overflow-y:auto;}
+  .sidebar.visible{display:flex;}
+  .sidebar-profile{text-align:center;margin-bottom:1.5em;padding-bottom:1.5em;border-bottom:1px solid var(--border);}
+  .sidebar-avatar{width:56px;height:56px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--green-light);font-weight:700;margin:0 auto 0.6em;overflow:hidden;cursor:pointer;}
+  .sidebar-avatar img{width:100%;height:100%;object-fit:cover;}
+  .sidebar-name{font-size:0.82rem;font-weight:500;color:var(--text-bright);margin-bottom:0.2em;}
+  .sidebar-code{font-size:0.6rem;color:var(--text-dim);font-family:'Cormorant Garamond',serif;letter-spacing:0.15em;}
+  .sidebar-currency{font-size:0.7rem;color:var(--green-light);margin-top:0.5em;}
+  .sidebar-nav{list-style:none;display:flex;flex-direction:column;gap:2px;}
+  .sidebar-nav li a{display:block;padding:10px 12px;font-size:0.78rem;color:var(--text-secondary);text-decoration:none;cursor:pointer;border-radius:2px;transition:all 0.3s ease;letter-spacing:0.05em;}
+  .sidebar-nav li a:hover{background:rgba(45,90,39,0.08);color:var(--text-bright);}
+  .sidebar-nav li a.active-link{color:var(--green-light);background:rgba(45,90,39,0.1);}
+  .sidebar-toggle{position:fixed;left:16px;top:20px;z-index:160;width:32px;height:32px;background:rgba(20,26,20,0.8);border:1px solid var(--border);border-radius:2px;color:var(--text-dim);font-size:0.9rem;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all 0.3s ease;}
+  .sidebar-toggle.visible{display:flex;}
+  .sidebar-toggle:hover{border-color:var(--green-mid);color:var(--text-bright);}
+  .sidebar-logout{margin-top:auto;padding:10px 12px;font-size:0.72rem;color:var(--text-dim);cursor:pointer;border:1px solid var(--border);border-radius:2px;text-align:center;transition:all 0.3s ease;background:none;font-family:'Noto Serif KR',serif;}
+  .sidebar-logout:hover{border-color:var(--accent-red);color:var(--accent-red);}
+  @media(max-width:768px){.sidebar{width:180px;}}
   .audio-panel.visible{display:flex;}
   .audio-btn{width:32px;height:32px;background:transparent;border:none;color:var(--text-dim);font-size:0.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color 0.3s ease;flex-shrink:0;}
   .audio-btn:hover{color:var(--green-light);}
@@ -221,18 +241,42 @@
 
 <!-- ===== SITE WRAP ===== -->
 <div id="siteWrap">
+  <!-- Sidebar toggle -->
+  <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-profile">
+      <div class="sidebar-avatar" id="sidebarAvatar" data-page="characters"></div>
+      <div class="sidebar-name" id="sidebarName"></div>
+      <div class="sidebar-code" id="sidebarCode"></div>
+      <div class="sidebar-currency" id="sidebarCurrency">☁ 0 안개 조각</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a data-page="main">메인</a></li>
+      <li><a data-page="board">타임라인</a></li>
+      <li><a data-page="dm">DM</a></li>
+      <li><a data-page="characters">캐릭터 도감</a></li>
+      <li><a data-page="shop">자판기</a></li>
+      <li><a data-page="event">이벤트</a></li>
+      <li><a data-page="notice">공지사항</a></li>
+      <li><a data-page="worldguide">세계관</a></li>
+      <li><a data-page="qna">Q&A</a></li>
+    </ul>
+    <button class="sidebar-logout" id="sidebarLogout">로그아웃</button>
+  </div>
+
   <nav class="top-nav">
     <div class="top-nav-logo" data-page="main">녹염</div>
     <ul class="top-nav-links">
       <li><a data-page="main">메인</a></li>
       <li><a data-page="notice">공지</a></li>
       <li><a data-page="worldguide">세계관</a></li>
-      <li><a data-page="apply">신청</a></li>
-      <li><a data-page="board">게시판</a></li>
+      <li><a data-page="board">타임라인</a></li>
+      <li><a data-page="dm">DM</a></li>
+      <li><a data-page="shop">자판기</a></li>
       <li id="adminNavItem" style="display:none;"><a data-page="admin" style="color:var(--accent-red);">관리</a></li>
       <li id="notifNavItem" style="position:relative;display:none;"><a id="notifBell" style="cursor:pointer;font-size:1rem;position:relative;">🔔<span id="notifBadge" style="display:none;position:absolute;top:-6px;right:-8px;background:var(--accent-red);color:#fff;font-size:0.55rem;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:sans-serif;">0</span></a></li>
-      <li id="adminNavItem" style="display:none;"><a data-page="admin" style="color:var(--accent-red);">관리</a></li>
-      <li id="adminNavItem" style="display:none;"><a data-page="admin" style="color:var(--accent-red);">관리</a></li>
     </ul>
   </nav>
 
@@ -322,19 +366,6 @@
       <div class="quote-text">"잠들면 숲이 있었다. 나무 사이로 안개가 흘렀다.<br>하얀 안개. 소리가 들렸다.<br>짐승 울음소리 같은 것. 낮고, 길게.<br>깨어나고 나서도 그것이 보인다. 창밖에. 초록빛 눈이."</div>
       <div class="quote-source">— 1985년 부산 생존자 증언에서 발췌</div>
     </section>
-    <section class="section">
-      <div class="section-label">Chronicle</div>
-      <h2 class="section-title">연표</h2>
-      <div class="section-divider"></div>
-      <div class="timeline">
-        <div class="timeline-item"><div class="timeline-year">1953</div><div class="timeline-title">최초 기록 — 강원도, 전쟁고아 집단 혼수 사건</div><div class="timeline-desc">한국전쟁 직후, 산간 지역 임시 보육원에서 아이 7명이 동시에 혼수상태에 빠짐. 생존자 2명이 수일 후 깨어남. 나머지 5명은 깨어나지 못한 채 수개월 내 사망. 생존 아동이 남긴 그림에 하얀 안개가 낀 녹색 숲과 초록색 눈을 가진 짐승이 반복 등장. 전쟁 후유증에 의한 집단 히스테리로 처리됨.</div></div>
-        <div class="timeline-item"><div class="timeline-year">1971</div><div class="timeline-title">서울, 대학생 실종 및 혼수 사건</div><div class="timeline-desc">서울 소재 대학교 남학생 3명이 같은 날 의식불명 상태로 발견. 1명이 약 2주 후 깨어남. 나머지 2명은 식물인간 판정. 깨어난 학생의 일기에 '종이 편지를 받은 뒤 잠들면 숲에 들어간다'는 내용이 최초로 기술됨. 퇴원 후 약 3개월 뒤 수면 중 사망.</div></div>
-        <div class="timeline-item"><div class="timeline-year">1985</div><div class="timeline-title">부산, 어선 선원 집단 혼수 사건</div><div class="timeline-desc">조업 중이던 어선에서 선원 4명이 깨울 수 없는 수면 상태로 발견. 11일 후 1명만 깨어남. 나머지 3명 사망. 생존자 증언: 편지가 와 있었다. 안개가 하얗고 소리가 들렸다. 숲 깊은 곳에서 짐승 울음소리가 들렸다. 퇴원 후에도 밤마다 창밖에 초록빛 눈이 보인다고 호소.</div></div>
-        <div class="timeline-item"><div class="timeline-year">1999</div><div class="timeline-title">대전, 주부 단독 혼수 사건</div><div class="timeline-desc">40대 주부가 자택에서 혼수상태로 발견. 베개 옆에 출처 불명의 봉투. 5일 후 깨어남. 이후 블로그에 숲 경험을 상세히 기록. '길이 사라졌다. 시간이 없었다. 숲 안쪽에서 초록 눈을 가진 사슴 같은 것을 봤다. 깨어난 후에도 그것이 보인다.' 약 2주간 화제가 된 후 글 전량 삭제, 본인 잠적. 이 사건을 계기로 사슴에게 눌린 꿈이라는 뜻의 '녹염(鹿魘)'이라는 단어가 처음 사용됨.</div></div>
-        <div class="timeline-item"><div class="timeline-year">2019</div><div class="timeline-title">온라인, 익명 게시글 파문</div><div class="timeline-desc">대형 커뮤니티에 '3년간 식물인간이었다가 깨어난 사람입니다'라는 장문 게시글 등장. 작성자는 혼수상태 동안 기이한 현상이 일어나는 검은 숲에 가는 꿈을 반복적으로 꿨다고 서술. 숲의 구조와 그 안에서 겪은 일들을 구체적으로 기록. 24시간 내 조회수 50만 돌파 후 계정 돌연 삭제. 캡처본이 유통되며 '녹염'이 도시괴담으로 정착. 진위 여부는 현재까지 미확인.</div></div>
-        <div class="timeline-item"><div class="timeline-year">현재</div><div class="timeline-title">녹염의 현재</div><div class="timeline-desc">녹염은 인터넷에서 떠도는 괴담 중 하나로 취급된다. 대부분의 사람들은 창작물이나 도시전설 정도로 인식하고 있다. 그러나 초대장은 여전히 나타나고 있다. 그리고 당신에게도 편지가 도착했다.</div></div>
-      </div>
-    </section>
     <section class="section" id="navigate">
       <div class="section-label">Navigate</div>
       <h2 class="section-title">바로가기</h2>
@@ -342,11 +373,12 @@
       <div class="nav-grid">
         <div class="nav-card" data-page="notice"><div class="nav-card-title">공지사항</div><div class="nav-card-desc">커뮤니티 규칙 및 안내</div></div>
         <div class="nav-card" data-page="worldguide"><div class="nav-card-title">세계관 가이드</div><div class="nav-card-desc">녹염의 역사와 설정</div></div>
-        <div class="nav-card" data-page="apply"><div class="nav-card-title">캐릭터 신청</div><div class="nav-card-desc">캐릭터 가이드 및 신청서 양식</div></div>
+        <div class="nav-card" data-page="board"><div class="nav-card-title">타임라인</div><div class="nav-card-desc">숲에서의 이야기</div></div>
+        <div class="nav-card" data-page="dm"><div class="nav-card-title">DM</div><div class="nav-card-desc">비공개 메시지</div></div>
         <div class="nav-card" data-page="event"><div class="nav-card-title">이벤트 / 미션</div><div class="nav-card-desc">진행 중인 이벤트 확인</div></div>
-        <div class="nav-card" data-page="characters"><div class="nav-card-title">캐릭터 도감</div><div class="nav-card-desc">합격 캐릭터 목록</div></div>
+        <div class="nav-card" data-page="characters"><div class="nav-card-title">캐릭터 도감</div><div class="nav-card-desc">캐릭터 목록</div></div>
+        <div class="nav-card" data-page="shop"><div class="nav-card-title">자판기</div><div class="nav-card-desc">아이템 구매 및 판매</div></div>
         <div class="nav-card" data-page="qna"><div class="nav-card-title">Q&A</div><div class="nav-card-desc">자주 묻는 질문</div></div>
-        <div class="nav-card" data-page="board"><div class="nav-card-title">게시판</div><div class="nav-card-desc">숲에서의 이야기</div></div>
       </div>
     </section>
     <footer class="footer"><p>녹염 — 鹿魘</p><p>본 커뮤니티의 모든 배경, 설정, 등장인물은 전부 허구이며</p><p>실제 사건, 단체, 인물과는 무관합니다.</p></footer>
@@ -634,6 +666,159 @@
   <!-- PAGE: QNA (준비중) -->
   <div class="page" id="page-qna"><div class="preparing"><div class="preparing-title">준비중</div><div class="preparing-desc">Q&A 페이지는 현재 준비중입니다.</div><div class="back-link" data-page="main">← 메인으로 돌아가기</div></div></div>
 
+  <!-- PAGE: DM -->
+  <div class="page" id="page-dm">
+    <style>
+      .dm-wrap{max-width:650px;margin:0 auto;padding:100px 24px 80px;}
+      .dm-header{text-align:center;margin-bottom:1.5em;}
+      .dm-header-label{font-family:'Cormorant Garamond',serif;font-size:0.75rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--green-mid);margin-bottom:0.8em;}
+      .dm-header-title{font-size:1.8rem;font-weight:700;color:var(--text-bright);letter-spacing:0.1em;margin-bottom:0.5em;}
+      .dm-header-line{width:40px;height:1px;background:var(--green-mid);margin:0 auto;}
+      .dm-layout{display:flex;gap:1em;min-height:60vh;}
+      .dm-sidebar{width:180px;flex-shrink:0;border-right:1px solid var(--border);padding-right:1em;}
+      .dm-contact{padding:10px;cursor:pointer;border-radius:2px;transition:all 0.3s ease;display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+      .dm-contact:hover{background:rgba(45,90,39,0.05);}
+      .dm-contact.active{background:rgba(45,90,39,0.1);border-left:2px solid var(--green-mid);}
+      .dm-contact-avatar{width:28px;height:28px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:var(--green-light);font-weight:700;flex-shrink:0;overflow:hidden;}
+      .dm-contact-avatar img{width:100%;height:100%;object-fit:cover;}
+      .dm-contact-name{font-size:0.78rem;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+      .dm-contact-unread{width:8px;height:8px;border-radius:50%;background:var(--accent-red);flex-shrink:0;}
+      .dm-chat{flex:1;display:flex;flex-direction:column;}
+      .dm-chat-empty{display:flex;align-items:center;justify-content:center;flex:1;font-size:0.85rem;color:var(--text-dim);font-style:italic;}
+      .dm-messages{flex:1;overflow-y:auto;padding:1em 0;display:flex;flex-direction:column;gap:0.5em;max-height:50vh;}
+      .dm-msg{max-width:80%;padding:10px 14px;border-radius:2px;font-size:0.82rem;line-height:1.8;word-break:break-word;}
+      .dm-msg.sent{align-self:flex-end;background:rgba(45,90,39,0.15);color:var(--text-bright);border:1px solid rgba(45,90,39,0.2);}
+      .dm-msg.received{align-self:flex-start;background:var(--bg-card);color:var(--text-secondary);border:1px solid var(--border);}
+      .dm-msg-time{font-size:0.6rem;color:var(--text-dim);margin-top:4px;}
+      .dm-input-area{display:flex;gap:8px;padding-top:1em;border-top:1px solid var(--border);}
+      .dm-input{flex:1;padding:10px 14px;background:rgba(10,12,8,0.6);border:1px solid var(--border);border-radius:2px;color:var(--text-bright);font-family:'Noto Serif KR',serif;font-size:0.82rem;outline:none;resize:none;min-height:40px;max-height:100px;}
+      .dm-input:focus{border-color:var(--green-mid);}
+      .dm-send{padding:10px 18px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.78rem;cursor:pointer;transition:all 0.3s ease;flex-shrink:0;}
+      .dm-send:hover{border-color:var(--green-mid);color:var(--text-bright);}
+      .dm-auth{text-align:center;padding:3em 0;}
+      @media(max-width:600px){.dm-layout{flex-direction:column;}.dm-sidebar{width:100%;border-right:none;border-bottom:1px solid var(--border);padding-right:0;padding-bottom:1em;display:flex;gap:4px;overflow-x:auto;}.dm-messages{max-height:40vh;}}
+    </style>
+    <div class="dm-wrap">
+      <div class="dm-header">
+        <div class="dm-header-label">Direct Message</div>
+        <div class="dm-header-title">DM</div>
+        <div class="dm-header-line"></div>
+      </div>
+      <div id="dmAuth" class="dm-auth">
+        <button id="dmAuthBtn" style="padding:12px 30px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.85rem;letter-spacing:0.15em;cursor:pointer;">DM 입장</button>
+      </div>
+      <div id="dmContent" style="display:none;">
+        <div class="dm-layout">
+          <div class="dm-sidebar" id="dmSidebar"></div>
+          <div class="dm-chat" id="dmChat">
+            <div class="dm-chat-empty">대화 상대를 선택하세요.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: SHOP (자판기) -->
+  <div class="page" id="page-shop">
+    <style>
+      .shop-wrap{max-width:700px;margin:0 auto;padding:100px 24px 80px;}
+      .shop-header{text-align:center;margin-bottom:2em;}
+      .shop-header-label{font-family:'Cormorant Garamond',serif;font-size:0.75rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--green-mid);margin-bottom:0.8em;}
+      .shop-header-title{font-family:'KimJwaJinGeneral',serif;font-size:2rem;font-weight:700;color:var(--text-bright);letter-spacing:0.2em;margin-bottom:0.3em;}
+      .shop-header-desc{font-size:0.8rem;color:var(--text-dim);font-style:italic;}
+      .shop-currency{text-align:center;margin-bottom:2em;padding:1em;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;}
+      .shop-currency-num{font-size:1.5rem;font-weight:700;color:var(--text-bright);}
+      .shop-currency-label{font-size:0.7rem;color:var(--text-dim);letter-spacing:0.1em;margin-top:0.3em;}
+      .shop-tabs{display:flex;gap:0;margin-bottom:1.5em;border:1px solid var(--border);border-radius:2px;overflow:hidden;}
+      .shop-tab{flex:1;padding:10px;background:transparent;border:none;color:var(--text-dim);font-family:'Noto Serif KR',serif;font-size:0.72rem;letter-spacing:0.08em;cursor:pointer;transition:all 0.3s ease;text-align:center;border-right:1px solid var(--border);}
+      .shop-tab:last-child{border-right:none;}
+      .shop-tab:hover{color:var(--text-secondary);}
+      .shop-tab.active{color:var(--green-light);background:rgba(45,90,39,0.08);}
+      .shop-panel{display:none;}
+      .shop-panel.active{display:block;}
+      .shop-item{display:flex;align-items:center;padding:1em;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;margin-bottom:0.6em;transition:border-color 0.3s ease;}
+      .shop-item:hover{border-color:var(--green-dark);}
+      .shop-item-info{flex:1;}
+      .shop-item-name{font-size:0.88rem;font-weight:500;color:var(--text-bright);margin-bottom:0.2em;}
+      .shop-item-grade{font-size:0.65rem;letter-spacing:0.1em;margin-bottom:0.3em;}
+      .shop-item-grade.low{color:var(--text-dim);}
+      .shop-item-grade.mid{color:var(--green-light);}
+      .shop-item-grade.high{color:#b8860b;}
+      .shop-item-grade.special{color:var(--accent-red);}
+      .shop-item-desc{font-size:0.78rem;color:var(--text-dim);font-style:italic;line-height:1.6;}
+      .shop-item-price{font-size:0.9rem;font-weight:700;color:var(--text-bright);margin-right:1em;white-space:nowrap;}
+      .shop-buy{padding:6px 14px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.72rem;cursor:pointer;transition:all 0.3s ease;}
+      .shop-buy:hover{border-color:var(--green-mid);color:var(--text-bright);}
+      .shop-auth{text-align:center;padding:3em 0;}
+      .shop-sell-section{margin-bottom:2em;padding:1.5em;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;}
+      .shop-sell-title{font-size:0.85rem;font-weight:700;color:var(--text-bright);margin-bottom:1em;}
+      .shop-sell-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(30,38,30,0.3);}
+      .shop-sell-item:last-child{border-bottom:none;}
+    </style>
+    <div class="shop-wrap">
+      <div class="shop-header">
+        <div class="shop-header-label">Vending Machine</div>
+        <div class="shop-header-title">자판기</div>
+        <div class="shop-header-desc">"전원이 어디서 오는지 모르겠다. 하지만 작동한다."</div>
+      </div>
+      <div id="shopAuth" class="shop-auth">
+        <button id="shopAuthBtn" style="padding:12px 30px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.85rem;letter-spacing:0.15em;cursor:pointer;">자판기 앞에 선다</button>
+      </div>
+      <div id="shopContent" style="display:none;">
+        <div class="shop-currency">
+          <div class="shop-currency-num" id="shopCurrency">0</div>
+          <div class="shop-currency-label">안개 조각</div>
+        </div>
+        <div class="shop-tabs">
+          <button class="shop-tab active" data-shop-tab="consumable">소모품</button>
+          <button class="shop-tab" data-shop-tab="title">칭호</button>
+          <button class="shop-tab" data-shop-tab="border">테두리</button>
+          <button class="shop-tab" data-shop-tab="gift">선물</button>
+          <button class="shop-tab" data-shop-tab="sell">판매</button>
+        </div>
+        <div class="shop-panel active" id="shopConsumable"></div>
+        <div class="shop-panel" id="shopTitle"></div>
+        <div class="shop-panel" id="shopBorder"></div>
+        <div class="shop-panel" id="shopGift"></div>
+        <div class="shop-panel" id="shopSell"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: PROLOGUE -->
+  <div class="page" id="page-prologue">
+    <style>
+      .prolog-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;}
+      .prolog-text{max-width:600px;font-size:clamp(0.9rem,1.5vw,1.05rem);font-weight:300;color:var(--text-secondary);line-height:2.5;opacity:0;animation:fadeInUp 2s ease-out forwards;}
+      .prolog-text p{margin-bottom:1.5em;}
+      .prolog-text .delay1{animation-delay:0.5s;}
+      .prolog-text .delay2{animation-delay:2s;}
+      .prolog-text .delay3{animation-delay:3.5s;}
+      .prolog-text .delay4{animation-delay:5s;}
+      .prolog-text .delay5{animation-delay:6.5s;}
+      .prolog-text .delay6{animation-delay:8s;}
+      .prolog-text .eerie{color:var(--fog-white);font-style:italic;}
+      .prolog-title{font-family:'KimJwaJinGeneral',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:var(--text-bright);letter-spacing:0.3em;opacity:0;animation:fadeInUp 2s ease-out 10s forwards;margin-bottom:0.5em;}
+      .prolog-sub{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--text-dim);letter-spacing:0.5em;opacity:0;animation:fadeInUp 2s ease-out 11s forwards;}
+      .prolog-enter{margin-top:3em;opacity:0;animation:fadeInUp 2s ease-out 12.5s forwards;}
+      .prolog-enter a{font-size:0.8rem;color:var(--text-dim);letter-spacing:0.15em;cursor:pointer;transition:color 0.3s ease;}
+      .prolog-enter a:hover{color:var(--green-light);}
+    </style>
+    <div class="prolog-wrap">
+      <div class="prolog-text">
+        <p class="delay1">초대장이 도착했다.</p>
+        <p class="delay2">베개 밑에 놓여 있었는지, 꿈속에서 읽었는지 모르겠다.</p>
+        <p class="delay3">분명한 건 그것을 받았다는 사실뿐이다.</p>
+        <p class="delay4 eerie">잠에 들면, 숲이 있을 것이다.</p>
+        <p class="delay5 eerie">하얀 안개. 끝이 없는 나무. 돌아갈 수 없는 길.</p>
+        <p class="delay6 eerie">그리고, 무언가가 당신을 보고 있을 것이다.</p>
+      </div>
+      <div class="prolog-title">녹염</div>
+      <div class="prolog-sub">鹿 魘</div>
+      <div class="prolog-enter"><a data-page="main">숲에 들어간다 →</a></div>
+    </div>
+  </div>
+
 
   <!-- PAGE: ADMIN -->
   <div class="page" id="page-admin">
@@ -781,7 +966,8 @@
       .tl-post.notice{border-left:3px solid var(--green-mid);}
       .tl-post.reply{margin-left:2em;border-left:2px solid var(--border);opacity:0.9;}
       .tl-post-header{display:flex;align-items:center;gap:0.8em;margin-bottom:0.6em;}
-      .tl-post-name{font-size:0.82rem;font-weight:500;color:var(--text-bright);letter-spacing:0.03em;}
+      .tl-post-name{font-size:0.82rem;font-weight:500;color:var(--text-bright);letter-spacing:0.03em;cursor:pointer;}
+      .tl-post-name:hover{color:var(--green-light);}
       .tl-post-meta{margin-left:auto;display:flex;align-items:center;gap:0.8em;}
       .tl-post-time{font-size:0.62rem;color:var(--text-dim);letter-spacing:0.05em;}
       .tl-post-delete{background:none;border:none;color:var(--text-dim);font-size:0.6rem;cursor:pointer;transition:color 0.3s ease;}
@@ -833,10 +1019,10 @@
             <div class="tl-avatar" id="tlAvatar"></div>
             <div class="tl-composer-name" id="boardUserName">캐릭터명</div>
           </div>
-          <textarea id="boardTextarea" placeholder="숲 속에서의 이야기를 남겨주세요..." maxlength="500"></textarea>
+          <textarea id="boardTextarea" placeholder="숲 속에서의 이야기를 남겨주세요..." maxlength="1000"></textarea>
           <div class="tl-composer-footer">
             <div>
-              <span class="tl-composer-count"><span id="boardCharCount">0</span>/500</span>
+              <span class="tl-composer-count"><span id="boardCharCount">0</span>/1000</span>
               <span class="tl-composer-hint"> · @캐릭터명으로 멘션</span>
             </div>
             <button class="tl-composer-submit" id="boardSubmit">작성</button>
@@ -868,6 +1054,31 @@ let isMuted=false;
 let sessionCode=null;
 let sessionCharName=null;
 let pendingLoginData=null;
+
+// Restore session from localStorage
+(function restoreSession(){
+  const saved=localStorage.getItem('nokyeom_session');
+  if(saved){
+    try{
+      const s=JSON.parse(saved);
+      if(s.code&&s.name){
+        sessionCode=s.code;
+        sessionCharName=s.name;
+        // Auto-enter
+        setTimeout(()=>{
+          entryPage.classList.add('hidden');
+          setTimeout(()=>{entryPage.style.display='none';siteWrap.classList.add('visible');showPage('main');initParticles();initNotifications();initAdmin();loadAvatarCache().then(()=>initSidebar());
+            bgm.volume=0;bgm.play().then(()=>{let v=0;const fi=setInterval(()=>{v+=0.02;if(v>=0.5){v=0.5;clearInterval(fi);}bgm.volume=v;},100);audioPanel.classList.add('visible');}).catch(()=>{});
+          },500);
+        },300);
+      }
+    }catch(e){}
+  }
+})();
+
+function saveSession(){
+  localStorage.setItem('nokyeom_session',JSON.stringify({code:sessionCode,name:sessionCharName}));
+}
 
 // === ENTRY ===
 enterBtn.addEventListener('click',handleEntry);
@@ -941,9 +1152,10 @@ document.getElementById('newPw2').addEventListener('keydown',e=>{if(e.key==='Ent
 
 // 입장 애니메이션
 function doEnter(){
+  saveSession();
   bgm.volume=0;bgm.play().then(()=>{let v=0;const fi=setInterval(()=>{v+=0.02;if(v>=0.5){v=0.5;clearInterval(fi);}bgm.volume=v;},100);audioPanel.classList.add('visible');}).catch(()=>{});
   setTimeout(()=>entryPage.classList.add('hidden'),800);
-  setTimeout(()=>{entryPage.style.display='none';siteWrap.classList.add('visible');showPage('main');initParticles();initNotifications();initAdmin();},2300);
+  setTimeout(()=>{entryPage.style.display='none';siteWrap.classList.add('visible');showPage('main');initParticles();initNotifications();initAdmin();loadAvatarCache().then(()=>initSidebar());},2300);
 }
 
 // === SPA ROUTING ===
@@ -1794,7 +2006,7 @@ async function loadPosts(){
       </div>
       <div class="tl-reply-composer" id="replyComposer-${post.id}">
         <div class="tl-reply-to">↩ <span>${escHtml(post.author_name)}</span>에게 답글</div>
-        <textarea class="tl-reply-input" id="replyInput-${post.id}" placeholder="@${escHtml(post.author_name)} " maxlength="500"></textarea>
+        <textarea class="tl-reply-input" id="replyInput-${post.id}" placeholder="@${escHtml(post.author_name)} " maxlength="1000"></textarea>
         <div class="tl-reply-actions">
           <button class="tl-reply-btn" data-reply-cancel="${post.id}">취소</button>
           <button class="tl-reply-btn submit" data-reply-submit="${post.id}" data-reply-to-name="${escHtml(post.author_name)}" data-reply-to-code="${post.author_code}">답글 작성</button>
@@ -1946,12 +2158,22 @@ async function handleTimelineClick(e){
     loadPosts();return;
   }
   
-  // Mention click → filter to that person's posts
+  // Mention click → show profile card
   const mentionEl=e.target.closest('.mention');
   if(mentionEl){
-    const name=mentionEl.dataset.mention;
-    // Could navigate to profile or filter — for now just alert
-    alert(name+'님의 프로필 (준비중)');
+    showProfileCard(mentionEl.dataset.mention);
+    return;
+  }
+  
+  // Author name/avatar click → show profile card
+  const nameEl=e.target.closest('.tl-post-name');
+  const avatarEl=e.target.closest('.tl-avatar');
+  if(nameEl||avatarEl){
+    const postEl=e.target.closest('.tl-post');
+    if(postEl){
+      const headerName=postEl.querySelector('.tl-post-name');
+      if(headerName)showProfileCard(headerName.textContent);
+    }
     return;
   }
 }
@@ -1967,6 +2189,296 @@ function formatTime(ts){
 }
 
 function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// === DM SYSTEM ===
+let dmCurrentPartner=null;
+let dmPartnerCode=null;
+
+document.getElementById('dmAuthBtn').addEventListener('click',async()=>{
+  if(!sessionCode){alert('먼저 사이트에 로그인해주세요.');return;}
+  document.getElementById('dmAuth').style.display='none';
+  document.getElementById('dmContent').style.display='block';
+  loadDmContacts();
+});
+
+async function loadDmContacts(){
+  const sidebar=document.getElementById('dmSidebar');
+  sidebar.innerHTML='';
+  
+  // Get all registered runners
+  const{data:users}=await sb.from('invite_codes').select('code,character_name,avatar_url').not('character_name','is',null).order('character_name');
+  if(!users)return;
+  
+  // Check unread messages per user
+  const{data:unreadMsgs}=await sb.from('direct_messages').select('sender_code').eq('receiver_code',sessionCode).eq('is_read',false);
+  const unreadSet=new Set((unreadMsgs||[]).map(m=>m.sender_code));
+  
+  const contacts=users.filter(u=>u.code!==sessionCode);
+  
+  contacts.forEach(u=>{
+    const div=document.createElement('div');
+    div.className='dm-contact';
+    div.dataset.code=u.code;
+    div.dataset.name=u.character_name;
+    const av=u.avatar_url?`<img src="${u.avatar_url}" alt="">`:u.character_name.charAt(0);
+    div.innerHTML=`
+      <div class="dm-contact-avatar">${av}</div>
+      <div class="dm-contact-name">${escHtml(u.character_name)}</div>
+      ${unreadSet.has(u.code)?'<div class="dm-contact-unread"></div>':''}
+    `;
+    div.addEventListener('click',()=>openDmChat(u.code,u.character_name));
+    sidebar.appendChild(div);
+  });
+}
+
+async function openDmChat(code,name){
+  dmCurrentPartner=name;
+  dmPartnerCode=code;
+  
+  // Highlight active contact
+  document.querySelectorAll('.dm-contact').forEach(c=>c.classList.remove('active'));
+  const active=document.querySelector(`.dm-contact[data-code="${code}"]`);
+  if(active)active.classList.add('active');
+  
+  // Mark as read
+  await sb.from('direct_messages').update({is_read:true}).eq('sender_code',code).eq('receiver_code',sessionCode).eq('is_read',false);
+  
+  const chatEl=document.getElementById('dmChat');
+  chatEl.innerHTML=`
+    <div class="dm-messages" id="dmMessages"></div>
+    <div class="dm-input-area">
+      <textarea class="dm-input" id="dmInput" placeholder="${escHtml(name)}에게 메시지..." maxlength="2000"></textarea>
+      <button class="dm-send" id="dmSendBtn">전송</button>
+    </div>
+  `;
+  
+  document.getElementById('dmSendBtn').addEventListener('click',sendDm);
+  document.getElementById('dmInput').addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendDm();}
+  });
+  
+  loadDmMessages();
+}
+
+async function loadDmMessages(){
+  if(!dmPartnerCode)return;
+  const msgEl=document.getElementById('dmMessages');
+  if(!msgEl)return;
+  
+  const{data:msgs}=await sb.from('direct_messages').select('*')
+    .or(`and(sender_code.eq.${sessionCode},receiver_code.eq.${dmPartnerCode}),and(sender_code.eq.${dmPartnerCode},receiver_code.eq.${sessionCode})`)
+    .order('created_at',{ascending:true}).limit(100);
+  
+  if(!msgs||msgs.length===0){msgEl.innerHTML='<div style="text-align:center;padding:2em;font-size:0.8rem;color:var(--text-dim);font-style:italic;">대화를 시작하세요.</div>';return;}
+  
+  msgEl.innerHTML=msgs.map(m=>{
+    const isSent=m.sender_code===sessionCode;
+    return `<div class="dm-msg ${isSent?'sent':'received'}">
+      ${escHtml(m.content)}
+      <div class="dm-msg-time">${formatTime(m.created_at)}</div>
+    </div>`;
+  }).join('');
+  
+  msgEl.scrollTop=msgEl.scrollHeight;
+}
+
+async function sendDm(){
+  const input=document.getElementById('dmInput');
+  const text=input.value.trim();
+  if(!text||!dmPartnerCode)return;
+  
+  await sb.from('direct_messages').insert({
+    sender_code:sessionCode,
+    sender_name:sessionCharName,
+    receiver_code:dmPartnerCode,
+    receiver_name:dmCurrentPartner,
+    content:text
+  });
+  
+  // Send notification
+  sendNotification(dmPartnerCode,'comment',null,sessionCharName,sessionCharName+'님이 DM을 보냈습니다.');
+  
+  input.value='';
+  loadDmMessages();
+}
+
+// === SHOP SYSTEM ===
+const SHOP_ITEMS={
+  consumable:[
+    {id:'c1',name:'이끼 붕대',grade:'하급',gradeClass:'low',price:8,desc:'"습기를 머금은 이끼. 상처에 대면 아프지만 낫는다."',effect:'체력 +15'},
+    {id:'c2',name:'안개꽃 차',grade:'하급',gradeClass:'low',price:8,desc:'"찻잔은 없다. 하지만 마실 수 있다."',effect:'정신력 +15'},
+    {id:'c3',name:'작은 부적',grade:'하급',gradeClass:'low',price:12,desc:'"돌에 뭔가 새겨져 있다. 읽을 수 없다."',effect:'판정 +2 (1회)'},
+    {id:'c4',name:'숲의 수액',grade:'중급',gradeClass:'mid',price:20,desc:'"나무에서 흘러나온 것. 끈적이지만 상처가 닫힌다."',effect:'체력 +35'},
+    {id:'c5',name:'검은 열매',grade:'중급',gradeClass:'mid',price:20,desc:'"맛이 없다. 하지만 먹으면 머릿속이 잠시 맑아진다."',effect:'정신력 +35'},
+    {id:'c6',name:'어둠의 부적',grade:'중급',gradeClass:'mid',price:30,desc:'"무언가의 가죽 위에 그려져 있다. 만지면 따뜻하다."',effect:'판정 +4 (1회)'},
+    {id:'c7',name:'녹슨 주사기',grade:'고급',gradeClass:'high',price:70,desc:'"안에 든 액체가 초록빛을 띤다. 어디서 왔는지 묻지 마라."',effect:'체력 +60'},
+    {id:'c8',name:'잊혀진 자의 일기',grade:'고급',gradeClass:'high',price:70,desc:'"이전 탐색자가 남긴 것. 읽으면 내가 누군지 기억난다."',effect:'정신력 +60'},
+    {id:'c9',name:'사슴의 눈물',grade:'고급',gradeClass:'high',price:90,desc:'"초록빛 액체. 한 방울이면 충분하다."',effect:'판정 +6 (1회)'},
+    {id:'c10',name:'숲의 나침반',grade:'특수',gradeClass:'special',price:40,desc:'"바늘이 북쪽을 가리키지 않는다. 하지만 출구를 안다."',effect:'탈출 DC -5 (1회)'},
+    {id:'c11',name:'투명 이슬',grade:'특수',gradeClass:'special',price:45,desc:'"마시면 숲이 당신을 잠시 잊는다."',effect:'주의(alert) -30'},
+    {id:'c12',name:'사슴뿔 향',grade:'특수',gradeClass:'special',price:80,desc:'"태우면 그것이 멈춘다. 연기가 사라질 때까지."',effect:'점프스케어 면역 1회'},
+  ],
+  title:[
+    {id:'t1',name:'"길 잃은 자"',grade:'',gradeClass:'low',price:15,desc:'기본 칭호. 숲에 처음 온 사람.'},
+    {id:'t2',name:'"안개를 삼킨 자"',grade:'',gradeClass:'mid',price:40,desc:'안개 속에서 살아남은 자.'},
+    {id:'t3',name:'"나무가 기억하는 이름"',grade:'',gradeClass:'mid',price:70,desc:'숲이 당신을 인식하기 시작했다.'},
+    {id:'t4',name:'"그것의 시선 아래"',grade:'',gradeClass:'high',price:100,desc:'사슴과 눈을 마주치고 살아남은 자.'},
+    {id:'t5',name:'"깨어나지 못한 자의 후계"',grade:'',gradeClass:'high',price:150,desc:'이전 탐색자의 기억을 이어받은 자.'},
+    {id:'t6',name:'"鹿魘"',grade:'',gradeClass:'special',price:300,desc:'사슴에게 눌린 꿈. 최고 등급.'},
+  ],
+  border:[
+    {id:'b1',name:'낙엽',grade:'',gradeClass:'low',price:20,desc:'마른 낙엽이 프로필 가장자리에 쌓여 있다.'},
+    {id:'b2',name:'이끼',grade:'',gradeClass:'low',price:40,desc:'초록 이끼가 천천히 번지고 있다.'},
+    {id:'b3',name:'하얀 안개',grade:'',gradeClass:'mid',price:70,desc:'프로필 주변으로 안개가 흐른다.'},
+    {id:'b4',name:'사슴 발자국',grade:'',gradeClass:'mid',price:100,desc:'프로필 주위에 발자국이 찍혀 있다. 점점 가까워진다.'},
+    {id:'b5',name:'뿔의 그림자',grade:'',gradeClass:'high',price:150,desc:'프로필 위로 거대한 뿔의 그림자가 드리워져 있다.'},
+    {id:'b6',name:'초록빛 눈',grade:'',gradeClass:'special',price:250,desc:'프로필 어딘가에서 두 개의 초록빛이 빛나고 있다.'},
+  ],
+  gift:[
+    {id:'g1',name:'안개꽃 한 송이',grade:'',gradeClass:'low',price:8,desc:'"숲에서 피는 꽃. 향이 없다."'},
+    {id:'g2',name:'이름 없는 편지',grade:'',gradeClass:'mid',price:15,desc:'"접혀 있었다. 누가 보낸 건지 모른다." (익명)'},
+    {id:'g3',name:'깨진 손거울',grade:'',gradeClass:'mid',price:25,desc:'"비친 얼굴이 내 것이 맞나."'},
+    {id:'g4',name:'사슴 뿔 조각',grade:'',gradeClass:'high',price:50,desc:'"따뜻하다. 아직 살아있는 것 같다."'},
+  ]
+};
+
+let shopUserCurrency=0;
+
+document.getElementById('shopAuthBtn').addEventListener('click',async()=>{
+  if(!sessionCode){alert('먼저 사이트에 로그인해주세요.');return;}
+  document.getElementById('shopAuth').style.display='none';
+  document.getElementById('shopContent').style.display='block';
+  await loadShopCurrency();
+  renderShopTab('consumable');
+});
+
+// Shop tabs
+document.querySelectorAll('.shop-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.shop-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.shop-panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    const tabName=tab.dataset.shopTab;
+    document.getElementById('shop'+tabName.charAt(0).toUpperCase()+tabName.slice(1)).classList.add('active');
+    if(tabName==='sell')renderShopSell();
+    else renderShopTab(tabName);
+  });
+});
+
+async function loadShopCurrency(){
+  const{data}=await sb.from('invite_codes').select('currency').eq('code',sessionCode).maybeSingle();
+  shopUserCurrency=data?.currency||0;
+  document.getElementById('shopCurrency').textContent=shopUserCurrency;
+}
+
+function renderShopTab(tab){
+  const items=SHOP_ITEMS[tab];
+  if(!items)return;
+  const el=document.getElementById('shop'+tab.charAt(0).toUpperCase()+tab.slice(1));
+  
+  el.innerHTML=items.map(item=>{
+    const canBuy=shopUserCurrency>=item.price;
+    const isGiftTab=tab==='gift';
+    return `<div class="shop-item">
+      <div class="shop-item-info">
+        <div class="shop-item-name">${item.name}</div>
+        ${item.grade?`<div class="shop-item-grade ${item.gradeClass}">${item.grade}</div>`:''}
+        <div class="shop-item-desc">${item.desc}${item.effect?' · '+item.effect:''}</div>
+      </div>
+      <div class="shop-item-price">${item.price} ☁</div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <button class="shop-buy" data-buy-id="${item.id}" data-buy-name="${item.name}" data-buy-price="${item.price}" ${canBuy?'':'disabled style="opacity:0.3;cursor:not-allowed;"'}>${isGiftTab?'선물':'구매'}</button>
+        ${!isGiftTab&&tab==='consumable'?`<button class="shop-buy" data-gift-id="${item.id}" data-gift-name="${item.name}" data-gift-price="${item.price}" ${canBuy?'':'disabled style="opacity:0.3;cursor:not-allowed;"'} style="font-size:0.65rem;">선물</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  
+  // Buy handlers
+  el.querySelectorAll('[data-buy-id]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const id=btn.dataset.buyId;
+      const name=btn.dataset.buyName;
+      const price=parseInt(btn.dataset.buyPrice);
+      const isGift=btn.textContent==='선물'||btn.closest('.shop-panel').id==='shopGift';
+      
+      if(isGift){
+        const target=prompt('선물할 캐릭터명을 입력하세요:');
+        if(!target)return;
+        const{data:tUser}=await sb.from('invite_codes').select('code,character_name').eq('character_name',target).maybeSingle();
+        if(!tUser){alert('해당 캐릭터를 찾을 수 없습니다.');return;}
+        if(!confirm(`${name}을(를) ${target}에게 선물합니다. (${price} 안개 조각)`))return;
+        
+        await sb.from('invite_codes').update({currency:shopUserCurrency-price}).eq('code',sessionCode);
+        await sb.from('shop_purchases').insert({buyer_code:sessionCode,buyer_name:sessionCharName,item_id:id,item_name:name,price:price,gift_to_code:tUser.code,gift_to_name:target});
+        const isAnon=id==='g2';
+        await sb.from('gifts').insert({from_code:sessionCode,from_name:sessionCharName,to_code:tUser.code,to_name:target,item_name:name,is_anonymous:isAnon});
+        sendNotification(tUser.code,'like',null,isAnon?'누군가':sessionCharName,(isAnon?'누군가':sessionCharName)+'님이 '+name+'을(를) 선물했습니다.');
+        alert('선물 완료!');
+      }else{
+        if(!confirm(`${name}을(를) 구매합니다. (${price} 안개 조각)`))return;
+        await sb.from('invite_codes').update({currency:shopUserCurrency-price}).eq('code',sessionCode);
+        await sb.from('shop_purchases').insert({buyer_code:sessionCode,buyer_name:sessionCharName,item_id:id,item_name:name,price:price});
+        alert('구매 완료!');
+      }
+      await loadShopCurrency();
+      renderShopTab(btn.closest('.shop-panel').id.replace('shop','').toLowerCase());
+    });
+  });
+  
+  // Gift handlers for consumables
+  el.querySelectorAll('[data-gift-id]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const id=btn.dataset.giftId;
+      const name=btn.dataset.giftName;
+      const price=parseInt(btn.dataset.giftPrice);
+      const target=prompt('선물할 캐릭터명을 입력하세요:');
+      if(!target)return;
+      const{data:tUser}=await sb.from('invite_codes').select('code,character_name').eq('character_name',target).maybeSingle();
+      if(!tUser){alert('해당 캐릭터를 찾을 수 없습니다.');return;}
+      if(!confirm(`${name}을(를) ${target}에게 선물합니다. (${price} 안개 조각)`))return;
+      await sb.from('invite_codes').update({currency:shopUserCurrency-price}).eq('code',sessionCode);
+      await sb.from('shop_purchases').insert({buyer_code:sessionCode,buyer_name:sessionCharName,item_id:id,item_name:name,price:price,gift_to_code:tUser.code,gift_to_name:target});
+      await sb.from('gifts').insert({from_code:sessionCode,from_name:sessionCharName,to_code:tUser.code,to_name:target,item_name:name});
+      sendNotification(tUser.code,'like',null,sessionCharName,sessionCharName+'님이 '+name+'을(를) 선물했습니다.');
+      alert('선물 완료!');
+      await loadShopCurrency();
+      renderShopTab('consumable');
+    });
+  });
+}
+
+async function renderShopSell(){
+  const el=document.getElementById('shopSell');
+  const{data:items}=await sb.from('farming_items').select('*').eq('claimed_by',sessionCode).eq('is_active',true);
+  
+  if(!items||items.length===0){el.innerHTML='<div style="text-align:center;padding:2em;font-size:0.8rem;color:var(--text-dim);font-style:italic;">판매할 아이템이 없습니다.</div>';return;}
+  
+  const prices={common:10,rare:30,legendary:80};
+  const rl={common:'일반',rare:'희귀',legendary:'전설'};
+  
+  el.innerHTML='<div class="shop-sell-section"><div class="shop-sell-title">보유 아이템 판매</div>'+
+    items.map(i=>`<div class="shop-sell-item">
+      <div><span style="font-size:0.7rem;color:var(--text-dim);">[${rl[i.rarity]}]</span> <span style="font-size:0.82rem;color:var(--text-secondary);">${escHtml(i.name)}</span></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:0.8rem;color:var(--text-bright);">${prices[i.rarity]} ☁</span>
+        <button class="shop-buy" data-sell-id="${i.id}" data-sell-price="${prices[i.rarity]}" data-sell-name="${escHtml(i.name)}">판매</button>
+      </div>
+    </div>`).join('')+'</div>';
+  
+  el.querySelectorAll('[data-sell-id]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const id=parseInt(btn.dataset.sellId);
+      const price=parseInt(btn.dataset.sellPrice);
+      const name=btn.dataset.sellName;
+      if(!confirm(`${name}을(를) ${price} 안개 조각에 판매합니다.`))return;
+      await sb.from('farming_items').update({claimed_by:null,claimed_at:null}).eq('id',id);
+      await sb.from('invite_codes').update({currency:shopUserCurrency+price}).eq('code',sessionCode);
+      alert(`${name} 판매 완료! +${price} 안개 조각`);
+      await loadShopCurrency();
+      renderShopSell();
+    });
+  });
+}
 
 // === CHARACTER PROFILE SYSTEM ===
 let charAllData=[];
@@ -2093,42 +2605,43 @@ document.getElementById('avatarFileInput').addEventListener('change',async(e)=>{
   const file=e.target.files[0];
   if(!file)return;
   if(!file.type.startsWith('image/')){alert('이미지 파일만 업로드할 수 있습니다.');return;}
-  if(file.size>2*1024*1024){alert('파일 크기는 2MB 이하여야 합니다.');return;}
+  if(file.size>5*1024*1024){alert('파일 크기는 5MB 이하여야 합니다.');return;}
   
   const avatarEl=document.getElementById('charPAvatar');
-  avatarEl.innerHTML='<span style="font-size:0.6rem;color:var(--text-dim);">업로드 중...</span>';
+  avatarEl.innerHTML='<span style="font-size:0.6rem;color:var(--text-dim);">처리 중...</span>';
   
-  const ext=file.name.split('.').pop();
-  const path=`${sessionCode}.${ext}`;
-  
-  // Upload to Supabase Storage
-  const{error:upErr}=await sb.storage.from('avatars').upload(path,file,{upsert:true,contentType:file.type});
-  if(upErr){
-    console.error('Upload error:',upErr);
-    alert('업로드 실패: '+upErr.message);
-    avatarEl.innerHTML=sessionCharName.charAt(0);
-    return;
-  }
-  
-  // Get public URL
-  const{data:urlData}=sb.storage.from('avatars').getPublicUrl(path);
-  const avatarUrl=urlData.publicUrl+'?t='+Date.now();
-  
-  // Save to DB
-  await sb.from('invite_codes').update({avatar_url:avatarUrl}).eq('code',sessionCode);
-  
-  // Update UI
-  avatarEl.innerHTML=`<img src="${avatarUrl}" alt="">`;
-  
-  // Update cache
-  charAvatarCache[sessionCharName]=avatarUrl;
-  charAvatarCache['code_'+sessionCode]=avatarUrl;
-  
-  // Update composer avatar
-  const tlAv=document.getElementById('tlAvatar');
-  if(tlAv)tlAv.innerHTML=`<img src="${avatarUrl}" alt="">`;
-  
-  e.target.value='';
+  // Crop to square + resize using canvas
+  const img=new Image();
+  img.onload=async()=>{
+    const size=Math.min(img.width,img.height);
+    const canvas=document.createElement('canvas');
+    canvas.width=300;canvas.height=300;
+    const ctx=canvas.getContext('2d');
+    const sx=(img.width-size)/2;
+    const sy=(img.height-size)/2;
+    ctx.drawImage(img,sx,sy,size,size,0,0,300,300);
+    
+    canvas.toBlob(async(blob)=>{
+      const path=`${sessionCode}.webp`;
+      const{error:upErr}=await sb.storage.from('avatars').upload(path,blob,{upsert:true,contentType:'image/webp'});
+      if(upErr){
+        console.error('Upload error:',upErr);
+        alert('업로드 실패: '+upErr.message);
+        avatarEl.innerHTML=sessionCharName.charAt(0);
+        return;
+      }
+      const{data:urlData}=sb.storage.from('avatars').getPublicUrl(path);
+      const avatarUrl=urlData.publicUrl+'?t='+Date.now();
+      await sb.from('invite_codes').update({avatar_url:avatarUrl}).eq('code',sessionCode);
+      avatarEl.innerHTML=`<img src="${avatarUrl}" alt="">`;
+      charAvatarCache[sessionCharName]=avatarUrl;
+      charAvatarCache['code_'+sessionCode]=avatarUrl;
+      const tlAv=document.getElementById('tlAvatar');
+      if(tlAv)tlAv.innerHTML=`<img src="${avatarUrl}" alt="">`;
+      e.target.value='';
+    },'image/webp',0.85);
+  };
+  img.src=URL.createObjectURL(file);
 });
 
 document.getElementById('charProfileBack').addEventListener('click',()=>{
@@ -2143,6 +2656,96 @@ showPage=function(name){
   origShowPage2(name);
   if(name==='characters')loadCharGrid();
 };
+
+// === SIDEBAR SYSTEM ===
+function initSidebar(){
+  const toggle=document.getElementById('sidebarToggle');
+  const sidebar=document.getElementById('sidebar');
+  toggle.classList.add('visible');
+  
+  toggle.addEventListener('click',()=>{
+    sidebar.classList.toggle('visible');
+  });
+  
+  // Close sidebar when clicking a nav link inside it
+  sidebar.querySelectorAll('[data-page]').forEach(a=>{
+    a.addEventListener('click',()=>{sidebar.classList.remove('visible');});
+  });
+  
+  // Update sidebar profile
+  updateSidebarProfile();
+}
+
+async function updateSidebarProfile(){
+  document.getElementById('sidebarName').textContent=sessionCharName||sessionCode;
+  document.getElementById('sidebarCode').textContent=sessionCode;
+  
+  const av=getAvatarByName(sessionCharName);
+  const avatarEl=document.getElementById('sidebarAvatar');
+  if(av){avatarEl.innerHTML=`<img src="${av}" alt="">`;}
+  else{avatarEl.textContent=(sessionCharName||'?').charAt(0);}
+  
+  const{data}=await sb.from('invite_codes').select('currency').eq('code',sessionCode).maybeSingle();
+  document.getElementById('sidebarCurrency').textContent='☁ '+(data?.currency||0)+' 안개 조각';
+}
+
+// Logout
+document.getElementById('sidebarLogout').addEventListener('click',()=>{
+  if(!confirm('로그아웃하시겠습니까?'))return;
+  localStorage.removeItem('nokyeom_session');
+  sessionCode=null;sessionCharName=null;
+  location.reload();
+});
+
+// === PROFILE CARD MODAL ===
+// Create modal element
+const profileModal=document.createElement('div');
+profileModal.id='profileCardModal';
+profileModal.style.cssText='position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.7);display:none;justify-content:center;align-items:center;cursor:pointer;';
+profileModal.innerHTML=`<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:4px;padding:2em;max-width:320px;width:90%;text-align:center;cursor:default;" id="profileCardInner">
+  <div id="pcAvatar" style="width:80px;height:80px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--green-light);font-weight:700;margin:0 auto 1em;overflow:hidden;"></div>
+  <div id="pcName" style="font-size:1.1rem;font-weight:700;color:var(--text-bright);margin-bottom:0.3em;"></div>
+  <div id="pcTitle" style="font-size:0.7rem;color:var(--green-mid);letter-spacing:0.1em;margin-bottom:0.5em;"></div>
+  <div id="pcStatus" style="display:inline-block;padding:3px 10px;border-radius:10px;font-size:0.65rem;margin-bottom:1em;"></div>
+  <div id="pcItems" style="font-size:0.75rem;color:var(--text-dim);margin-bottom:1em;"></div>
+  <div style="display:flex;gap:8px;justify-content:center;">
+    <button style="padding:8px 16px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.75rem;cursor:pointer;" id="pcViewProfile">프로필 보기</button>
+    <button style="padding:8px 16px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.75rem;cursor:pointer;" id="pcSendDm">DM 보내기</button>
+  </div>
+</div>`;
+profileModal.addEventListener('click',(e)=>{if(e.target===profileModal)profileModal.style.display='none';});
+document.body.appendChild(profileModal);
+
+async function showProfileCard(name){
+  const{data:user}=await sb.from('invite_codes').select('code,character_name,avatar_url,status').eq('character_name',name).maybeSingle();
+  if(!user)return;
+  
+  const avEl=document.getElementById('pcAvatar');
+  if(user.avatar_url){avEl.innerHTML=`<img src="${user.avatar_url}" alt="" style="width:100%;height:100%;object-fit:cover;">`;}
+  else{avEl.innerHTML=user.character_name.charAt(0);}
+  
+  document.getElementById('pcName').textContent=user.character_name;
+  document.getElementById('pcTitle').textContent='';
+  
+  const statusLabel={active:'활동중',warned:'경고',banned:'제명',departed:'하차'};
+  const sEl=document.getElementById('pcStatus');
+  sEl.textContent=statusLabel[user.status||'active'];
+  sEl.className='';
+  sEl.style.background=user.status==='banned'?'rgba(138,48,48,0.15)':'rgba(45,90,39,0.15)';
+  sEl.style.color=user.status==='banned'?'var(--accent-red)':'var(--green-light)';
+  
+  const{data:items}=await sb.from('farming_items').select('name,rarity').eq('claimed_by',user.code).eq('is_active',true);
+  document.getElementById('pcItems').textContent=items&&items.length>0?'아이템 '+items.length+'개 보유':'아이템 없음';
+  
+  document.getElementById('pcViewProfile').onclick=()=>{profileModal.style.display='none';showPage('characters');setTimeout(()=>openCharProfile(user.code),300);};
+  document.getElementById('pcSendDm').onclick=()=>{profileModal.style.display='none';showPage('dm');setTimeout(()=>{
+    document.getElementById('dmAuth').style.display='none';
+    document.getElementById('dmContent').style.display='block';
+    loadDmContacts().then(()=>openDmChat(user.code,user.character_name));
+  },300);};
+  
+  profileModal.style.display='flex';
+}
 
 // === ADMIN MANAGEMENT SYSTEM ===
 function initAdmin(){
