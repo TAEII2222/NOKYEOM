@@ -2305,6 +2305,21 @@ async function loadDmContacts(){
   
   // Regular runner view
   const approved=[],pending=[],others=[];
+  const contactCodes=new Set(contacts.map(u=>u.code));
+  
+  // Check rooms and add missing partners (e.g. ADMIN) to approved
+  dmApprovedPairs.forEach((room,key)=>{
+    const codes=key.split('|');
+    const partnerCode=codes[0]===sessionCode?codes[1]:codes[1]===sessionCode?codes[0]:null;
+    if(!partnerCode)return;
+    if(!contactCodes.has(partnerCode)&&room.status==='approved'){
+      // Partner not in contacts list (probably ADMIN with no character_name)
+      const pName=room.created_by===partnerCode?room.created_by_name:room.target_name;
+      contacts.push({code:partnerCode,character_name:pName||'총괄',avatar_url:null});
+      contactCodes.add(partnerCode);
+    }
+  });
+  
   contacts.forEach(u=>{
     const room=dmApprovedPairs.get(dmPairKey(sessionCode,u.code));
     if(room&&room.status==='approved')approved.push(u);
