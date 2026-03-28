@@ -572,48 +572,59 @@
     opacity: 0;
     animation: titleReveal 2s ease-out 1.5s forwards;
   }
-  .final-tags {
-    display: flex; gap: 1.5rem; flex-wrap: wrap;
-    justify-content: center;
-    opacity: 0;
-    animation: titleReveal 2s ease-out 2.5s forwards;
-  }
-  .final-tags span {
-    font-size: clamp(0.65rem, 1.2vw, 0.8rem);
-    color: #555;
-    letter-spacing: 0.15em;
-    padding: 0.4em 1em;
-    border: 1px solid #2a2a2a;
-  }
-  .final-desc {
-    max-width: 500px;
-    text-align: center;
-    font-size: clamp(0.75rem, 1.3vw, 0.9rem);
-    font-weight: 300;
-    color: #666;
-    line-height: 2;
-    opacity: 0;
-    animation: titleReveal 2s ease-out 3.5s forwards;
-  }
   .final-cta {
     opacity: 0;
-    animation: titleReveal 2s ease-out 4.5s forwards;
+    animation: titleReveal 2s ease-out 2.5s forwards;
     cursor: pointer;
+    position: relative;
   }
   .final-cta a {
-    font-size: 0.85rem;
-    color: var(--green);
-    letter-spacing: 0.3em;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    color: #8a8a78;
+    letter-spacing: 0.5em;
     text-decoration: none;
-    padding: 0.8em 2.5em;
-    border: 1px solid var(--green-dim);
+    padding: 1em 3em;
     display: inline-block;
-    transition: all 0.4s ease;
+    border: 1px solid #3a3a30;
+    position: relative;
+    transition: all 0.6s ease;
+    background: transparent;
+    text-shadow: 0 0 8px rgba(200,200,180,0.08);
+  }
+  /* Worn double border */
+  .final-cta a::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px solid rgba(58,58,48,0.4);
+    pointer-events: none;
+    transition: border-color 0.6s ease;
+  }
+  /* Corner cracks */
+  .final-cta a::after {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px; right: -1px; bottom: -1px;
+    background:
+      linear-gradient(135deg, rgba(30,30,25,0.6) 0%, transparent 15%),
+      linear-gradient(225deg, rgba(30,30,25,0.4) 0%, transparent 10%),
+      linear-gradient(315deg, rgba(30,30,25,0.5) 0%, transparent 12%);
+    pointer-events: none;
+    opacity: 0.6;
+    transition: opacity 0.6s ease;
   }
   .final-cta a:hover {
-    background: rgba(46,204,64,0.1);
-    box-shadow: 0 0 30px rgba(46,204,64,0.2), 0 0 60px rgba(46,204,64,0.05);
-    transform: translateY(-2px);
+    color: #c8c8b8;
+    border-color: rgba(46,204,64,0.25);
+    text-shadow: 0 0 20px rgba(46,204,64,0.15);
+    box-shadow: 0 0 40px rgba(46,204,64,0.06), inset 0 0 30px rgba(46,204,64,0.03);
+  }
+  .final-cta a:hover::before {
+    border-color: rgba(46,204,64,0.15);
+  }
+  .final-cta a:hover::after {
+    opacity: 0.3;
   }
   .final-notice {
     position: absolute;
@@ -905,23 +916,6 @@
   <div class="final-scene">
     <h1 class="final-logo">녹 염</h1>
     <p class="final-hanja">鹿 魘</p>
-
-    <div class="final-tags">
-      <span>BL</span>
-      <span>05 UP</span>
-      <span>여성 오너 ONLY</span>
-      <span>공포 · 괴담</span>
-      <span>현대판타지</span>
-      <span>약시리</span>
-    </div>
-
-    <div class="final-desc">
-      잠에 빠지면 열리는 숲. 원한에 물든 사슴의 영역.<br>
-      살아 돌아온 자는 '낙인'이 찍히고,<br>
-      무의식 속에서 다음 희생자를 이끈다.<br>
-      <br>
-      그림 인감 · 전용 홈페이지 · TRPG 시스템
-    </div>
 
     <div class="final-cta">
       <a href="https://taeii2222.github.io/NOKYEOM/" target="_blank" rel="noopener">입 장</a>
