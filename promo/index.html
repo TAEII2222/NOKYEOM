@@ -435,6 +435,20 @@
     animation: textFadeIn 2s ease-out 5.3s forwards;
   }
 
+  .inv-footer p {
+    font-size: clamp(0.7rem, 1.2vw, 0.82rem);
+    font-weight: 300;
+    color: #555548;
+    line-height: 2.4;
+    opacity: 0;
+  }
+  .inv-footer .inv-f1 { animation: textFadeIn 2s ease-out 5.6s forwards; }
+  .inv-footer .inv-f2 {
+    color: #4a4a3a;
+    font-size: clamp(0.65rem, 1.1vw, 0.75rem);
+    animation: textFadeIn 2s ease-out 6.2s forwards;
+  }
+
   .inv-mark {
     font-family: 'KimJwaJinGeneral', serif;
     font-size: 0.7rem;
@@ -442,7 +456,7 @@
     color: rgba(90,70,50,0.35);
     letter-spacing: 0.5em;
     opacity: 0;
-    animation: markAppear 1.5s ease-out 5.8s forwards;
+    animation: markAppear 1.5s ease-out 7s forwards;
   }
   @keyframes markAppear {
     0% { opacity:0; filter: blur(3px); }
@@ -453,7 +467,7 @@
     margin-top: 2rem;
     opacity: 0;
     cursor: pointer;
-    animation: textFadeIn 2s ease-out 6.5s forwards;
+    animation: textFadeIn 2s ease-out 8s forwards;
     position: relative;
     z-index: 3;
   }
@@ -820,14 +834,19 @@
       <div class="inv-body">
         <p class="inv-l1">같은 꿈을 꾸고 있군요.</p>
         <p class="inv-l2">&nbsp;</p>
-        <p class="inv-l3">매일 밤, 안개 너머로 걸어오는 당신을</p>
-        <p class="inv-l4">오래 지켜보고 있었습니다.</p>
+        <p class="inv-l3">안개 너머로 걸어오는 당신을</p>
+        <p class="inv-l4">매일 밤 지켜보고 있었습니다.</p>
         <p class="inv-l5">&nbsp;</p>
-        <p class="inv-l6">이제 <em>문</em>을 열어두겠습니다.</p>
-        <p class="inv-l7">다음에 잠들면, 들어오십시오.</p>
+        <p class="inv-l6">당신이 먼저 이곳을 찾아온 겁니다.</p>
+        <p class="inv-l7">나는 그저 <em>문</em>을 열어둘 뿐.</p>
       </div>
 
       <div class="inv-scratch"></div>
+
+      <div class="inv-footer">
+        <p class="inv-f1">다음에 잠들면, 들어오십시오.</p>
+        <p class="inv-f2">돌아오는 길은 없습니다.</p>
+      </div>
 
       <div class="inv-mark">鹿 魘</div>
 
