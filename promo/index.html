@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>녹염 鹿魘</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;500;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  @font-face { font-family:'KimJwaJinGeneral'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GenKJwajinOTF-Rg.woff') format('woff'); font-weight:normal; font-display:swap; }
+  @font-face { font-family:'KimJwaJinGeneral'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GenKJwajinOTF-Bd.woff') format('woff'); font-weight:700; font-display:swap; }
+
+  :root {
+    --green: #2ecc40;
+    --green-dim: #1a6b25;
+    --green-glow: #3dff55;
+    --dark: #0a0a0a;
+    --fog: rgba(180, 200, 180, 0.04);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; background:#000; }
+
+  body {
+    font-family: 'Noto Serif KR', serif;
+    color: #c8c8c0;
+    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* ===== SCREEN SYSTEM ===== */
+  .screen {
+    position: fixed; inset:0;
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    opacity: 0; pointer-events: none;
+    transition: opacity 1.5s ease;
+    z-index: 1;
+  }
+  .screen.active { opacity: 1; pointer-events: all; z-index: 10; }
+  .screen.fade-out { opacity: 0; pointer-events: none; }
+
+  /* ===== AMBIENT FOG ===== */
+  .fog-layer {
+    position: fixed; inset: -50%; z-index: 2; pointer-events: none;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(30,60,30,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 30%, rgba(30,60,30,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 80%, rgba(30,60,30,0.06) 0%, transparent 40%);
+    animation: fogDrift 20s ease-in-out infinite alternate;
+  }
+  @keyframes fogDrift {
+    0% { transform: translate(0,0) scale(1); }
+    100% { transform: translate(3%,-2%) scale(1.05); }
+  }
+
+  /* ===== PARTICLES ===== */
+  .particles {
+    position: fixed; inset:0; z-index: 3; pointer-events: none;
+  }
+  .particle {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: var(--green-dim);
+    border-radius: 50%;
+    opacity: 0;
+    animation: particleFloat 8s ease-in-out infinite;
+  }
+  @keyframes particleFloat {
+    0% { opacity:0; transform: translateY(0) scale(0.5); }
+    30% { opacity: 0.6; }
+    70% { opacity: 0.3; }
+    100% { opacity:0; transform: translateY(-120px) scale(0); }
+  }
+
+  /* ===== SCREEN 0: INTRO ===== */
+  #screen-intro {
+    background: #000;
+    cursor: pointer;
+  }
+  #screen-intro::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(20,40,20,0.3) 0%, transparent 70%);
+  }
+  .intro-text {
+    text-align: center;
+    z-index: 5;
+  }
+  .intro-title {
+    font-family: 'KimJwaJinGeneral', serif;
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 700;
+    color: #e8e8e0;
+    letter-spacing: 0.3em;
+    text-shadow: 0 0 40px rgba(46,204,64,0.3), 0 0 80px rgba(46,204,64,0.1);
+    opacity: 0;
+    animation: titleReveal 3s ease-out 0.5s forwards;
+  }
+  .intro-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(0.9rem, 2vw, 1.3rem);
+    font-weight: 300;
+    color: #888;
+    letter-spacing: 0.5em;
+    margin-top: 1rem;
+    opacity: 0;
+    animation: titleReveal 2s ease-out 2s forwards;
+  }
+  .intro-prompt {
+    position: absolute;
+    bottom: 15%;
+    font-size: 0.85rem;
+    color: #555;
+    letter-spacing: 0.15em;
+    opacity: 0;
+    animation: pulse 3s ease-in-out 3.5s infinite;
+  }
+  @keyframes titleReveal {
+    0% { opacity:0; transform: translateY(20px); filter: blur(4px); }
+    100% { opacity:1; transform: translateY(0); filter: blur(0); }
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+  }
+
+  /* ===== SCREEN 1: FOREST ENTRANCE ===== */
+  #screen-forest {
+    background: linear-gradient(180deg, #040804 0%, #0a120a 40%, #060a06 100%);
+  }
+  .forest-scene {
+    position: relative;
+    width: 100%; height: 100%;
+    overflow: hidden;
+  }
+
+  /* SVG Trees */
+  .trees-bg {
+    position: absolute; inset: 0;
+    z-index: 1;
+  }
+  .tree-line {
+    stroke: #1a2a1a;
+    stroke-width: 1.5;
+    fill: none;
+  }
+  .tree-fill {
+    fill: #0d160d;
+  }
+
+  .forest-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 5;
+  }
+  .forest-text p {
+    font-size: clamp(0.85rem, 1.8vw, 1.1rem);
+    font-weight: 300;
+    line-height: 2.4;
+    color: #8a8a80;
+    opacity: 0;
+  }
+  .forest-text p.show {
+    animation: textFadeIn 2s ease-out forwards;
+  }
+  @keyframes textFadeIn {
+    0% { opacity:0; transform: translateY(10px); }
+    100% { opacity:1; transform: translateY(0); }
+  }
+
+  .forest-click-zone {
+    position: absolute;
+    bottom: 20%; left: 50%;
+    transform: translateX(-50%);
+    z-index: 6;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .forest-click-zone.show { opacity: 1; }
+  .forest-click-zone .arrow {
+    display: inline-block;
+    animation: arrowBounce 2s ease-in-out infinite;
+    font-size: 1.5rem;
+    color: var(--green-dim);
+  }
+  .forest-click-zone span {
+    display: block;
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 0.5rem;
+    letter-spacing: 0.2em;
+  }
+  @keyframes arrowBounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+  }
+
+  /* ===== SCREEN 2: DEEP FOREST - DISCOVERY ===== */
+  #screen-deep {
+    background: #030603;
+  }
+  .deep-scene {
+    position: relative; width:100%; height:100%;
+  }
+  .hidden-element {
+    position: absolute;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  .hidden-element.revealed { opacity: 1; }
+  .hidden-element:hover { transform: scale(1.1); }
+
+  .glow-orb {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 20px var(--green-glow), 0 0 40px var(--green-dim);
+    animation: orbPulse 3s ease-in-out infinite;
+  }
+  @keyframes orbPulse {
+    0%,100% { box-shadow: 0 0 20px var(--green-glow), 0 0 40px var(--green-dim); transform: scale(1); }
+    50% { box-shadow: 0 0 30px var(--green-glow), 0 0 60px var(--green-dim); transform: scale(1.3); }
+  }
+
+  .whisper-text {
+    font-size: 0.7rem;
+    color: var(--green-dim);
+    white-space: nowrap;
+    opacity: 0;
+    animation: whisperReveal 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes whisperReveal {
+    0%,100% { opacity:0; }
+    30%,70% { opacity: 0.6; }
+  }
+
+  .discovery-counter {
+    position: absolute;
+    top: 5%; right: 5%;
+    font-size: 0.75rem;
+    color: #444;
+    letter-spacing: 0.15em;
+    z-index: 10;
+  }
+  .discovery-counter .found {
+    color: var(--green-dim);
+  }
+
+  .deep-hint {
+    position: absolute;
+    bottom: 8%;
+    left: 50%; transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: #333;
+    letter-spacing: 0.2em;
+    z-index: 10;
+    opacity: 0;
+    animation: pulse 4s ease-in-out 2s infinite;
+  }
+
+  /* ===== SCREEN 3: ENCOUNTER ===== */
+  #screen-encounter {
+    background: #000;
+  }
+  .encounter-scene {
+    position: relative; width:100%; height:100%;
+    display: flex; align-items:center; justify-content:center;
+  }
+  .deer-eyes-container {
+    position: relative;
+    z-index: 5;
+    opacity: 0;
+    animation: eyesAppear 4s ease-out forwards;
+  }
+  .deer-eyes-container img {
+    width: clamp(200px, 40vw, 400px);
+    filter: brightness(1.2) saturate(1.5);
+    animation: eyesPulse 4s ease-in-out infinite;
+  }
+  @keyframes eyesAppear {
+    0% { opacity:0; transform: scale(0.5); filter: blur(10px); }
+    60% { opacity: 0.5; }
+    100% { opacity:1; transform: scale(1); filter: blur(0); }
+  }
+  @keyframes eyesPulse {
+    0%,100% { filter: brightness(1.2) saturate(1.5); }
+    50% { filter: brightness(1.6) saturate(2); }
+  }
+  .encounter-text {
+    position: absolute;
+    bottom: 25%;
+    text-align: center;
+    z-index: 6;
+  }
+  .encounter-text p {
+    font-size: clamp(0.8rem, 1.5vw, 1rem);
+    font-weight: 300;
+    color: #777;
+    line-height: 2.2;
+    opacity: 0;
+  }
+  .encounter-text p.show {
+    animation: textFadeIn 2s ease-out forwards;
+  }
+  .encounter-click {
+    position: absolute;
+    bottom: 10%;
+    left: 50%; transform: translateX(-50%);
+    z-index: 7;
+    opacity: 0;
+    cursor: pointer;
+    transition: opacity 1s ease;
+  }
+  .encounter-click.show { opacity:1; }
+  .encounter-click span {
+    font-size: 0.8rem;
+    color: var(--green-dim);
+    letter-spacing: 0.3em;
+    border: 1px solid var(--green-dim);
+    padding: 0.6em 2em;
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+  .encounter-click span:hover {
+    background: rgba(46,204,64,0.1);
+    box-shadow: 0 0 20px rgba(46,204,64,0.2);
+  }
+
+  /* ===== SCREEN 4: INVITATION ===== */
+  #screen-reveal {
+    background: #000;
+  }
+  .reveal-scene {
+    position: relative; width:100%; height:100%;
+    display: flex; align-items:center; justify-content:center;
+  }
+
+  /* Invitation card */
+  .invitation-card {
+    position: relative;
+    width: clamp(320px, 50vw, 520px);
+    padding: clamp(2.5rem, 5vw, 4rem) clamp(2rem, 4vw, 3.5rem);
+    border: 1px solid rgba(26,107,37,0.25);
+    background: rgba(8,12,8,0.95);
+    z-index: 5;
+    text-align: center;
+    opacity: 0;
+    transform: scale(0.9);
+    animation: cardAppear 3s ease-out 0.5s forwards;
+  }
+  .invitation-card::before {
+    content: '';
+    position: absolute; inset: 6px;
+    border: 1px solid rgba(26,107,37,0.1);
+    pointer-events: none;
+  }
+  .invitation-card::after {
+    content: '';
+    position: absolute; inset: -1px;
+    box-shadow: 0 0 60px rgba(46,204,64,0.06), 0 0 120px rgba(46,204,64,0.03);
+    pointer-events: none;
+  }
+  @keyframes cardAppear {
+    0% { opacity:0; transform: scale(0.9); filter: blur(6px); }
+    60% { opacity: 0.7; }
+    100% { opacity:1; transform: scale(1); filter: blur(0); }
+  }
+
+  .inv-ornament-top, .inv-ornament-bottom {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    color: var(--green-dim);
+    letter-spacing: 0.5em;
+    opacity: 0;
+  }
+  .inv-ornament-top {
+    margin-bottom: 1.5rem;
+    animation: invLineIn 2s ease-out 1.5s forwards;
+  }
+  .inv-ornament-bottom {
+    margin-top: 1.5rem;
+    animation: invLineIn 2s ease-out 4s forwards;
+  }
+  @keyframes invLineIn {
+    0% { opacity:0; letter-spacing: 1em; }
+    100% { opacity: 0.5; letter-spacing: 0.5em; }
+  }
+
+  .inv-header {
+    font-family: 'KimJwaJinGeneral', serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+    font-weight: 700;
+    color: var(--green-dim);
+    letter-spacing: 0.4em;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: textFadeIn 2s ease-out 2s forwards;
+  }
+
+  .inv-divider {
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--green-dim), transparent);
+    margin: 0 auto 2rem;
+    opacity: 0;
+    animation: textFadeIn 2s ease-out 2.5s forwards;
+  }
+
+  .inv-body p {
+    font-size: clamp(0.75rem, 1.3vw, 0.88rem);
+    font-weight: 300;
+    color: #777;
+    line-height: 2.4;
+    opacity: 0;
+  }
+  .inv-body p em {
+    font-style: normal;
+    color: var(--green-dim);
+  }
+  .inv-body p.inv-l1 { animation: textFadeIn 2s ease-out 3s forwards; }
+  .inv-body p.inv-l2 { animation: textFadeIn 2s ease-out 3.4s forwards; }
+  .inv-body p.inv-l3 { animation: textFadeIn 2s ease-out 3.8s forwards; }
+  .inv-body p.inv-l4 { animation: textFadeIn 2s ease-out 4.2s forwards; }
+  .inv-body p.inv-l5 { animation: textFadeIn 2s ease-out 4.6s forwards; }
+
+  .inv-warning {
+    margin-top: 2rem;
+    font-size: 0.65rem;
+    color: #3a3a3a;
+    letter-spacing: 0.15em;
+    line-height: 2;
+    opacity: 0;
+    animation: textFadeIn 2s ease-out 5s forwards;
+  }
+
+  .inv-seal {
+    margin-top: 1.5rem;
+    font-family: 'KimJwaJinGeneral', serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--green-dim);
+    letter-spacing: 0.3em;
+    opacity: 0;
+    animation: sealStamp 1s ease-out 5.5s forwards;
+  }
+  @keyframes sealStamp {
+    0% { opacity:0; transform: scale(2) rotate(-5deg); filter: blur(4px); }
+    60% { opacity: 0.8; transform: scale(1.05) rotate(0deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0); }
+  }
+
+  /* Glitch flicker on card */
+  .inv-glitch {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    animation: invGlitch 8s ease-in-out 4s infinite;
+  }
+  @keyframes invGlitch {
+    0%,95%,100% { opacity:0; }
+    96% { opacity: 0.08; background: var(--green-dim); }
+    97% { opacity: 0; }
+    98% { opacity: 0.05; background: var(--green-dim); }
+  }
+
+  .proceed-btn {
+    position: absolute;
+    bottom: 5%;
+    left: 50%; transform: translateX(-50%);
+    z-index: 6;
+    opacity: 0;
+    cursor: pointer;
+    animation: textFadeIn 2s ease-out 7s forwards;
+  }
+  .proceed-btn span {
+    font-size: 0.75rem;
+    color: #555;
+    letter-spacing: 0.3em;
+    transition: color 0.3s;
+  }
+  .proceed-btn:hover span { color: var(--green-dim); }
+
+  /* ===== SCREEN 5: FINAL - PROMO ===== */
+  #screen-final {
+    background: #000;
+  }
+  .final-scene {
+    position: relative; width:100%; height:100%;
+    display: flex; align-items:center; justify-content:center;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem;
+  }
+  .final-logo {
+    font-family: 'KimJwaJinGeneral', serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 700;
+    color: #e8e8e0;
+    letter-spacing: 0.4em;
+    text-shadow: 0 0 60px rgba(46,204,64,0.4), 0 0 120px rgba(46,204,64,0.15);
+    opacity: 0;
+    animation: titleReveal 3s ease-out 0.5s forwards;
+  }
+  .final-hanja {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    font-weight: 300;
+    color: #666;
+    letter-spacing: 0.8em;
+    margin-top: -0.5rem;
+    opacity: 0;
+    animation: titleReveal 2s ease-out 1.5s forwards;
+  }
+  .final-tags {
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    animation: titleReveal 2s ease-out 2.5s forwards;
+  }
+  .final-tags span {
+    font-size: clamp(0.65rem, 1.2vw, 0.8rem);
+    color: #555;
+    letter-spacing: 0.15em;
+    padding: 0.4em 1em;
+    border: 1px solid #2a2a2a;
+  }
+  .final-desc {
+    max-width: 500px;
+    text-align: center;
+    font-size: clamp(0.75rem, 1.3vw, 0.9rem);
+    font-weight: 300;
+    color: #666;
+    line-height: 2;
+    opacity: 0;
+    animation: titleReveal 2s ease-out 3.5s forwards;
+  }
+  .final-cta {
+    opacity: 0;
+    animation: titleReveal 2s ease-out 4.5s forwards;
+    cursor: pointer;
+  }
+  .final-cta a {
+    font-size: 0.85rem;
+    color: var(--green);
+    letter-spacing: 0.3em;
+    text-decoration: none;
+    padding: 0.8em 2.5em;
+    border: 1px solid var(--green-dim);
+    display: inline-block;
+    transition: all 0.4s ease;
+  }
+  .final-cta a:hover {
+    background: rgba(46,204,64,0.1);
+    box-shadow: 0 0 30px rgba(46,204,64,0.2), 0 0 60px rgba(46,204,64,0.05);
+    transform: translateY(-2px);
+  }
+  .final-notice {
+    position: absolute;
+    bottom: 3%;
+    font-size: 0.6rem;
+    color: #333;
+    letter-spacing: 0.1em;
+    text-align: center;
+    line-height: 1.8;
+    opacity: 0;
+    animation: titleReveal 2s ease-out 5.5s forwards;
+  }
+
+  /* ===== SCREEN FLASH ===== */
+  .screen-flash {
+    position: fixed; inset:0;
+    background: rgba(46,204,64,0.15);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .screen-flash.flash {
+    animation: flashEffect 0.3s ease-out forwards;
+  }
+  @keyframes flashEffect {
+    0% { opacity:1; }
+    100% { opacity:0; }
+  }
+
+  /* ===== VIGNETTE GLOBAL ===== */
+  .global-vignette {
+    position: fixed; inset:0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  /* ===== SCANLINES ===== */
+  .scanlines {
+    position: fixed; inset:0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  /* ===== MOBILE ===== */
+  @media (max-width: 768px) {
+    .final-tags { gap: 0.8rem; }
+    .final-tags span { font-size: 0.6rem; padding: 0.3em 0.7em; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Ambient layers -->
+<div class="fog-layer"></div>
+<div class="global-vignette"></div>
+<div class="scanlines"></div>
+<div class="particles" id="particles"></div>
+<div class="screen-flash" id="flash"></div>
+
+<!-- SCREEN 0: INTRO -->
+<div class="screen active" id="screen-intro" onclick="startJourney()">
+  <div class="intro-text">
+    <h1 class="intro-title">녹 염</h1>
+    <p class="intro-sub">鹿 魘</p>
+  </div>
+  <div class="intro-prompt">화면을 누르세요</div>
+</div>
+
+<!-- SCREEN 1: FOREST ENTRANCE -->
+<div class="screen" id="screen-forest">
+  <div class="forest-scene">
+    <!-- SVG forest background -->
+    <svg class="trees-bg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+      <!-- Background trees - far -->
+      <g opacity="0.3">
+        <line class="tree-line" x1="80" y1="800" x2="80" y2="200" stroke-width="3"/>
+        <line class="tree-line" x1="80" y1="300" x2="40" y2="200"/>
+        <line class="tree-line" x1="80" y1="350" x2="120" y2="250"/>
+        <line class="tree-line" x1="200" y1="800" x2="200" y2="150"/>
+        <line class="tree-line" x1="200" y1="250" x2="160" y2="150"/>
+        <line class="tree-line" x1="200" y1="300" x2="250" y2="200"/>
+        <line class="tree-line" x1="350" y1="800" x2="355" y2="180"/>
+        <line class="tree-line" x1="355" y1="280" x2="310" y2="180"/>
+        <line class="tree-line" x1="900" y1="800" x2="895" y2="170"/>
+        <line class="tree-line" x1="895" y1="270" x2="940" y2="170"/>
+        <line class="tree-line" x1="1050" y1="800" x2="1050" y2="200"/>
+        <line class="tree-line" x1="1050" y1="300" x2="1000" y2="200"/>
+        <line class="tree-line" x1="1120" y1="800" x2="1125" y2="250"/>
+        <line class="tree-line" x1="1125" y1="350" x2="1160" y2="250"/>
+      </g>
+      <!-- Mid trees -->
+      <g opacity="0.5">
+        <line class="tree-line" x1="150" y1="800" x2="148" y2="100" stroke-width="4"/>
+        <line class="tree-line" x1="148" y1="200" x2="100" y2="100"/>
+        <line class="tree-line" x1="148" y1="250" x2="190" y2="150"/>
+        <line class="tree-line" x1="500" y1="800" x2="503" y2="120" stroke-width="4"/>
+        <line class="tree-line" x1="503" y1="220" x2="460" y2="120"/>
+        <line class="tree-line" x1="503" y1="280" x2="550" y2="180"/>
+        <line class="tree-line" x1="700" y1="800" x2="697" y2="140" stroke-width="4"/>
+        <line class="tree-line" x1="697" y1="240" x2="740" y2="140"/>
+        <line class="tree-line" x1="697" y1="300" x2="650" y2="200"/>
+        <line class="tree-line" x1="980" y1="800" x2="982" y2="130" stroke-width="4"/>
+        <line class="tree-line" x1="982" y1="230" x2="940" y2="130"/>
+      </g>
+      <!-- Fog patches -->
+      <ellipse cx="600" cy="500" rx="500" ry="80" fill="rgba(20,40,20,0.15)"/>
+      <ellipse cx="300" cy="600" rx="300" ry="50" fill="rgba(20,40,20,0.1)"/>
+      <ellipse cx="900" cy="550" rx="350" ry="60" fill="rgba(20,40,20,0.08)"/>
+      <!-- Path -->
+      <path d="M550,800 Q570,650 590,550 Q610,450 600,350" stroke="rgba(30,50,30,0.2)" stroke-width="60" fill="none" stroke-linecap="round"/>
+    </svg>
+
+    <div class="forest-text" id="forest-text">
+      <p>안개가 자욱한 숲의 입구에 서 있다.</p>
+      <p>어디선가 바스락거리는 소리가 들린다.</p>
+      <p>…돌아가야 할까, 아니면 더 깊이 들어가야 할까.</p>
+    </div>
+
+    <div class="forest-click-zone" id="forest-click">
+      <div class="arrow">▽</div>
+      <span>숲으로 들어가기</span>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: DEEP FOREST - DISCOVERY -->
+<div class="screen" id="screen-deep">
+  <div class="deep-scene" id="deep-scene">
+    <!-- SVG dense forest -->
+    <svg style="position:absolute;inset:0;z-index:1" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+      <rect width="1200" height="800" fill="#030603"/>
+      <g opacity="0.6">
+        <line class="tree-line" x1="50" y1="800" x2="48" y2="50" stroke-width="5"/>
+        <line class="tree-line" x1="48" y1="150" x2="10" y2="50"/>
+        <line class="tree-line" x1="48" y1="200" x2="90" y2="80"/>
+        <line class="tree-line" x1="180" y1="800" x2="183" y2="30" stroke-width="6"/>
+        <line class="tree-line" x1="183" y1="130" x2="140" y2="30"/>
+        <line class="tree-line" x1="183" y1="180" x2="230" y2="60"/>
+        <line class="tree-line" x1="183" y1="350" x2="130" y2="270"/>
+        <line class="tree-line" x1="400" y1="800" x2="397" y2="60" stroke-width="5"/>
+        <line class="tree-line" x1="397" y1="160" x2="350" y2="60"/>
+        <line class="tree-line" x1="397" y1="220" x2="450" y2="100"/>
+        <line class="tree-line" x1="600" y1="800" x2="602" y2="40" stroke-width="6"/>
+        <line class="tree-line" x1="602" y1="140" x2="560" y2="40"/>
+        <line class="tree-line" x1="602" y1="200" x2="650" y2="80"/>
+        <line class="tree-line" x1="800" y1="800" x2="798" y2="50" stroke-width="5"/>
+        <line class="tree-line" x1="798" y1="150" x2="750" y2="50"/>
+        <line class="tree-line" x1="798" y1="210" x2="850" y2="90"/>
+        <line class="tree-line" x1="1000" y1="800" x2="1003" y2="35" stroke-width="6"/>
+        <line class="tree-line" x1="1003" y1="135" x2="960" y2="35"/>
+        <line class="tree-line" x1="1003" y1="190" x2="1050" y2="70"/>
+        <line class="tree-line" x1="1150" y1="800" x2="1148" y2="60" stroke-width="5"/>
+        <line class="tree-line" x1="1148" y1="160" x2="1100" y2="60"/>
+      </g>
+      <!-- Dense fog -->
+      <ellipse cx="600" cy="400" rx="600" ry="150" fill="rgba(15,30,15,0.3)"/>
+      <ellipse cx="200" cy="500" rx="300" ry="100" fill="rgba(15,30,15,0.2)"/>
+      <ellipse cx="1000" cy="450" rx="350" ry="120" fill="rgba(15,30,15,0.15)"/>
+    </svg>
+
+    <!-- Hidden discoverable elements -->
+    <div class="hidden-element" id="orb1" style="top:25%;left:18%" onclick="discover(1)">
+      <div class="glow-orb"></div>
+    </div>
+    <div class="hidden-element" id="orb2" style="top:40%;left:72%" onclick="discover(2)">
+      <div class="glow-orb"></div>
+    </div>
+    <div class="hidden-element" id="orb3" style="top:60%;left:35%" onclick="discover(3)">
+      <div class="glow-orb"></div>
+    </div>
+    <div class="hidden-element" id="orb4" style="top:30%;left:55%" onclick="discover(4)">
+      <div class="glow-orb"></div>
+    </div>
+    <div class="hidden-element" id="orb5" style="top:70%;left:80%" onclick="discover(5)">
+      <div class="glow-orb"></div>
+    </div>
+
+    <!-- Whisper texts that appear on discover -->
+    <div class="whisper-text" id="w1" style="top:22%;left:22%;display:none">…여기서 나가야 해…</div>
+    <div class="whisper-text" id="w2" style="top:37%;left:76%;display:none">…소리가 들려…</div>
+    <div class="whisper-text" id="w3" style="top:57%;left:39%;display:none">…이 나무들은 전부…</div>
+    <div class="whisper-text" id="w4" style="top:27%;left:59%;display:none">…안개는 숨결이다…</div>
+    <div class="whisper-text" id="w5" style="top:67%;left:84%;display:none">…너도 결국…</div>
+
+    <div class="discovery-counter">
+      <span class="found" id="found-count">0</span> / 5
+    </div>
+
+    <p class="deep-hint">빛나는 것을 찾으세요</p>
+  </div>
+</div>
+
+<!-- SCREEN 3: ENCOUNTER -->
+<div class="screen" id="screen-encounter">
+  <div class="encounter-scene">
+    <div class="deer-eyes-container">
+      <img src="deer_eyes.png" alt="" id="deer-eyes-img">
+    </div>
+    <div class="encounter-text" id="encounter-text">
+      <p>어둠 속에서 녹색 빛 두 개가 당신을 바라보고 있다.</p>
+      <p>그것은 움직이지 않는다. 다만, 기다리고 있다.</p>
+      <p>당신이 여기까지 온 것은 우연이 아니다.</p>
+    </div>
+    <div class="encounter-click" id="encounter-click" onclick="goToReveal()">
+      <span>다가가기</span>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 4: INVITATION -->
+<div class="screen" id="screen-reveal">
+  <div class="reveal-scene">
+    <div class="invitation-card">
+      <div class="inv-glitch"></div>
+      <div class="inv-ornament-top">⸻ ✦ ⸻</div>
+
+      <div class="inv-header">초 대 장</div>
+      <div class="inv-divider"></div>
+
+      <div class="inv-body">
+        <p class="inv-l1">당신은 <em>선택</em>되었습니다.</p>
+        <p class="inv-l2">안개가 짙은 밤, 잠이 들면</p>
+        <p class="inv-l3">이 숲의 문이 열릴 것입니다.</p>
+        <p class="inv-l4">돌아올 수 있을 거라는 <em>착각</em>은</p>
+        <p class="inv-l5">버리고 오십시오.</p>
+      </div>
+
+      <div class="inv-ornament-bottom">⸻ ✦ ⸻</div>
+
+      <div class="inv-warning">
+        이 초대장을 받은 자는 이미 낙인이 찍혔습니다.<br>
+        거부는 무의미합니다.
+      </div>
+
+      <div class="inv-seal">— 鹿 魘 —</div>
+    </div>
+
+    <div class="proceed-btn" onclick="goToFinal()">
+      <span>▸ 수락하기</span>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 5: FINAL PROMO -->
+<div class="screen" id="screen-final">
+  <div class="final-scene">
+    <h1 class="final-logo">녹 염</h1>
+    <p class="final-hanja">鹿 魘</p>
+
+    <div class="final-tags">
+      <span>BL</span>
+      <span>05 UP</span>
+      <span>여성 오너 ONLY</span>
+      <span>공포 · 괴담</span>
+      <span>현대판타지</span>
+      <span>약시리</span>
+    </div>
+
+    <div class="final-desc">
+      잠에 빠지면 열리는 숲. 원한에 물든 사슴의 영역.<br>
+      살아 돌아온 자는 '낙인'이 찍히고,<br>
+      무의식 속에서 다음 희생자를 이끈다.<br>
+      <br>
+      그림 인감 · 전용 홈페이지 · TRPG 시스템
+    </div>
+
+    <div class="final-cta">
+      <a href="https://taeii2222.github.io/NOKYEOM/" target="_blank" rel="noopener">입 장</a>
+    </div>
+
+    <div class="final-notice">
+      본 커뮤니티는 성인 전용이며, 미성년자의 참여를 금지합니다.<br>
+      모든 배경, 설정, 등장인물은 허구이며 실제와 무관합니다.
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===== PARTICLES =====
+  (function createParticles() {
+    const container = document.getElementById('particles');
+    for (let i = 0; i < 30; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.top = (40 + Math.random() * 60) + '%';
+      p.style.animationDelay = Math.random() * 8 + 's';
+      p.style.animationDuration = (6 + Math.random() * 6) + 's';
+      container.appendChild(p);
+    }
+  })();
+
+  // ===== SCREEN TRANSITION =====
+  function transitionTo(fromId, toId, delay = 0) {
+    const from = document.getElementById(fromId);
+    const to = document.getElementById(toId);
+    setTimeout(() => {
+      from.classList.add('fade-out');
+      from.classList.remove('active');
+      setTimeout(() => {
+        to.classList.add('active');
+      }, 800);
+    }, delay);
+  }
+
+  function flashScreen() {
+    const flash = document.getElementById('flash');
+    flash.classList.add('flash');
+    setTimeout(() => flash.classList.remove('flash'), 400);
+  }
+
+  // ===== SCREEN 0 → 1: START =====
+  function startJourney() {
+    transitionTo('screen-intro', 'screen-forest');
+    setTimeout(showForestText, 2000);
+  }
+
+  // ===== SCREEN 1: FOREST TEXT =====
+  function showForestText() {
+    const texts = document.querySelectorAll('#forest-text p');
+    texts.forEach((t, i) => {
+      setTimeout(() => t.classList.add('show'), i * 1500);
+    });
+    setTimeout(() => {
+      document.getElementById('forest-click').classList.add('show');
+    }, texts.length * 1500 + 500);
+
+    document.getElementById('forest-click').addEventListener('click', () => {
+      transitionTo('screen-forest', 'screen-deep');
+      setTimeout(startDiscovery, 2000);
+    });
+  }
+
+  // ===== SCREEN 2: DISCOVERY PHASE =====
+  let discovered = new Set();
+  let orbRevealed = false;
+
+  function startDiscovery() {
+    // Reveal orbs one by one with delay
+    const orbs = document.querySelectorAll('.hidden-element');
+    orbs.forEach((orb, i) => {
+      setTimeout(() => {
+        orb.classList.add('revealed');
+      }, i * 800 + 1000);
+    });
+  }
+
+  function discover(id) {
+    if (discovered.has(id)) return;
+    discovered.add(id);
+
+    // Flash effect
+    flashScreen();
+
+    // Show whisper text
+    const w = document.getElementById('w' + id);
+    if (w) w.style.display = 'block';
+
+    // Hide orb
+    const orb = document.getElementById('orb' + id);
+    if (orb) {
+      orb.style.transition = 'opacity 0.5s, transform 0.5s';
+      orb.style.opacity = '0';
+      orb.style.transform = 'scale(2)';
+    }
+
+    // Update counter
+    document.getElementById('found-count').textContent = discovered.size;
+
+    // If all found, transition
+    if (discovered.size >= 5) {
+      setTimeout(() => {
+        transitionTo('screen-deep', 'screen-encounter');
+        setTimeout(showEncounterText, 2500);
+      }, 1500);
+    }
+  }
+
+  // ===== SCREEN 3: ENCOUNTER =====
+  function showEncounterText() {
+    const texts = document.querySelectorAll('#encounter-text p');
+    texts.forEach((t, i) => {
+      setTimeout(() => t.classList.add('show'), i * 2000);
+    });
+    setTimeout(() => {
+      document.getElementById('encounter-click').classList.add('show');
+    }, texts.length * 2000 + 1000);
+  }
+
+  function goToReveal() {
+    flashScreen();
+    transitionTo('screen-encounter', 'screen-reveal');
+  }
+
+  // ===== SCREEN 4 → 5 =====
+  function goToFinal() {
+    transitionTo('screen-reveal', 'screen-final');
+  }
+
+  // ===== MOUSE FOLLOW GLOW (subtle) =====
+  document.addEventListener('mousemove', (e) => {
+    const fogLayer = document.querySelector('.fog-layer');
+    const x = (e.clientX / window.innerWidth) * 100;
+    const y = (e.clientY / window.innerHeight) * 100;
+    fogLayer.style.background = `
+      radial-gradient(ellipse at ${x}% ${y}%, rgba(30,60,30,0.15) 0%, transparent 30%),
+      radial-gradient(ellipse at 20% 50%, rgba(30,60,30,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 30%, rgba(30,60,30,0.05) 0%, transparent 50%)
+    `;
+  });
+</script>
+
+</body>
+</html>
