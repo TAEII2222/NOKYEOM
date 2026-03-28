@@ -611,6 +611,30 @@
     pointer-events: none;
   }
 
+  /* ===== BGM TOGGLE ===== */
+  .bgm-toggle {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    z-index: 200;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid #2a2a2a;
+    background: rgba(10,10,10,0.8);
+    display: flex; align-items:center; justify-content:center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.5;
+  }
+  .bgm-toggle:hover { opacity: 1; border-color: var(--green-dim); }
+  .bgm-toggle span {
+    font-size: 0.85rem;
+    color: #555;
+    transition: color 0.3s;
+  }
+  .bgm-toggle.playing span { color: var(--green); }
+  .bgm-toggle.playing { opacity: 0.7; border-color: var(--green-dim); }
+  .bgm-toggle:not(.playing) span { opacity: 0.4; }
+
   /* ===== MOBILE ===== */
   @media (max-width: 768px) {
     .final-tags { gap: 0.8rem; }
@@ -845,6 +869,14 @@
   </div>
 </div>
 
+<!-- BGM -->
+<audio id="bgm" loop preload="auto">
+  <source src="bgm.mp3" type="audio/mpeg">
+</audio>
+<div class="bgm-toggle" id="bgm-toggle" onclick="toggleBGM()" title="배경음악">
+  <span id="bgm-icon">♪</span>
+</div>
+
 <script>
   // ===== PARTICLES =====
   (function createParticles() {
@@ -881,8 +913,30 @@
 
   // ===== SCREEN 0 → 1: START =====
   function startJourney() {
+    // Start BGM on first user interaction
+    const bgm = document.getElementById('bgm');
+    bgm.volume = 0.35;
+    bgm.play().catch(() => {});
+    document.getElementById('bgm-toggle').classList.add('playing');
+
     transitionTo('screen-intro', 'screen-forest');
     setTimeout(showForestText, 2000);
+  }
+
+  // ===== BGM TOGGLE =====
+  function toggleBGM() {
+    const bgm = document.getElementById('bgm');
+    const toggle = document.getElementById('bgm-toggle');
+    const icon = document.getElementById('bgm-icon');
+    if (bgm.paused) {
+      bgm.play().catch(() => {});
+      toggle.classList.add('playing');
+      icon.textContent = '♪';
+    } else {
+      bgm.pause();
+      toggle.classList.remove('playing');
+      icon.textContent = '♪';
+    }
   }
 
   // ===== SCREEN 1: FOREST TEXT =====
