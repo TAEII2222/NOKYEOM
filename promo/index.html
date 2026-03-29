@@ -423,6 +423,53 @@
     box-shadow: 0 0 20px rgba(140,130,110,0.1);
   }
 
+  /* ===== SCREEN 3.5: SENSATION (transition) ===== */
+  #screen-sensation {
+    background: #000;
+  }
+  .sensation-scene {
+    position: relative; width:100%; height:100%;
+    display: flex; align-items:center; justify-content:center;
+  }
+  .sensation-text {
+    text-align: center;
+    z-index: 5;
+  }
+  .sensation-text p {
+    font-size: clamp(0.85rem, 1.5vw, 1.05rem);
+    font-weight: 300;
+    color: #777;
+    line-height: 2.6;
+    opacity: 0;
+  }
+  .sensation-text p.show {
+    animation: textFadeIn 2.5s ease-out forwards;
+  }
+  .sensation-btn {
+    position: absolute;
+    bottom: 15%;
+    left: 0; right: 0;
+    text-align: center;
+    z-index: 6;
+    opacity: 0;
+    cursor: pointer;
+    transition: opacity 1s ease;
+  }
+  .sensation-btn.show { opacity: 1; }
+  .sensation-btn span {
+    font-size: 0.8rem;
+    color: #888;
+    letter-spacing: 0.3em;
+    padding: 0.6em 2em;
+    border: 1px solid rgba(120,120,100,0.25);
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+  .sensation-btn:hover span {
+    color: #aaa;
+    border-color: rgba(160,160,140,0.4);
+  }
+
   /* ===== SCREEN 5: FINAL - PROMO ===== */
   #screen-final {
     background: #000;
@@ -765,6 +812,23 @@
   </div>
 </div>
 
+<!-- SCREEN 3.5: SENSATION (transition) -->
+<div class="screen" id="screen-sensation">
+  <div class="sensation-scene">
+    <div class="sensation-text" id="sensation-text">
+      <p>어둠.</p>
+      <p>&nbsp;</p>
+      <p>아무것도 보이지 않는다.</p>
+      <p>&nbsp;</p>
+      <p>그런데 손에 무언가가 쥐어지는 감각.</p>
+      <p>종이……인 것 같다.</p>
+    </div>
+    <div class="sensation-btn" id="sensation-btn" onclick="goToInvitation()">
+      <span>눈을 뜬다</span>
+    </div>
+  </div>
+</div>
+
 <!-- SCREEN 4: INVITATION -->
 <div class="screen" id="screen-reveal">
   <div class="reveal-scene">
@@ -951,7 +1015,24 @@
 
   function goToReveal() {
     flashScreen();
-    transitionTo('screen-encounter', 'screen-reveal');
+    transitionTo('screen-encounter', 'screen-sensation');
+    setTimeout(showSensationText, 2000);
+  }
+
+  // ===== SCREEN 3.5: SENSATION =====
+  function showSensationText() {
+    const texts = document.querySelectorAll('#sensation-text p');
+    texts.forEach((t, i) => {
+      setTimeout(() => t.classList.add('show'), i * 1500);
+    });
+    setTimeout(() => {
+      document.getElementById('sensation-btn').classList.add('show');
+    }, texts.length * 1500 + 1000);
+  }
+
+  function goToInvitation() {
+    flashScreen();
+    transitionTo('screen-sensation', 'screen-reveal');
   }
 
   // ===== SCREEN 4 → 5 =====
