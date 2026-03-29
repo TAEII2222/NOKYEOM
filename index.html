@@ -693,6 +693,17 @@
         <div class="char-header-line"></div>
       </div>
 
+      <!-- Search -->
+      <div style="margin-bottom:1.5em;display:flex;gap:8px;align-items:center;">
+        <input type="text" class="adm-input" style="flex:1;width:auto;" id="charSearchInput" placeholder="캐릭터명 검색">
+        <select class="adm-input" id="charSearchPos" style="width:auto;">
+          <option value="">전체 포지션</option>
+          <option value="T">T</option>
+          <option value="M">M</option>
+          <option value="B">B</option>
+        </select>
+      </div>
+
       <!-- Character grid -->
       <div id="charGrid" class="char-grid">
         <div class="char-empty" style="text-align:center;padding:2em;grid-column:1/-1;">불러오는 중...</div>
@@ -2827,7 +2838,7 @@ async function loadCharGrid(){
     const displayName=c.character_name||c.code;
     const av=c.avatar_url?`<img src="${c.avatar_url}" alt="">`:`${displayName.charAt(0)}`;
     const borderCls=c.equipped_border?'border-'+c.equipped_border:'';
-    return `<div class="char-card" data-char-code="${c.code}">
+    return `<div class="char-card" data-char-code="${c.code}" data-char-pos="${c.position||''}">
       <div class="char-card-avatar ${borderCls}">${av}</div>
       <div class="char-card-name">${escHtml(displayName)}</div>
       ${c.position?`<div style="font-size:0.65rem;color:var(--green-light);letter-spacing:0.1em;">${c.position}</div>`:''}
@@ -3011,6 +3022,21 @@ async function loadCharInventory(code){
 }
 
 // Profile edit save
+// Character search & filter
+function filterCharGrid(){
+  const q=document.getElementById('charSearchInput').value.trim().toLowerCase();
+  const pos=document.getElementById('charSearchPos').value;
+  document.querySelectorAll('#charGrid .char-card').forEach(card=>{
+    const name=(card.querySelector('.char-card-name')?.textContent||'').toLowerCase();
+    const cardPos=card.dataset.charPos||'';
+    const matchName=!q||name.includes(q);
+    const matchPos=!pos||cardPos===pos;
+    card.style.display=(matchName&&matchPos)?'':'none';
+  });
+}
+document.getElementById('charSearchInput').addEventListener('input',filterCharGrid);
+document.getElementById('charSearchPos').addEventListener('change',filterCharGrid);
+
 document.getElementById('charPEditSave').addEventListener('click',async()=>{
   if(!sessionCode)return;
   const newName=document.getElementById('charPEditName').value.trim();
