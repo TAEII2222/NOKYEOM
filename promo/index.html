@@ -343,7 +343,7 @@
   /* Aged parchment card */
   .invitation-card {
     position: relative;
-    width: clamp(300px, 50vw, 520px);
+    width: clamp(340px, 65vw, 700px);
     aspect-ratio: 1.35 / 1;
     z-index: 5;
     display: flex;
@@ -374,20 +374,20 @@
     padding: 15% 12%;
   }
   .inv-content p {
-    font-size: clamp(0.85rem, 1.6vw, 1.05rem);
+    font-size: clamp(1rem, 2.2vw, 1.4rem);
     font-weight: 300;
-    color: #a8a090;
+    color: #b8b0a0;
     line-height: 2;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.2em;
     opacity: 0;
     animation: textFadeIn 3s ease-out 2s forwards;
-    text-shadow: 0 0 10px rgba(0,0,0,0.6);
+    text-shadow: 0 0 15px rgba(0,0,0,0.7);
   }
 
   .inv-mark {
     margin-top: 1.5rem;
     font-family: 'KimJwaJinGeneral', serif;
-    font-size: 0.7rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: rgba(120,90,70,0.4);
     letter-spacing: 0.5em;
@@ -400,12 +400,14 @@
   }
 
   .inv-proceed {
-    margin-top: 1.5rem;
+    position: absolute;
+    bottom: 8%;
+    left: 50%;
+    transform: translateX(-50%);
     opacity: 0;
     cursor: pointer;
     animation: textFadeIn 2s ease-out 5s forwards;
-    position: relative;
-    z-index: 3;
+    z-index: 6;
   }
   .inv-proceed span {
     font-size: 0.8rem;
@@ -774,10 +776,10 @@
       </div>
 
       <div class="inv-mark">鹿 魘</div>
+    </div>
 
-      <div class="inv-proceed" onclick="goToFinal()">
-        <span>눈을 뜬다</span>
-      </div>
+    <div class="inv-proceed" onclick="goToFinal()">
+      <span>눈을 뜬다</span>
     </div>
   </div>
 </div>
