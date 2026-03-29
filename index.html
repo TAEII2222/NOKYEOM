@@ -517,12 +517,38 @@
       .stalking-fill{height:100%;background:linear-gradient(90deg,var(--green-dark),var(--accent-red));transition:width 1s ease;width:0%;}
       .whisper-text{font-size:0.72rem;color:var(--text-dim);font-style:italic;letter-spacing:0.3em;opacity:0;animation:whisperFade 3s ease-in-out;margin-top:0.5em;}
       @keyframes whisperFade{0%{opacity:0}30%{opacity:0.6}70%{opacity:0.6}100%{opacity:0}}
+      .evt-panel{display:none;}
+      .evt-panel.active{display:block;}
+      .evt-card{padding:1.2em;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;margin-bottom:0.8em;transition:border-color 0.3s ease;}
+      .evt-card:hover{border-color:var(--green-dark);}
+      .evt-card-title{font-size:0.9rem;font-weight:500;color:var(--text-bright);margin-bottom:0.3em;}
+      .evt-card-desc{font-size:0.8rem;color:var(--text-secondary);line-height:1.8;margin-bottom:0.5em;}
+      .evt-card-meta{font-size:0.7rem;color:var(--text-dim);}
+      .evt-card-status{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.65rem;letter-spacing:0.05em;margin-left:6px;}
+      .evt-card-status.live{background:rgba(45,90,39,0.15);color:var(--green-light);}
+      .evt-card-status.upcoming{background:rgba(184,134,11,0.15);color:#b8860b;}
+      .evt-card-status.ended{background:rgba(74,78,72,0.15);color:var(--text-dim);}
+      .evt-link{display:inline-block;margin-top:0.8em;padding:8px 20px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.8rem;letter-spacing:0.1em;cursor:pointer;text-decoration:none;transition:all 0.3s ease;}
+      .evt-link:hover{border-color:var(--green-mid);color:var(--text-bright);background:rgba(45,90,39,0.05);}
     </style>
 
     <div class="game-wrap">
+      <!-- Event Tabs -->
+      <div style="text-align:center;margin-bottom:1.5em;">
+        <div style="font-family:'KimJwaJinGeneral',serif;font-size:2rem;font-weight:700;color:var(--text-bright);letter-spacing:0.2em;margin-bottom:0.3em;">이벤트</div>
+        <div style="font-size:0.75rem;color:var(--text-dim);letter-spacing:0.15em;margin-bottom:1.5em;">Events</div>
+      </div>
+      <div class="adm-tabs" style="margin-bottom:2em;">
+        <button class="adm-tab active" data-evt-tab="farming">숲 탐색</button>
+        <button class="adm-tab" data-evt-tab="missions">주간 미션</button>
+        <button class="adm-tab" data-evt-tab="story">스토리</button>
+        <button class="adm-tab" data-evt-tab="minigame">미니게임</button>
+      </div>
+
+      <!-- Tab: Farming (existing game) -->
+      <div class="evt-panel active" id="evtFarming">
       <!-- Auth (auto from session) -->
       <div id="gameAuth" style="text-align:center;padding:4em 0;">
-        <div style="font-family:'KimJwaJinGeneral',serif;font-size:2rem;font-weight:700;color:var(--text-bright);letter-spacing:0.2em;margin-bottom:0.5em;">탐색</div>
         <div style="font-size:0.8rem;color:var(--text-dim);letter-spacing:0.15em;margin-bottom:2em;">숲에서 쓸 수 있는 것을 찾아라.</div>
         <button id="gAuthBtn" style="padding:12px 30px;background:transparent;border:1px solid var(--green-dark);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif KR',serif;font-size:0.85rem;letter-spacing:0.15em;cursor:pointer;">숲에 들어간다</button>
       </div>
@@ -546,6 +572,22 @@
           <div class="game-inv-title">획득한 아이템 (<span id="gInvCount">0</span>/3)</div>
           <div id="gInvList"><span style="font-size:0.8rem;color:var(--text-dim);font-style:italic;">아직 없음</span></div>
         </div>
+      </div>
+      </div><!-- end evtFarming -->
+
+      <!-- Tab: Missions -->
+      <div class="evt-panel" id="evtMissions">
+        <div id="evtMissionList"><div class="adm-empty">불러오는 중...</div></div>
+      </div>
+
+      <!-- Tab: Story -->
+      <div class="evt-panel" id="evtStory">
+        <div id="evtStoryList"><div class="adm-empty">불러오는 중...</div></div>
+      </div>
+
+      <!-- Tab: Minigame -->
+      <div class="evt-panel" id="evtMinigame">
+        <div id="evtMinigameList"><div class="adm-empty">불러오는 중...</div></div>
       </div>
     </div>
 
@@ -965,6 +1007,8 @@
       <div class="adm-tabs">
         <button class="adm-tab active" data-adm-tab="runners">러너 관리</button>
         <button class="adm-tab" data-adm-tab="codes">초대코드</button>
+        <button class="adm-tab" data-adm-tab="events">이벤트</button>
+        <button class="adm-tab" data-adm-tab="currency">안개 조각</button>
         <button class="adm-tab" data-adm-tab="posts">게시글 관리</button>
         <button class="adm-tab" data-adm-tab="stats">통계</button>
       </div>
@@ -984,6 +1028,44 @@
           <button class="adm-btn" id="admAddCode">코드 생성</button>
         </div>
         <div id="admCodeList"><div class="adm-empty">불러오는 중...</div></div>
+      </div>
+
+      <!-- Panel: Events -->
+      <div class="adm-panel" id="admEvents">
+        <div class="adm-section-title">이벤트 관리</div>
+        <div style="margin-bottom:1.5em;padding:1.2em;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <input type="text" class="adm-input" style="width:100%;" id="admEvtTitle" placeholder="이벤트 제목">
+            <textarea class="adm-input" style="width:100%;height:60px;resize:vertical;" id="admEvtDesc" placeholder="이벤트 설명"></textarea>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <select class="adm-input" id="admEvtType"><option value="mission">주간 미션</option><option value="story">스토리 이벤트</option><option value="minigame">미니게임</option></select>
+              <input type="number" class="adm-input" style="width:80px;" id="admEvtRewardAmt" placeholder="보상 ☁" value="0">
+              <input type="text" class="adm-input" id="admEvtRewardDesc" placeholder="보상 설명 (예: 안개 조각 30)">
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <label style="font-size:0.7rem;color:var(--text-dim);">시작일 <input type="datetime-local" class="adm-input" id="admEvtStart"></label>
+              <label style="font-size:0.7rem;color:var(--text-dim);">종료일 <input type="datetime-local" class="adm-input" id="admEvtEnd"></label>
+            </div>
+            <input type="text" class="adm-input" style="width:100%;" id="admEvtLink" placeholder="외부 링크 (미니게임용, 선택사항)">
+            <button class="adm-btn" id="admEvtAdd" style="align-self:flex-start;">이벤트 등록</button>
+          </div>
+        </div>
+        <div id="admEvtList"><div class="adm-empty">불러오는 중...</div></div>
+      </div>
+
+      <!-- Panel: Currency -->
+      <div class="adm-panel" id="admCurrency">
+        <div class="adm-section-title">안개 조각 지급</div>
+        <div style="margin-bottom:1.5em;padding:1.2em;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select class="adm-input wide" id="admCurTarget"><option value="">캐릭터 선택</option></select>
+            <input type="number" class="adm-input" style="width:100px;" id="admCurAmount" placeholder="수량" value="10">
+            <input type="text" class="adm-input" id="admCurReason" placeholder="사유 (선택)">
+            <button class="adm-btn" id="admCurGive">지급</button>
+            <button class="adm-btn" id="admCurGiveAll">전체 지급</button>
+          </div>
+        </div>
+        <div id="admCurList"><div class="adm-empty">불러오는 중...</div></div>
       </div>
 
       <!-- Panel: Posts -->
@@ -1293,6 +1375,54 @@ volumeSlider.addEventListener('input',()=>{
 window.addEventListener('load',()=>setTimeout(()=>codeInput.focus(),500));
 
 // === HORROR FARMING GAME — TRPG ENGINE ===
+// === EVENT TAB SYSTEM ===
+document.querySelectorAll('[data-evt-tab]').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('[data-evt-tab]').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.evt-panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    const tabName=tab.dataset.evtTab;
+    const panelMap={farming:'evtFarming',missions:'evtMissions',story:'evtStory',minigame:'evtMinigame'};
+    document.getElementById(panelMap[tabName]).classList.add('active');
+    if(tabName!=='farming')loadEvtTab(tabName);
+  });
+});
+
+async function loadEvtTab(tab){
+  const typeMap={missions:'mission',story:'story',minigame:'minigame'};
+  const elId={missions:'evtMissionList',story:'evtStoryList',minigame:'evtMinigameList'};
+  const el=document.getElementById(elId[tab]);
+  if(!el)return;
+  el.innerHTML='<div class="adm-empty">불러오는 중...</div>';
+  const{data}=await sb.from('events').select('*').eq('type',typeMap[tab]).eq('is_active',true).order('start_date',{ascending:false});
+  if(!data||data.length===0){el.innerHTML='<div class="adm-empty" style="padding:3em 0;">현재 진행 중인 이벤트가 없습니다.</div>';return;}
+  const now=new Date();
+  el.innerHTML=data.map(e=>{
+    const s=new Date(e.start_date),en=new Date(e.end_date);
+    const isLive=now>=s&&now<=en;
+    const isUpcoming=now<s;
+    const isEnded=now>en;
+    const statusText=isLive?'진행중':isUpcoming?'곧 시작':'종료';
+    const statusCls=isLive?'live':isUpcoming?'upcoming':'ended';
+    const daysLeft=isLive?Math.ceil((en-now)/(1000*60*60*24)):isUpcoming?Math.ceil((s-now)/(1000*60*60*24)):0;
+    const timeText=isLive?daysLeft+'일 남음':isUpcoming?daysLeft+'일 후 시작':'';
+    let html=`<div class="evt-card" style="${isEnded?'opacity:0.5;':''}">
+      <div class="evt-card-title">${escHtml(e.title)} <span class="evt-card-status ${statusCls}">${statusText}</span></div>
+      <div class="evt-card-desc">${escHtml(e.description||'')}</div>
+      <div class="evt-card-meta">${s.toLocaleDateString('ko')} ~ ${en.toLocaleDateString('ko')} ${timeText?' · '+timeText:''} ${e.reward_description?' · 보상: '+escHtml(e.reward_description):''}</div>`;
+    if(e.external_link&&isLive){
+      html+=`<a class="evt-link" href="${escHtml(e.external_link)}" target="_blank" rel="noopener">게임 참여하기 →</a>`;
+      html+=`<div style="margin-top:0.6em;font-size:0.75rem;color:var(--text-dim);">점수 화면을 캡처하여 게시판에 인증 글을 올려주세요.</div>`;
+    }
+    if(isUpcoming){
+      html+=`<div style="margin-top:0.8em;font-size:0.8rem;color:var(--text-dim);font-style:italic;">이벤트 시작까지 ${daysLeft}일 남았습니다.</div>`;
+    }
+    html+=`</div>`;
+    return html;
+  }).join('');
+}
+
+// === FARMING GAME ===
 let gUser=null,gCount=0,gTimer=300,gTimerInterval=null,gItems=[];
 const GMAX=3;
 // TRPG Stats
@@ -2877,6 +3007,8 @@ document.querySelectorAll('.adm-tab').forEach(tab=>{
     // Load data
     if(tab.dataset.admTab==='runners')loadAdmRunners();
     if(tab.dataset.admTab==='codes')loadAdmCodes();
+    if(tab.dataset.admTab==='events')loadAdmEvents();
+    if(tab.dataset.admTab==='currency')loadAdmCurrency();
     if(tab.dataset.admTab==='posts')loadAdmPosts();
     if(tab.dataset.admTab==='stats')loadAdmStats();
   });
@@ -3078,6 +3210,94 @@ async function loadAdmStats(){
     <div class="adm-stat-box"><div class="adm-stat-num">${totalLikes||0}</div><div class="adm-stat-label">총 좋아요</div></div>
   `;
 }
+
+// === ADMIN: EVENT MANAGEMENT ===
+async function loadAdmEvents(){
+  const el=document.getElementById('admEvtList');
+  el.innerHTML='<div class="adm-empty">불러오는 중...</div>';
+  const{data}=await sb.from('events').select('*').order('start_date',{ascending:false});
+  if(!data||data.length===0){el.innerHTML='<div class="adm-empty">등록된 이벤트가 없습니다.</div>';return;}
+  const typeLabel={mission:'주간 미션',story:'스토리',minigame:'미니게임'};
+  const now=new Date();
+  el.innerHTML=data.map(e=>{
+    const s=new Date(e.start_date),en=new Date(e.end_date);
+    const status=now<s?'예정':now>en?'종료':'진행중';
+    const statusCls=status==='진행중'?'active':status==='종료'?'departed':'warned';
+    return `<div class="adm-post-item">
+      <div class="adm-post-header">
+        <div><span class="adm-post-author">${escHtml(e.title)}</span> <span class="adm-status ${statusCls}">${status}</span> <span style="font-size:0.65rem;color:var(--text-dim);margin-left:6px;">${typeLabel[e.type]||e.type}</span></div>
+        <button class="adm-btn danger" data-adm-evt-del="${e.id}">삭제</button>
+      </div>
+      <div class="adm-post-body" style="max-height:none;">${escHtml(e.description||'')}</div>
+      <div style="font-size:0.65rem;color:var(--text-dim);margin-top:0.5em;">${s.toLocaleDateString('ko')} ~ ${en.toLocaleDateString('ko')} · 보상: ${escHtml(e.reward_description||'')} ${e.reward_amount?'(☁'+e.reward_amount+')':''} ${e.external_link?'· <a href="'+escHtml(e.external_link)+'" target="_blank" style="color:var(--green-light);">외부 링크</a>':''}</div>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('[data-adm-evt-del]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      if(!confirm('이 이벤트를 삭제합니까?'))return;
+      await sb.from('events').delete().eq('id',btn.dataset.admEvtDel);
+      loadAdmEvents();
+    });
+  });
+}
+
+document.getElementById('admEvtAdd').addEventListener('click',async()=>{
+  const title=document.getElementById('admEvtTitle').value.trim();
+  const desc=document.getElementById('admEvtDesc').value.trim();
+  const type=document.getElementById('admEvtType').value;
+  const start=document.getElementById('admEvtStart').value;
+  const end=document.getElementById('admEvtEnd').value;
+  const rewardDesc=document.getElementById('admEvtRewardDesc').value.trim();
+  const rewardAmt=parseInt(document.getElementById('admEvtRewardAmt').value)||0;
+  const link=document.getElementById('admEvtLink').value.trim();
+  if(!title||!start||!end){alert('제목, 시작일, 종료일은 필수입니다.');return;}
+  await sb.from('events').insert({title,description:desc,type,start_date:start,end_date:end,reward_description:rewardDesc,reward_amount:rewardAmt,external_link:link||null});
+  alert('이벤트 등록 완료!');
+  document.getElementById('admEvtTitle').value='';
+  document.getElementById('admEvtDesc').value='';
+  document.getElementById('admEvtLink').value='';
+  document.getElementById('admEvtRewardDesc').value='';
+  document.getElementById('admEvtRewardAmt').value='0';
+  loadAdmEvents();
+});
+
+// === ADMIN: CURRENCY (안개 조각 지급) ===
+async function loadAdmCurrency(){
+  const sel=document.getElementById('admCurTarget');
+  const el=document.getElementById('admCurList');
+  // Load character list for dropdown
+  const{data:users}=await sb.from('invite_codes').select('code,character_name,currency').not('character_name','is',null).order('character_name');
+  sel.innerHTML='<option value="">캐릭터 선택</option>'+(users||[]).map(u=>`<option value="${u.code}">${escHtml(u.character_name)} (☁${u.currency||0})</option>`).join('');
+  // Show current balances
+  if(!users||users.length===0){el.innerHTML='<div class="adm-empty">등록된 캐릭터가 없습니다.</div>';return;}
+  el.innerHTML='<table class="adm-table"><thead><tr><th>캐릭터명</th><th>코드</th><th>안개 조각</th></tr></thead><tbody>'+
+    users.map(u=>`<tr><td>${escHtml(u.character_name)}</td><td style="font-size:0.75rem;color:var(--text-dim);">${escHtml(u.code)}</td><td style="font-weight:700;">☁ ${u.currency||0}</td></tr>`).join('')+'</tbody></table>';
+}
+
+document.getElementById('admCurGive').addEventListener('click',async()=>{
+  const code=document.getElementById('admCurTarget').value;
+  const amt=parseInt(document.getElementById('admCurAmount').value)||0;
+  const reason=document.getElementById('admCurReason').value.trim();
+  if(!code){alert('캐릭터를 선택해주세요.');return;}
+  if(amt===0){alert('수량을 입력해주세요.');return;}
+  const{data:cur}=await sb.from('invite_codes').select('currency,character_name').eq('code',code).maybeSingle();
+  const newCur=(cur?.currency||0)+amt;
+  await sb.from('invite_codes').update({currency:newCur}).eq('code',code);
+  alert(`${cur?.character_name}에게 ☁${amt} 지급 완료! (잔액: ☁${newCur})`);
+  loadAdmCurrency();
+});
+
+document.getElementById('admCurGiveAll').addEventListener('click',async()=>{
+  const amt=parseInt(document.getElementById('admCurAmount').value)||0;
+  if(amt===0){alert('수량을 입력해주세요.');return;}
+  if(!confirm(`모든 캐릭터에게 ☁${amt}을 지급합니다. 계속할까요?`))return;
+  const{data:users}=await sb.from('invite_codes').select('code,currency').not('character_name','is',null);
+  for(const u of (users||[])){
+    await sb.from('invite_codes').update({currency:(u.currency||0)+amt}).eq('code',u.code);
+  }
+  alert(`전체 ${users?.length||0}명에게 ☁${amt} 지급 완료!`);
+  loadAdmCurrency();
+});
 
 // === NOTIFICATION SYSTEM ===
 let notifSettings={notify_comment:true,notify_like:true,notify_notice:true,notify_new_post:false};
