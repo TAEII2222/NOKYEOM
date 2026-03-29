@@ -1,0 +1,67 @@
+name: Weekly Timeline Reward
+
+on:
+  schedule:
+    # 매주 월요일 00:00 UTC = 09:00 KST
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+jobs:
+  reward:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check timeline activity and distribute rewards
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "=== 녹염 주간 타임라인 보상 배포 ==="
+          
+          # 지난 7일간 게시글 3회 이상 작성한 유저 조회
+          WEEK_AGO=$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%S)
+          echo "기준일: $WEEK_AGO 이후"
+          
+          # board_posts에서 reply_to가 null인 원본 게시글만 카운트
+          POSTS=$(curl -s "${SUPABASE_URL}/rest/v1/board_posts?select=author_code&reply_to=is.null&created_at=gte.${WEEK_AGO}" \
+            -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}")
+          
+          echo "조회된 게시글: $POSTS"
+          
+          # author_code별 카운트 집계 → 3회 이상인 유저 필터
+          ELIGIBLE=$(echo "$POSTS" | python3 -c "
+          import json, sys
+          posts = json.load(sys.stdin)
+          counts = {}
+          for p in posts:
+              code = p['author_code']
+              counts[code] = counts.get(code, 0) + 1
+          eligible = [code for code, cnt in counts.items() if cnt >= 3]
+          print(json.dumps(eligible))
+          ")
+          
+          echo "보상 대상: $ELIGIBLE"
+          
+          # 각 대상에게 5 안개 조각 지급
+          for CODE in $(echo "$ELIGIBLE" | python3 -c "import json,sys; [print(c) for c in json.load(sys.stdin)]"); do
+            echo "지급: $CODE (+5 안개 조각)"
+            
+            # 현재 currency 조회
+            CURRENT=$(curl -s "${SUPABASE_URL}/rest/v1/invite_codes?select=currency&code=eq.${CODE}" \
+              -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+              -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}")
+            
+            CUR_VAL=$(echo "$CURRENT" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d[0]['currency'] if d else 0)")
+            NEW_VAL=$((CUR_VAL + 5))
+            
+            # currency 업데이트
+            curl -s -X PATCH "${SUPABASE_URL}/rest/v1/invite_codes?code=eq.${CODE}" \
+              -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+              -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+              -H "Content-Type: application/json" \
+              -d "{\"currency\": ${NEW_VAL}}"
+            
+            echo "완료: $CODE ($CUR_VAL → $NEW_VAL)"
+          done
+          
+          echo "=== 주간 보상 배포 완료 ==="
