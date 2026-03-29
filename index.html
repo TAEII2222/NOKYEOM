@@ -699,6 +699,19 @@
             <div class="char-profile-title" id="charPTitle"></div>
             <div class="char-profile-code" id="charPCode"></div>
             <div class="char-profile-status active" id="charPStatus"></div>
+            <div id="charPEditWrap" style="display:none;margin-top:1em;padding:1em;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;">
+              <div style="font-size:0.7rem;color:var(--text-dim);letter-spacing:0.1em;margin-bottom:0.8em;">프로필 편집</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <input type="text" class="adm-input" style="width:100%;" id="charPEditName" placeholder="캐릭터명">
+                <select class="adm-input" style="width:100%;" id="charPEditPos">
+                  <option value="">포지션 선택</option>
+                  <option value="T">T (공)</option>
+                  <option value="M">M (올)</option>
+                  <option value="B">B (수)</option>
+                </select>
+                <button class="adm-btn" id="charPEditSave" style="align-self:flex-start;">저장</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2757,7 +2770,7 @@ async function loadCharGrid(){
   const grid=document.getElementById('charGrid');
   grid.innerHTML='<div class="char-empty" style="text-align:center;padding:2em;grid-column:1/-1;">불러오는 중...</div>';
   
-  const{data}=await sb.from('invite_codes').select('code,character_name,status,avatar_url').not('character_name','is',null).order('character_name');
+  const{data}=await sb.from('invite_codes').select('code,character_name,status,avatar_url,position').not('character_name','is',null).order('character_name');
   if(!data||data.length===0){grid.innerHTML='<div class="char-empty" style="text-align:center;padding:2em;grid-column:1/-1;">등록된 캐릭터가 없습니다.</div>';return;}
   
   charAllData=data.filter(d=>d.character_name&&!d.code.includes('ADMIN'));
@@ -2768,6 +2781,7 @@ async function loadCharGrid(){
     return `<div class="char-card" data-char-code="${c.code}">
       <div class="char-card-avatar">${av}</div>
       <div class="char-card-name">${escHtml(c.character_name)}</div>
+      ${c.position?`<div style="font-size:0.65rem;color:var(--green-light);letter-spacing:0.1em;">${c.position}</div>`:''}
       <div class="char-card-status">${statusLabel[c.status||'active']}</div>
     </div>`;
   }).join('');
@@ -2806,8 +2820,18 @@ async function openCharProfile(code){
   }
   
   document.getElementById('charPName').textContent=name;
-  document.getElementById('charPTitle').textContent='';
+  document.getElementById('charPTitle').textContent=user.position?'포지션: '+user.position:'';
   document.getElementById('charPCode').textContent=code;
+  
+  // Show edit UI for own profile
+  const editWrap=document.getElementById('charPEditWrap');
+  if(code===sessionCode){
+    editWrap.style.display='block';
+    document.getElementById('charPEditName').value=user.character_name||'';
+    document.getElementById('charPEditPos').value=user.position||'';
+  }else{
+    editWrap.style.display='none';
+  }
   
   const statusEl=document.getElementById('charPStatus');
   statusEl.textContent=statusLabel[user.status||'active'];
@@ -2892,6 +2916,25 @@ document.getElementById('charProfileBack').addEventListener('click',()=>{
   charCurrentCode=null;
   document.getElementById('charProfile').classList.remove('open');
   document.getElementById('charGrid').style.display='grid';
+});
+
+// Profile edit save
+document.getElementById('charPEditSave').addEventListener('click',async()=>{
+  if(!sessionCode)return;
+  const newName=document.getElementById('charPEditName').value.trim();
+  const newPos=document.getElementById('charPEditPos').value;
+  if(!newName){alert('캐릭터명을 입력해주세요.');return;}
+  const updateData={character_name:newName};
+  if(newPos)updateData.position=newPos;
+  await sb.from('invite_codes').update(updateData).eq('code',sessionCode);
+  sessionCharName=newName;
+  alert('프로필이 저장되었습니다.');
+  // Refresh profile
+  document.getElementById('charPName').textContent=newName;
+  document.getElementById('charPTitle').textContent=newPos?'포지션: '+newPos:'';
+  // Update sidebar name
+  const sidebarName=document.getElementById('sidebarName');
+  if(sidebarName)sidebarName.textContent=newName;
 });
 
 // Load char grid when page opens
