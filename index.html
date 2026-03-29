@@ -1657,336 +1657,300 @@ async function findAvailableItem(preferredIds){
 
 // === SCENES — TRPG STYLE ===
 const scenes={
-  // ─── ACT 1: AWAKENING ───
-  start:{text:'눈을 떴다.\n\n사방이 어둡다. 나무 사이로 하얀 안개가 낮게 깔려 있다. 발밑에 마른 낙엽이 바스락거린다.\n\n냄새가 이상하다. 흙과 이끼, 그리고... 피 비슷한 것.\n\n<span class="eerie">멀리서 무언가 움직이는 소리가 들린다.</span>',choices:[
-    {text:'▸ 물소리가 나는 쪽으로 간다',to:'stream'},
-    {text:'▸ 나뭇잎 소리가 나는 쪽으로 간다',to:'rustling'},
-    {text:'▸ 움직이지 않고 주변을 살핀다 [관찰 판정]',to:'observe_check'},
-    {text:'▸ 소리가 나는 반대쪽으로 조용히 이동한다',to:'sneak_start'}
+
+  // ═══════════════════════════════════
+  // COMMON START — 구역 선택
+  // ═══════════════════════════════════
+  start:{text:'숲에 들어섰다. 안개가 낮게 깔려 있었고, 나무 사이로 희미한 길이 갈라져 있었다.\n\n어느 쪽으로든 갈 수 있었지만, 돌아오는 길이 같을 거라는 보장은 없었다.',choices:[
+    {text:'▸ 안개가 짙은 숲길로 간다',to:'forest_enter'},
+    {text:'▸ 물 냄새가 나는 낮은 지대로 내려간다',to:'swamp_enter'},
+    {text:'▸ 물소리가 들리는 쪽으로 간다',to:'lake_enter'}
   ]},
 
-  observe_check:{text:'loading',action:async()=>{
-    const r=rollDice(10);
-    if(r.crit)return{text:'주변을 살폈다.\n\n'+diceHTML(r)+'\n\n눈이 어둠에 빠르게 적응한다. 나무 사이의 미세한 움직임까지 포착했다.\n\n<span class="highlight">세 가지를 발견했다</span>: 왼쪽으로 희미한 물소리, 정면에 오래된 구조물의 윤곽, 그리고—\n\n오른쪽 나무 사이에 <span class="eerie">초록빛 두 개</span>가 빛나고 있다. 눈이다.\n\n그것이 당신을 보고 있다.',choices:[
-      {text:'▸ 구조물 쪽으로 간다 (숨을 곳)',to:'cabin_approach'},
-      {text:'▸ 초록빛을 향해 다가간다',to:'approach_deer'},
-      {text:'▸ 물소리 쪽으로 간다',to:'stream'}
-    ]};
-    if(r.success)return{text:'주변을 살폈다.\n\n'+diceHTML(r)+'\n\n안개 사이로 나무의 윤곽이 보인다. 두 방향에서 소리가 난다.\n\n왼쪽: 물 흐르는 소리. 오른쪽: 나뭇잎이 흔들리는 소리.\n\n<span class="eerie">그리고 멀리, 아주 멀리서 뭔가가 서 있는 것 같다.</span>',choices:[
-      {text:'▸ 물소리 쪽으로',to:'stream'},
-      {text:'▸ 나뭇잎 소리 쪽으로',to:'rustling'},
-      {text:'▸ 서 있는 것에 다가간다',to:'approach_deer'}
-    ]};
-    modStat('sanity',-5);
-    if(r.critFail){triggerScare(1);return{text:'주변을 살피려 했다.\n\n'+diceHTML(r)+'\n\n돌아선 순간— <span class="danger">바로 뒤에 있었다.</span>\n\n초록빛 눈이 코앞에서 빛났다. 비명을 질렀다. 몸이 굳었다.\n\n...순간이었다. 눈을 떴을 때, 그것은 없었다.\n\n<span class="eerie">하지만 발밑에 사슴 발자국이 있다. 방금 만들어진 것이다.</span>',choices:[
-      {text:'▸ 아무 방향으로나 뛴다',to:'run_panic'},
-      {text:'▸ 떨리는 다리를 붙잡고 서 있는다',to:'mid_fork'}
-    ]};}
-    return{text:'주변을 살폈다.\n\n'+diceHTML(r)+'\n\n어둠에 눈이 적응하지 않는다. 안개가 너무 짙다.\n\n아무것도 보이지 않는다. 오히려 불안감만 커졌다.',choices:[
-      {text:'▸ 아무 방향으로나 걷는다',to:'mid_fork'},
-      {text:'▸ 물소리 쪽으로 간다',to:'stream'}
-    ]};
-  }},
-
-  sneak_start:{text:'loading',action:async()=>{
-    const r=rollDice(12);modStat('alert',r.success?-5:10);
-    if(r.success)return{text:'소리를 죽이고 반대 방향으로 움직였다.\n\n'+diceHTML(r)+'\n\n발밑의 낙엽을 피하며 조심스럽게 걸었다. 소리가 멀어진다.\n\n잠시 후, 길이 갈라지는 곳에 도착했다.',choices:[
-      {text:'▸ 좁은 오솔길로 간다',to:'narrow_path'},
-      {text:'▸ 넓은 길로 간다',to:'mid_fork'},
-      {text:'▸ 나무 위로 올라가본다 [체력 판정]',to:'climb_tree'}
-    ]};
-    triggerScare(0.5);
-    return{text:'소리를 죽이고 움직이려 했다.\n\n'+diceHTML(r)+'\n\n<span class="danger">나뭇가지를 밟았다.</span> 소리가 숲에 울렸다.\n\n멀리서 움직이던 것이 멈췄다. 그리고—\n\n<span class="eerie">이쪽을 향해 오기 시작한다.</span>',choices:[
-      {text:'▸ 뛴다!',to:'run_panic'},
-      {text:'▸ 나무 뒤에 숨는다 [은신 판정]',to:'hide_check'}
-    ]};
-  }},
-
-  run_panic:{text:'뛰었다. 생각할 겨를이 없었다.\n\n나뭇가지가 얼굴을 스친다. 발이 뿌리에 걸린다.\n\n<span class="danger">뒤에서 발굽 소리가 들린다. 빠르다.</span>',action:async()=>{
-    modStat('hp',-10);modStat('alert',15);
-    const r=rollDice(13);
-    if(r.success)return{text:'뛰었다. 나뭇가지가 얼굴을 긁었다.\n\n'+diceHTML(r)+'\n\n숨이 찼지만 멈추지 않았다. 발굽 소리가 점점 멀어진다.\n\n달리다가 발이 빈 공간을 밟았다. 비탈이다.\n\n미끄러졌다. 굴렀다. 멈췄다.\n\n다른 장소다.',choices:[
-      {text:'▸ 일어나서 주변을 살핀다',to:'ravine'},
-      {text:'▸ 잠시 숨을 고른다',to:'rest_check'}
-    ]};
-    triggerScare(1.5);
-    return{text:'뛰었다.\n\n'+diceHTML(r)+'\n\n<span class="danger">넘어졌다.</span> 발이 뿌리에 걸렸다.\n\n땅에 엎어진 채 뒤를 돌아봤다.\n\n<span class="eerie">안개 사이로 뿔의 윤곽이 보인다. 멈춰 서서 당신을 내려다보고 있다.</span>\n\n그리고 천천히... 돌아섰다. 사라졌다.',choices:[
-      {text:'▸ 떨면서 일어난다',to:'mid_fork'}
-    ]};
-  }},
-
-  hide_check:{text:'loading',action:async()=>{
-    const r=rollDice(14);
-    if(r.success){modStat('alert',-10);return{text:'나무 뒤에 몸을 숨겼다. 숨을 죽였다.\n\n'+diceHTML(r)+'\n\n발굽 소리가 다가온다. 점점 가까이.\n\n나무 바로 옆을 지나간다. 안개 사이로 다리가 보인다. 가늘고 길다. 관절이 반대로 꺾여 있다.\n\n...지나갔다.',choices:[
-      {text:'▸ 조용히 반대 방향으로 간다',to:'narrow_path'},
-      {text:'▸ 그것이 간 방향을 살핀다',to:'deep_forest'}
-    ]};}
-    triggerScare(2);modStat('sanity',-15);
-    return{text:'나무 뒤에 숨었다.\n\n'+diceHTML(r)+'\n\n발굽 소리가 멈췄다. 조용하다. 너무 조용하다.\n\n<span class="danger">위에서 숨소리가 들린다.</span>\n\n올려다봤다.\n\n나무 위에 있었다. 가지 사이로 초록빛 눈이 내려다보고 있다.\n\n비명을 질렀다.',choices:[
-      {text:'▸ 뛴다!',to:'run_panic'},
-    ]};
-  }},
-
-  // ─── ACT 2: EXPLORATION ───
-  stream:{text:'물소리를 따라 걸었다.\n\n작은 개울이 보인다. 물은 맑아 보이지만 색이 이상하다. 희미하게 초록빛을 띤다.\n\n개울 옆에 무언가 떨어져 있다.\n\n<span class="eerie">물속에서 무언가가 움직인 것 같다.</span>',choices:[
-    {text:'▸ 떨어진 물건을 줍는다 [수색 판정]',to:'stream_item'},
-    {text:'▸ 물속을 들여다본다 [관찰 판정]',to:'stream_look'},
-    {text:'▸ 개울을 건너본다 [체력 판정]',to:'stream_cross'},
-    {text:'▸ 개울을 따라 걷는다',to:'stream_follow'}
+  // ═══════════════════════════════════
+  // ZONE A: 안개 숲 (MISTY FOREST)
+  // ═══════════════════════════════════
+  forest_enter:{text:'안개가 짙은 숲길로 들어섰다. 몇 발자국 지나지 않아 뒤를 돌아봤지만, 들어온 길은 이미 안개에 삼켜져 있었다.\n\n나무들이 빽빽했다. 가지 사이로 바람이 불 때마다 신음 같은 소리가 났고, 발밑에선 마른 낙엽이 바스락거렸다. 흙과 이끼가 뒤섞인 쾌쾌한 냄새가 코를 찔렀다.\n\n멀리서 무언가 움직이는 소리가 들렸다.',choices:[
+    {text:'▸ 물소리가 나는 쪽으로 간다',to:'forest_stream'},
+    {text:'▸ 소리가 나는 쪽을 향해 조용히 다가간다',to:'forest_approach'},
+    {text:'▸ 멈춰 서서 주변을 살핀다',to:'forest_observe'},
+    {text:'▸ 나무 위로 올라간다 [체력 판정]',to:'forest_climb'}
   ]},
 
-  stream_look:{text:'loading',action:async()=>{
-    const r=rollDice(16);
-    if(r.critFail){triggerScare(2);modStat('sanity',-20);return{text:'물속을 들여다봤다.\n\n'+diceHTML(r)+'\n\n자신의 얼굴이 비친다. 하지만—\n\n<span class="danger">반사된 얼굴이 웃고 있다. 당신은 웃지 않았는데.</span>\n\n반사된 얼굴의 눈이 초록빛으로 변한다.\n\n뒤로 물러났다. 심장이 터질 것 같다.',choices:[{text:'▸ 개울에서 벗어난다',to:'mid_fork'}]};}
-    if(r.success)return{text:'물속을 들여다봤다.\n\n'+diceHTML(r)+'\n\n물이 맑다. 바닥에 자갈이 보인다. 그리고 자갈 사이에 뭔가 빛나는 게 있다.\n\n<span class="eerie">하지만 물에 손을 넣는 건 꺼림칙하다.</span>',choices:[
-      {text:'▸ 손을 넣어 꺼낸다 [용기 판정]',to:'stream_reach'},
-      {text:'▸ 그만두고 다른 곳으로',to:'mid_fork'}
-    ]};
-    return{text:'물속을 들여다봤다.\n\n'+diceHTML(r)+'\n\n안개가 수면에 반사되어 아무것도 보이지 않는다.',choices:[{text:'▸ 물건을 줍는다',to:'stream_item'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};
-  }},
-
-  stream_reach:{text:'loading',action:async()=>{
-    const r=rollDice(16);
-    const item=await findAvailableItem([13,18,25]);
-    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'물속에 손을 넣었다. 차갑다. 뼛속까지.\n\n'+diceHTML(r)+'\n\n손끝에 무언가 닿았다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n손을 뺐을 때, 물이 잠시 붉어졌다가 다시 맑아졌다.',choices:[{text:'▸ 개울을 건넌다',to:'stream_cross'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
-    modStat('hp',-5);screenFlicker();
-    return{text:'물속에 손을 넣었다.\n\n'+diceHTML(r)+'\n\n<span class="danger">무언가가 손목을 잡았다.</span>\n\n급히 빼냈다. 손목에 붉은 자국이 있다.\n\n물속에는 아무것도 없다.',choices:[{text:'▸ 서둘러 떠난다',to:'mid_fork'}]};
-  }},
-
-  stream_follow:{text:'개울을 따라 걸었다.\n\n물소리가 점점 커진다. 작은 폭포가 나타났다.\n\n폭포 뒤에 어두운 공간이 보인다. 동굴인 것 같다.',choices:[
-    {text:'▸ 동굴에 들어간다 [용기 판정]',to:'cave_enter'},
-    {text:'▸ 폭포 주변을 살핀다 [수색 판정]',to:'waterfall_search'},
-    {text:'▸ 돌아간다',to:'mid_fork'}
+  // — 안개 숲 1: 물소리 쪽으로 —
+  forest_stream:{text:'물소리를 따라 걸었다. 안개 사이로 작은 개울이 나타났다. 물은 맑아 보였지만 색이 이상했다. 희미하게 초록빛을 띠고 있었다.\n\n개울 옆에 무언가 떨어져 있었다. 낡은 천 조각 같기도 하고, 누군가의 소지품 같기도 했다.\n\n그때 개울 건너편에서 인기척이 느껴졌다. 안개 너머로 누군가 서 있었다. 이쪽을 바라보고 있는 것 같았지만, 얼굴이 보이지 않았다. 안개가 얼굴 부분만 삼킨 것처럼.',choices:[
+    {text:'▸ 떨어진 물건을 줍는다 [수색 판정]',to:'forest_stream_item'},
+    {text:'▸ 건너편의 인물에게 말을 건다',to:'forest_stream_talk'},
+    {text:'▸ 개울을 건넌다 [체력 판정]',to:'forest_stream_cross'}
   ]},
 
-  cave_enter:{text:'loading',action:async()=>{
-    gDepth++;const r=rollDice(17);
-    if(r.critFail){triggerScare(2.5);modStat('sanity',-25);modStat('hp',-15);return{text:'동굴에 들어갔다.\n\n'+diceHTML(r)+'\n\n어둡다. 아무것도 보이지 않는다.\n\n<span class="danger">발밑이 무너졌다.</span>\n\n떨어졌다. 얼마나 떨어졌는지 모르겠다.\n\n몸이 아프다. 그리고—\n\n<span class="eerie">동굴 안에서 숨소리가 들린다. 당신의 것이 아니다.</span>',choices:[{text:'▸ 기어서 빛이 보이는 쪽으로',to:'deep_forest'},{text:'▸ 소리 나는 쪽을 살핀다',to:'cave_thing'}]};}
-    const item=await findAvailableItem([22,21,16,17]);
-    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'동굴에 들어갔다.\n\n'+diceHTML(r)+'\n\n좁지만 비바람은 피할 수 있는 곳이다.\n\n벽에 기대어 있는 무언가를 발견했다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n동굴 안쪽에서 바람이 분다. 출구가 하나 더 있는 것 같다.',choices:[{text:'▸ 안쪽으로 더 들어간다',to:'cave_deep'},{text:'▸ 나간다',to:'mid_fork'}]};}
-    return{text:'동굴에 들어갔다.\n\n'+diceHTML(r)+'\n\n텅 빈 공간이다. 쓸 만한 것은 없다.\n\n하지만 벽에 뭔가 새겨져 있다.\n\n<span class="eerie">"숲이 원하는 것을 주면 나갈 수 있다."</span>',choices:[{text:'▸ 나간다',to:'mid_fork'}]};
-  }},
-
-  cave_deep:{text:'동굴 안쪽으로 걸었다. 공기가 차갑다.\n\n벽에 손을 대고 더듬으며 걸었다.\n\n<span class="eerie">벽이 맥박처럼 뛰고 있다.</span>',action:async()=>{
-    const r=rollDice(18);modStat('sanity',-10);
-    if(r.success)return{text:''+diceHTML(r)+'\n\n벽의 진동을 무시하고 걸었다. 빛이 보인다.\n\n동굴이 끝나고 숲의 다른 구역이 나타났다.\n\n<span class="eerie">여기는... 나무가 거꾸로 자라고 있다.</span>',choices:[{text:'▸ 거꾸로 된 숲을 탐색한다',to:'inverted_forest'},{text:'▸ 돌아간다',to:'mid_fork'}]};
-    triggerScare(1);return{text:''+diceHTML(r)+'\n\n더 이상 앞으로 갈 수 없다. 동굴이 좁아진다.\n\n돌아서는 순간, <span class="danger">자신이 들어온 입구가 없다.</span>\n\n벽이다. 돌벽.\n\n...잠시 후 옆에서 바람이 분다. 다른 출구가 있었다.',choices:[{text:'▸ 바람이 부는 쪽으로 나간다',to:'deep_forest'}]};
-  }},
-
-  cave_thing:{text:'loading',action:async()=>{
-    triggerScare(2);modStat('sanity',-20);
-    return{text:'소리 나는 쪽으로 기어갔다.\n\n어둠 속에서 윤곽이 보인다. 사람이다. 아니, 사람이었던 것이다.\n\n<span class="danger">웅크리고 앉아 벽을 긁고 있다. 끊임없이. 같은 자리를.</span>\n\n얼굴을 돌렸다. 눈이 없다. 눈이 있어야 할 자리에 이끼가 자라고 있다.\n\n<span class="eerie">입이 열렸다. 소리가 나왔다. 당신의 이름이었다.</span>',choices:[{text:'▸ 빛이 보이는 쪽으로 뛴다',to:'deep_forest'}]};
-  }},
-
-  waterfall_search:{text:'loading',action:async()=>{
-    const r=rollDice(16);
-    const item=await findAvailableItem([9,10,5,6]);
-    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'폭포 주변의 바위 사이를 살폈다.\n\n'+diceHTML(r)+'\n\n이끼 밑에 무언가 있다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 동굴에 들어간다',to:'cave_enter'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
-    return{text:'폭포 주변을 살폈다.\n\n'+diceHTML(r)+'\n\n미끄러운 바위뿐이다. 특별한 것은 없었다.',choices:[{text:'▸ 동굴에 들어간다',to:'cave_enter'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};
-  }},
-
-  stream_item:{text:'loading',action:async()=>{
-    const r=rollDice(15);
-    const item=await findAvailableItem([1,2,3,4]);
-    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'개울 옆을 살폈다.\n\n'+diceHTML(r)+'\n\n젖은 흙 위에 무언가가 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 더 둘러본다',to:'stream_cross'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
-    if(r.critFail){modStat('hp',-5);return{text:'물건에 손을 뻗었다.\n\n'+diceHTML(r)+'\n\n<span class="danger">손이 미끄러져 날카로운 돌에 긁혔다.</span>\n\n물건은 물에 떠내려갔다.',choices:[{text:'▸ 개울을 건넌다',to:'stream_cross'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
-    return{text:'개울 옆을 살폈다.\n\n'+diceHTML(r)+'\n\n누군가 먼저 다녀간 흔적만 있다. 아무것도 없다.',choices:[{text:'▸ 개울을 건넌다',to:'stream_cross'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};
-  }},
-
-  stream_cross:{text:'loading',action:async()=>{
-    const r=rollDice(16);
-    if(r.critFail){modStat('hp',-10);triggerScare(0.8);return{text:'개울을 건너려 했다.\n\n'+diceHTML(r)+'\n\n<span class="danger">발이 미끄러졌다. 물속으로 빠졌다.</span>\n\n물이 얼음처럼 차갑다. 옷이 젖었다.\n\n간신히 건너편에 올라왔다. 몸이 떨린다.\n\n뒤를 돌아보니 개울 건너편에 <span class="eerie">무언가 서 있다</span>.',choices:[{text:'▸ 서둘러 떠난다',to:'tree_marks'}]};}
-    return{text:'개울을 건넜다.\n\n'+diceHTML(r)+'\n\n건너편에 이상한 것이 있다. 나무에 무언가 새겨져 있다.\n\n뒤에서 나뭇가지가 부러지는 소리.',choices:[{text:'▸ 뒤를 돌아본다 [관찰 판정]',to:'look_back_check'},{text:'▸ 무시하고 나무 자국을 살핀다',to:'tree_marks'}]};
-  }},
-
-  look_back_check:{text:'loading',action:async()=>{
-    const r=rollDice(13);modStat('alert',10);
-    if(r.success)return{text:'돌아봤다.\n\n'+diceHTML(r)+'\n\n안개 사이로 윤곽이 보인다. 멀리. 나무 사이에 서 있다.\n\n사슴의 형태. 하지만 너무 크다.\n\n당신을 보고 있다. 움직이지 않는다.\n\n<span class="eerie">...아직은 다가오지 않는다.</span>',choices:[{text:'▸ 나무 자국을 살핀다',to:'tree_marks'},{text:'▸ 서둘러 떠난다',to:'mid_fork'}]};
-    return{text:'돌아봤다.\n\n'+diceHTML(r)+'\n\n아무것도 없다.\n\n... 없어야 하는데. 방금 전까지 있던 개울이 없다.\n\n뒤에도 앞에도 나무뿐이다.',choices:[{text:'▸ 아무 방향으로나 걷는다',to:'mid_fork'}]};
-  }},
-
-  tree_marks:{text:'loading',action:async()=>{
-    const r=rollDice(16);
-    const item=await findAvailableItem([8,7]);
-    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'나무 자국을 살폈다.\n\n'+diceHTML(r)+'\n\n뿌리 사이에 무언가 끼어 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 더 깊이 들어간다',to:'deep_forest'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
-    return{text:'나무에 새겨진 자국을 만졌다.\n\n'+diceHTML(r)+'\n\n차갑다. 발톱 자국이다. 크다.\n\n<span class="eerie">"3"이라는 숫자가 새겨져 있다. 세 번째라는 뜻일까.</span>',choices:[{text:'▸ 더 깊이 들어간다',to:'deep_forest'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};
-  }},
-
-  rustling:{text:'소리가 나는 쪽으로 걸었다.\n\n소리가 멈췄다. 갑자기 조용해졌다. 너무 조용하다.\n\n발밑에 흙이 아닌 무언가를 밟았다. 딱딱하다.',choices:[
-    {text:'▸ 발밑을 확인한다 [수색 판정]',to:'rustling_item'},
-    {text:'▸ 소리가 멈춘 방향을 계속 간다',to:'rustling_continue'},
-    {text:'▸ 조용해진 게 불안하다. 숨는다 [은신 판정]',to:'hide_check'}
-  ]},
-
-  rustling_item:{text:'loading',action:async()=>{
-    const r=rollDice(15);
-    const item=await findAvailableItem([5,6,9,10]);
-    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'낙엽을 헤쳤다.\n\n'+diceHTML(r)+'\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 주변을 더 탐색한다',to:'rustling_continue'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
-    if(r.critFail){modStat('hp',-8);return{text:'낙엽을 헤쳤다.\n\n'+diceHTML(r)+'\n\n<span class="danger">가시덤불이었다. 손이 찢어졌다.</span>\n\n피가 낙엽 위에 떨어진다.\n\n<span class="eerie">어딘가에서 킁킁거리는 소리가 들린다. 피 냄새를 맡은 건가.</span>',choices:[{text:'▸ 서둘러 떠난다',to:'mid_fork'}]};}
-    return{text:'낙엽을 헤쳐봤다.\n\n'+diceHTML(r)+'\n\n돌멩이뿐이다.',choices:[{text:'▸ 계속 걷는다',to:'rustling_continue'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};
-  }},
-
-  rustling_continue:{text:'계속 걸었다.\n\n나무 사이로 무언가 보인다. 오래된 구조물. 오두막이다.\n\n문이 반쯤 열려 있다. 안에서 아무 소리도 나지 않는다.\n\n<span class="eerie">하지만 문고리에 손자국이 있다. 피로 된 것이다. 아직 마르지 않았다.</span>',choices:[
-    {text:'▸ 오두막 안으로 들어간다 [용기 판정]',to:'cabin'},
-    {text:'▸ 오두막 주변을 먼저 살핀다',to:'cabin_outside'},
-    {text:'▸ 오두막을 무시하고 지나간다',to:'deep_forest'}
-  ]},
-
-  narrow_path:{text:'좁은 오솔길을 걸었다. 양쪽의 나무가 터널처럼 머리 위로 휘어져 있다.\n\n<span class="eerie">나무 사이로 속삭임이 들린다. 점점 많아진다.</span>',action:async()=>{
-    modStat('sanity',-5);gDepth++;
-    const r=rollDice(16);
-    if(r.success)return{text:''+diceHTML(r)+'\n\n속삭임을 무시하고 걸었다. 길 끝에 공터가 있다.\n\n공터 한가운데 <span class="eerie">돌무더기</span>가 쌓여 있다. 의도적으로 쌓은 것이다.\n\n주변에 물건이 흩어져 있다.',choices:[
-      {text:'▸ 돌무더기를 조사한다 [수색 판정]',to:'stone_pile'},
-      {text:'▸ 흩어진 물건을 줍는다',to:'clearing_items'},
-      {text:'▸ 이상한 기분이 든다. 떠난다',to:'mid_fork'}
-    ]};
-    screenFlicker();
-    return{text:''+diceHTML(r)+'\n\n속삭임이 커진다. 알아들을 수 없는 말.\n\n<span class="eerie">하지만 한 단어만은 분명하다. 당신의 이름.</span>\n\n갑자기 길이 끝났다. 막다른 곳이다.',choices:[{text:'▸ 돌아간다',to:'mid_fork'}]};
-  }},
-
-  stone_pile:{text:'loading',action:async()=>{
-    const r=rollDice(18);gDepth++;
-    const item=await findAvailableItem([22,21,25,13]);
-    if(r.crit&&item){const c=await claimItemById(item.id);triggerScare(1);
-    return{text:'돌무더기를 살폈다.\n\n'+diceHTML(r)+'\n\n돌 사이에서 무언가 빛났다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n<span class="danger">돌무더기가 무너지면서 아래에서 뼈가 나왔다. 사람의 뼈.</span>',choices:[{text:'▸ 서둘러 떠난다',to:'deep_forest'}]};}
-    if(r.success)return{text:'돌무더기를 살폈다.\n\n'+diceHTML(r)+'\n\n돌 표면에 기호가 새겨져 있다. 사슴 뿔 모양.\n\n<span class="eerie">"숲은 기억한다"라고 읽을 수 있다.</span>',choices:[{text:'▸ 물건을 살핀다',to:'clearing_items'},{text:'▸ 떠난다',to:'deep_forest'}]};
-    modStat('sanity',-10);return{text:'돌무더기에 손을 대는 순간—\n\n'+diceHTML(r)+'\n\n<span class="danger">머리가 아프다. 기억이 흐려진다.</span>\n\n자기 이름이 뭐였는지 잠시 잊었다.',choices:[{text:'▸ 정신을 차리고 떠난다',to:'mid_fork'}]};
-  }},
-
-  clearing_items:{text:'loading',action:async()=>{
-    const r=rollDice(16);
-    const item=await findAvailableItem([11,12,14,15,19,20]);
-    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'흩어진 물건을 살폈다.\n\n'+diceHTML(r)+'\n\n대부분은 부서져 쓸 수 없다. 하지만 하나—\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 더 깊이 들어간다',to:'deep_forest'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
-    return{text:'물건을 살폈다.\n\n'+diceHTML(r)+'\n\n쓸 만한 것은 없다. 전부 부서져 있다.\n\n이전에 누군가 여기서 무언가를 했다. 좋은 일은 아니었을 것이다.',choices:[{text:'▸ 떠난다',to:'deep_forest'}]};
-  }},
-
-  climb_tree:{text:'loading',action:async()=>{
-    const r=rollDice(14);
-    if(r.success){modStat('sanity',-5);return{text:'나무에 올라갔다.\n\n'+diceHTML(r)+'\n\n높이 올라가자 숲의 윤곽이 보인다. 안개가 바다처럼 깔려 있다.\n\n<span class="eerie">숲에 끝이 없다. 어느 방향을 봐도 나무뿐이다.</span>\n\n하지만 한 곳, 안개가 유독 짙은 곳이 있다. 그리고 그 안에서—\n\n<span class="danger">초록빛이 올려다보고 있다. 당신을 찾았다.</span>',choices:[{text:'▸ 서둘러 내려간다',to:'mid_fork'},{text:'▸ 나무 위에서 주변을 더 살핀다',to:'tree_top_search'}]};}
-    modStat('hp',-15);return{text:'나무에 올라가려 했다.\n\n'+diceHTML(r)+'\n\n<span class="danger">가지가 부러졌다. 떨어졌다.</span>\n\n등을 세게 부딪혔다. 아프다.',choices:[{text:'▸ 일어나서 걷는다',to:'mid_fork'}]};
-  }},
-
-  tree_top_search:{text:'loading',action:async()=>{
-    const r=rollDice(16);modStat('alert',20);
-    const item=await findAvailableItem([25,22,13]);
-    if(r.success&&item){const c=await claimItemById(item.id);return{text:'나무 위에서 주변을 살폈다.\n\n'+diceHTML(r)+'\n\n가지 사이에 무언가 걸려 있다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n<span class="danger">아래에서 발굽 소리가 들린다. 나무 아래로 온 것 같다.</span>',choices:[{text:'▸ 조용히 기다린다',to:'tree_wait'},{text:'▸ 다른 나무로 옮겨간다 [체력 판정]',to:'tree_jump'}]};}
-    triggerScare(1.5);return{text:'나무 위에서 주변을 살피는 순간—\n\n'+diceHTML(r)+'\n\n<span class="danger">나무가 흔들린다. 아래에서 무언가가 나무를 밀고 있다.</span>',choices:[{text:'▸ 매달린다!',to:'tree_hold'}]};
-  }},
-
-  tree_wait:{text:'loading',action:async()=>{
-    const r=rollDice(14);modStat('sanity',-10);
-    if(r.success){modStat('alert',-15);return{text:'숨을 죽이고 기다렸다.\n\n'+diceHTML(r)+'\n\n발굽 소리가 나무 주변을 맴돈다. 1분. 2분.\n\n...떠났다. 소리가 멀어진다.\n\n<span class="eerie">하지만 나무 껍질에 새로운 발톱 자국이 있다.</span>',choices:[{text:'▸ 내려간다',to:'deep_forest'}]};}
-    triggerScare(1.5);return{text:'기다렸다.\n\n'+diceHTML(r)+'\n\n소리가 멈췄다.\n\n<span class="danger">나무 위로 올려다보는 초록빛 눈과 눈이 마주쳤다.</span>',choices:[{text:'▸ 뛰어내린다!',to:'run_panic'}]};
-  }},
-
-  tree_jump:{text:'loading',action:async()=>{
-    const r=rollDice(15);
-    if(r.success)return{text:'옆 나무로 뛰었다.\n\n'+diceHTML(r)+'\n\n가지를 잡았다. 간신히 매달렸다.\n\n아래에서 무언가가 지나갔다.',choices:[{text:'▸ 내려간다',to:'mid_fork'}]};
-    modStat('hp',-20);return{text:'뛰었다.\n\n'+diceHTML(r)+'\n\n<span class="danger">놓쳤다. 떨어졌다.</span>\n\n땅에 부딪혔다. 온몸이 아프다.',choices:[{text:'▸ 기어서라도 움직인다',to:'mid_fork'}]};
-  }},
-
-  tree_hold:{text:'loading',action:async()=>{
-    const r=rollDice(13);
-    if(r.success){return{text:'나무에 매달렸다.\n\n'+diceHTML(r)+'\n\n흔들림이 멈췄다. 무언가가 떠났다.\n\n조심히 내려왔다.',choices:[{text:'▸ 서둘러 이동한다',to:'mid_fork'}]};}
-    modStat('hp',-10);return{text:''+diceHTML(r)+'\n\n<span class="danger">손이 미끄러졌다. 떨어졌다.</span>',choices:[{text:'▸ 일어난다',to:'mid_fork'}]};
-  }},
-
-  rest_check:{text:'loading',action:async()=>{
-    const r=rollDice(10);
-    if(r.success){modStat('hp',10);modStat('sanity',5);return{text:'잠시 쉬었다.\n\n'+diceHTML(r)+'\n\n숨이 가라앉는다. 상처를 살폈다. 심하지는 않다.',choices:[{text:'▸ 일어나서 탐색한다',to:'ravine'}]};}
-    modStat('alert',15);screenFlicker();return{text:'쉬려고 앉았다.\n\n'+diceHTML(r)+'\n\n눈을 감은 순간 <span class="eerie">속삭임이 귓가에서 들렸다.</span>\n\n쉴 수 없다. 이 숲에서는.',choices:[{text:'▸ 일어난다',to:'ravine'}]};
-  }},
-
-  ravine:{text:'비탈을 내려온 곳이다. 좁은 협곡처럼 생겼다.\n\n양쪽이 높은 절벽이고, 한쪽으로만 갈 수 있다.\n\n바닥에 물이 얕게 흐른다. 발자국이 있다. 사슴의 것. 그리고 사람의 것.',choices:[
-    {text:'▸ 발자국을 따라간다',to:'follow_tracks'},
-    {text:'▸ 반대 방향으로 간다',to:'deep_forest'},
-    {text:'▸ 절벽을 기어오른다 [체력 판정]',to:'climb_ravine'}
-  ]},
-
-  follow_tracks:{text:'loading',action:async()=>{
-    gDepth++;modStat('alert',10);
-    const r=rollDice(16);
-    if(r.success){return{text:'발자국을 따라갔다.\n\n'+diceHTML(r)+'\n\n사람의 발자국이 멈춘 곳이 있다. 옆에 무언가 떨어져 있다.\n\n<span class="eerie">그리고 사슴 발자국만 계속된다.</span>\n\n사람은... 여기서 사라진 것이다.',choices:[{text:'▸ 떨어진 것을 살핀다 [수색 판정]',to:'track_item'},{text:'▸ 더 깊이 간다',to:'deep_forest'}]};}
-    return{text:'발자국을 따라갔다.\n\n'+diceHTML(r)+'\n\n발자국이 갑자기 사라졌다. 양쪽 다.\n\n<span class="eerie">마치 공중으로 들어올려진 것처럼.</span>',choices:[{text:'▸ 계속 간다',to:'deep_forest'}]};
-  }},
-
-  track_item:{text:'loading',action:async()=>{
-    const r=rollDice(16);
-    const item=await findAvailableItem([4,8,16,23,11,12]);
-    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'떨어진 것을 살폈다.\n\n'+diceHTML(r)+'\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n이전 탐색자의 것이었을 것이다.',choices:[{text:'▸ 더 깊이 간다',to:'deep_forest'},{text:'▸ 돌아간다',to:'mid_fork'}]};}
-    return{text:'살폈지만 쓸 만한 것은 없었다.\n\n'+diceHTML(r),choices:[{text:'▸ 계속 간다',to:'deep_forest'}]};
-  }},
-
-  climb_ravine:{text:'loading',action:async()=>{
-    const r=rollDice(16);
-    if(r.success){return{text:'절벽을 기어올랐다.\n\n'+diceHTML(r)+'\n\n힘들었지만 올라왔다. 위에서 보니 숲이 다르게 보인다.\n\n멀리 오두막의 지붕이 보인다.',choices:[{text:'▸ 오두막으로 간다',to:'cabin_approach'},{text:'▸ 반대쪽으로 간다',to:'inverted_forest'}]};}
-    modStat('hp',-12);return{text:'기어올라가다가—\n\n'+diceHTML(r)+'\n\n<span class="danger">발이 미끄러졌다. 다시 바닥으로.</span>',choices:[{text:'▸ 다른 길로 간다',to:'deep_forest'}]};
-  }},
-
-  inverted_forest:{text:'이상한 곳에 도착했다.\n\n<span class="eerie">나무가 거꾸로 자라고 있다.</span> 뿌리가 하늘을 향하고, 가지가 땅에 박혀 있다.\n\n공기가 무겁다. 안개가 위에서 아래로 내려온다.\n\n여기에 오래 있으면 안 될 것 같다.',action:async()=>{
-    modStat('sanity',-15);gDepth++;screenFlicker();
-    const item=await findAvailableItem([25,22,21]);
-    if(item){const c=await claimItemById(item.id);if(c)return{text:'거꾸로 된 나무 사이에서 무언가 빛난다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n<span class="danger">나무의 뿌리가... 움직이고 있다.</span>',choices:[{text:'▸ 서둘러 떠난다',to:'deep_forest'},{text:'▸ 숲에서 나간다',to:'ending'}]};}
-    return{text:'거꾸로 된 나무 사이를 걸었다. 쓸 만한 것은 없다.\n\n<span class="danger">발밑에서 뿌리가 발목을 감으려 한다.</span>',choices:[{text:'▸ 뛴다!',to:'deep_forest'}]};
-  }},
-
-  cabin_approach:{text:'오두막이 보인다. 낡고 기울어져 있다.\n\n창문이 하나 있다. 안이 어둡다.\n\n문 앞에 사슴 뿔이 걸려 있다.',choices:[
-    {text:'▸ 문을 열고 들어간다',to:'cabin'},
-    {text:'▸ 창문으로 안을 들여다본다 [관찰 판정]',to:'cabin_peek'},
-    {text:'▸ 오두막 뒤를 살핀다',to:'cabin_outside'}
-  ]},
-
-  cabin_peek:{text:'loading',action:async()=>{
+  forest_stream_item:{text:'loading',action:async()=>{
     const r=rollDice(12);
-    if(r.critFail){triggerScare(2.5);modStat('sanity',-20);return{text:'창문에 얼굴을 가까이 가져갔다.\n\n'+diceHTML(r)+'\n\n<span class="danger">안쪽에서도 얼굴이 다가왔다.</span>\n\n초록빛 눈. 유리 바로 너머에.\n\n비명을 질렀다.',choices:[{text:'▸ 도망친다!',to:'run_panic'}]};}
-    if(r.success)return{text:'창문으로 안을 들여다봤다.\n\n'+diceHTML(r)+'\n\n먼지가 두껍다. 선반, 의자, 벽에 새겨진 글씨가 보인다.\n\n<span class="eerie">안전해 보인다. 지금은.</span>',choices:[{text:'▸ 들어간다',to:'cabin'},{text:'▸ 뒤를 살핀다',to:'cabin_outside'}]};
-    return{text:'창문이 너무 더러워서 안이 보이지 않는다.\n\n'+diceHTML(r),choices:[{text:'▸ 들어간다',to:'cabin'},{text:'▸ 뒤를 살핀다',to:'cabin_outside'}]};
+    const item=await findAvailableItem([7,8,11,12,14]);
+    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'개울 옆에 웅크려 손을 뻗었다.\n\n'+diceHTML(r)+'\n\n낡은 천 아래에 무언가 숨겨져 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n건너편을 다시 올려다봤을 때, 서 있던 인물은 사라져 있었다.',choices:[{text:'▸ 개울을 따라 더 걷는다',to:'mid_fork'},{text:'▸ 숲 안쪽으로 들어간다',to:'deep_forest'}]};}
+    return{text:'개울 옆을 살폈다.\n\n'+diceHTML(r)+'\n\n젖은 천 조각이었다. 쓸 만한 것은 아니었다.\n\n건너편의 인물이 고개를 살짝 기울였다. 천천히. 비정상적인 각도로.',choices:[{text:'▸ 그 자리를 떠난다',to:'mid_fork'},{text:'▸ 건너편으로 건넌다 [체력 판정]',to:'forest_stream_cross'}]};
   }},
 
-  cabin:{text:'loading',action:async()=>{
-    const r=rollDice(11);
-    return{text:'오두막 안이다.\n\n먼지가 두껍다. 누군가 살았던 흔적이 있다.\n\n벽에 글씨가 새겨져 있다.\n\n<span class="eerie">"돌아보지 마."</span>\n<span class="eerie">"그것의 눈을 보면 움직일 수 없다."</span>\n<span class="eerie">"3일째. 이름이 기억나지 않는다."</span>\n\n방 안에 몇 가지 물건이 보인다.',choices:[
-      {text:'▸ 물건을 뒤진다 [수색 판정]',to:'cabin_item'},
-      {text:'▸ 마지막 줄을 해독한다 [관찰 판정]',to:'cabin_last_line'},
-      {text:'▸ 오두막을 나간다',to:'deep_forest'}
-    ]};
+  forest_stream_talk:{text:'건너편을 향해 입을 열었다.\n\n"...여기 누구—"\n\n말을 채 끝내기 전에, 그것이 웃었다. 소리는 나지 않았다. 입이 양쪽으로 찢어지듯 벌어졌고, 안개 속에서 이빨 같은 것이 희미하게 빛났다.\n\n<span class="eerie">그것이 한 발 앞으로 나왔다. 물 위를 밟고 있었다. 발이 수면에 닿지 않았다.</span>',action:async()=>{
+    modStat('sanity',-10);triggerScare(1);
+    return{text:'건너편을 향해 말을 걸었다.\n\n그것이 웃었다. 소리 없이. 입이 양쪽으로 찢어지듯 벌어졌다.\n\n<span class="eerie">한 발 앞으로 나왔다. 물 위를 밟고 있었다.</span>',choices:[{text:'▸ 뒤돌아 도망친다',to:'forest_run'},{text:'▸ 눈을 마주한 채 뒤로 물러난다 [의지 판정]',to:'forest_stream_resist'}]};
   }},
 
-  cabin_last_line:{text:'loading',action:async()=>{
-    const r=rollDice(18);modStat('sanity',-5);
-    if(r.success)return{text:'긁어서 지워진 마지막 줄을 해독하려 했다.\n\n'+diceHTML(r)+'\n\n<span class="eerie">"...먹이를 준비한다. 자신도 모르게. 숲이 시키는 대로."</span>\n\n그 아래에 사슴 뿔 모양이 그려져 있다. 그 안에 사람 모양이 있다.',choices:[{text:'▸ 물건을 뒤진다',to:'cabin_item'},{text:'▸ 나간다',to:'deep_forest'}]};
-    return{text:'마지막 줄을 해독하려 했다.\n\n'+diceHTML(r)+'\n\n읽을 수 없다. 너무 많이 긁혀 있다.',choices:[{text:'▸ 물건을 뒤진다',to:'cabin_item'},{text:'▸ 나간다',to:'deep_forest'}]};
+  forest_stream_resist:{text:'loading',action:async()=>{
+    const r=rollDice(15);modStat('sanity',-5);
+    if(r.success){return{text:'시선을 떼지 않은 채 천천히 물러났다.\n\n'+diceHTML(r)+'\n\n그것이 멈췄다. 고개를 다시 기울였다. 반대쪽으로. 그리고 천천히 안개 속으로 녹아들었다.\n\n심장이 빠르게 뛰었다. 하지만 살아 있었다.',choices:[{text:'▸ 서둘러 자리를 뜬다',to:'mid_fork'}]};}
+    triggerScare(1.5);modStat('hp',-10);
+    return{text:'물러나려 했지만 발이 움직이지 않았다.\n\n'+diceHTML(r)+'\n\n<span class="danger">그것이 코앞까지 왔다. 차가운 손이 볼을 스쳤다.</span>\n\n...정신이 돌아왔을 때, 그것은 없었다. 볼에 긁힌 자국만 남아 있었다.',choices:[{text:'▸ 비틀거리며 떠난다',to:'mid_fork'}]};
   }},
 
-  cabin_item:{text:'loading',action:async()=>{
-    const r=rollDice(16);
-    const item=await findAvailableItem([4,8,16,23]);
-    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'선반을 뒤졌다.\n\n'+diceHTML(r)+'\n\n먼지 아래에 무언가 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 오두막을 나간다',to:'deep_forest'}]};}
-    if(r.critFail){triggerScare(1.5);return{text:'선반을 뒤지다가—\n\n'+diceHTML(r)+'\n\n<span class="danger">선반이 무너졌다. 먼지가 피어오르고 그 사이로—</span>\n\n<span class="eerie">선반 뒤 벽에 사슴 뿔이 박혀 있었다. 진짜 뿔이다. 피가 아직 굳지 않았다.</span>',choices:[{text:'▸ 나간다',to:'deep_forest'}]};}
-    return{text:'물건을 뒤져봤지만 쓸 만한 것은 없었다.\n\n'+diceHTML(r),choices:[{text:'▸ 나간다',to:'deep_forest'}]};
+  forest_stream_cross:{text:'loading',action:async()=>{
+    const r=rollDice(13);
+    if(r.success){return{text:'개울에 발을 디뎠다. 물이 차가웠지만 깊지는 않았다.\n\n'+diceHTML(r)+'\n\n건너편에 도착했다. 서 있던 인물은 이미 없었다. 대신 발자국이 남아 있었다. 맨발이었고, 발가락이 다섯 개가 아니었다.',choices:[{text:'▸ 발자국을 따라간다',to:'deep_forest'},{text:'▸ 반대쪽으로 간다',to:'mid_fork'}]};}
+    modStat('hp',-8);return{text:'개울에 발을 디뎠다. 바닥이 미끄러웠다.\n\n'+diceHTML(r)+'\n\n발이 빠지면서 물속에 넘어졌다. 물이 생각보다 차가웠고, 무릎을 돌에 부딪혔다.\n\n겨우 일어났을 때, 건너편에는 아무도 없었다.',choices:[{text:'▸ 젖은 채로 숲 안쪽으로 간다',to:'mid_fork'}]};
   }},
 
-  cabin_outside:{text:'loading',action:async()=>{
-    const r=rollDice(16);
-    const item=await findAvailableItem([9,10,5,6]);
-    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'오두막 뒤편을 살폈다.\n\n'+diceHTML(r)+'\n\n풀 사이에 무언가 있다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 안으로 들어간다',to:'cabin'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
-    return{text:'오두막 주변을 둘러봤다.\n\n'+diceHTML(r)+'\n\n특별한 것은 없었다. 하지만—\n\n<span class="eerie">오두막 뒤에 무덤 같은 흙더미가 있다. 하나가 아니다. 여러 개.</span>',choices:[{text:'▸ 안으로 들어간다',to:'cabin'},{text:'▸ 떠난다',to:'mid_fork'}]};
-  }},
-
-  // ─── ACT 3: DEEP FOREST ───
-  approach_deer:{text:'다가갔다. 한 발, 두 발.\n\n초록빛이 사라졌다. 있던 자리에 아무것도 없다.\n\n대신 발밑에 무언가 떨어져 있다. 사슴의 발자국.',choices:[
-    {text:'▸ 발자국 옆의 물건을 줍는다 [수색 판정]',to:'deer_item'},
-    {text:'▸ 발자국을 따라간다',to:'deep_forest'}
+  // — 안개 숲 2: 소리 쪽으로 다가감 —
+  forest_approach:{text:'소리를 향해 천천히 걸었다. 숨을 죽이고, 발소리를 최대한 줄이며.\n\n나무 사이로 무언가가 서 있었다. 사람의 형태였다. 하지만 움직이지 않았다. 축 늘어진 팔, 앞으로 숙인 고개. 맨발이었고, 발끝이 땅에 닿아 있지 않았다.\n\n공중에 떠 있었다. 머리카락 사이로 하얀 숨이 새어 나왔다.',choices:[
+    {text:'▸ 더 가까이 다가간다',to:'forest_approach_close'},
+    {text:'▸ 그대로 뒤로 물러난다 [은신 판정]',to:'forest_approach_retreat'},
+    {text:'▸ 발밑에 떨어진 것을 줍는다 [수색 판정]',to:'forest_approach_item'}
   ]},
 
-  deer_item:{text:'loading',action:async()=>{
-    const r=rollDice(17);
-    const item=await findAvailableItem([13,18,25,7,8,4]);
-    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'발자국 옆을 살폈다.\n\n'+diceHTML(r)+'\n\n이끼 사이에 무언가 빛나고 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 발자국을 따라간다',to:'deep_forest'},{text:'▸ 다른 곳으로',to:'mid_fork'}]};}
-    return{text:'발자국 옆을 살폈다.\n\n'+diceHTML(r)+'\n\n아무것도 없다. 발자국만.',choices:[{text:'▸ 계속 간다',to:'deep_forest'}]};
+  forest_approach_close:{text:'한 발 더 다가갔다. 그리고 한 발 더.\n\n그것의 머리가 천천히 올라왔다. 얼굴이 보였다. 눈이 없었다. 눈이 있어야 할 자리에 나무껍질 같은 것이 자라나 있었다.\n\n<span class="eerie">입이 움직였다. 소리가 나지 않았지만, 입 모양을 읽을 수 있었다. "도...망...쳐..."</span>',action:async()=>{
+    modStat('sanity',-12);triggerScare(1);
+    return{text:'한 발 더 다가갔다.\n\n그것의 머리가 올라왔다. 눈이 없었다. 나무껍질이 자라나 있었다.\n\n<span class="eerie">입이 움직였다. "도...망...쳐..."</span>',choices:[{text:'▸ 도망친다',to:'forest_run'},{text:'▸ "누구야"라고 묻는다',to:'forest_approach_ask'}]};
   }},
 
-  mid_fork:{text:'숲 한가운데. 어느 방향에서 왔는지 기억나지 않는다.\n\n길이 여러 갈래로 갈라져 있다.',choices:[
+  forest_approach_ask:{text:'"누구야."\n\n그것이 고개를 옆으로 꺾었다. 한쪽으로. 더. 더.\n\n<span class="danger">목이 꺾이는 소리가 났다. 그런데도 멈추지 않았다.</span>\n\n입이 다시 움직였다. 이번엔 소리가 들렸다. 낮고, 갈라진 목소리.\n\n<span class="eerie">"...여기서... 나가지... 못해..."</span>',action:async()=>{
+    modStat('sanity',-8);
+    return{text:'"누구야"라고 물었다.\n\n그것의 목이 꺾이는 소리가 났다. 멈추지 않았다.\n\n<span class="eerie">"...여기서... 나가지... 못해..."</span>',choices:[{text:'▸ 서둘러 떠난다',to:'mid_fork'},{text:'▸ "어떻게 하면 나갈 수 있어?"',to:'forest_approach_hint'}]};
+  }},
+
+  forest_approach_hint:{text:'loading',action:async()=>{
+    modStat('sanity',-5);
+    return{text:'"어떻게 하면 나갈 수 있어?"\n\n그것이 팔을 들었다. 천천히. 숲의 깊은 곳을 가리켰다.\n\n<span class="eerie">"...제단... 제단에... 가지... 마..."</span>\n\n그리고 안개 속으로 사라졌다. 가리킨 방향에서 희미한 빛이 깜빡이고 있었다.',choices:[{text:'▸ 가리킨 방향으로 간다',to:'deep_forest'},{text:'▸ 반대쪽으로 간다',to:'mid_fork'}]};
+  }},
+
+  forest_approach_retreat:{text:'loading',action:async()=>{
+    const r=rollDice(12);
+    if(r.success){return{text:'숨을 죽이고 천천히 뒤로 물러났다.\n\n'+diceHTML(r)+'\n\n그것은 눈치채지 못한 것 같았다. 여전히 공중에 떠 있었고, 머리카락 사이로 하얀 숨이 새어 나오고 있었다.\n\n충분히 멀어졌을 때 등을 돌렸다.',choices:[{text:'▸ 다른 방향으로 간다',to:'mid_fork'}]};}
+    modStat('sanity',-8);triggerScare(1);
+    return{text:'뒤로 물러나려는 순간 발밑에서 나뭇가지가 부러졌다.\n\n'+diceHTML(r)+'\n\n<span class="danger">그것의 머리가 돌아갔다. 정확히 이쪽을 향해.</span>\n\n눈이 없는 얼굴이 이쪽을 보고 있었다.',choices:[{text:'▸ 도망친다',to:'forest_run'},{text:'▸ 그 자리에서 얼어붙는다',to:'forest_freeze'}]};
+  }},
+
+  forest_approach_item:{text:'loading',action:async()=>{
+    const r=rollDice(14);
+    const item=await findAvailableItem([13,18,25,4,8]);
+    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'시선을 그것에게 고정한 채 천천히 웅크렸다. 손끝으로 바닥을 더듬었다.\n\n'+diceHTML(r)+'\n\n무언가 손에 잡혔다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n다시 올려다보니 그것은 사라져 있었다.',choices:[{text:'▸ 숲 안쪽으로 간다',to:'deep_forest'},{text:'▸ 다른 곳으로 간다',to:'mid_fork'}]};}
+    return{text:'시선을 고정한 채 바닥을 더듬었다.\n\n'+diceHTML(r)+'\n\n낙엽뿐이었다. 쓸 만한 것은 없었다.\n\n올려다보니 그것이 조금 더 가까이 와 있었다.',choices:[{text:'▸ 서둘러 떠난다',to:'mid_fork'}]};
+  }},
+
+  // — 안개 숲 3: 주변을 살핌 —
+  forest_observe:{text:'움직이지 않고 서서 주변을 살폈다. 눈이 어둠에 천천히 적응하기 시작했다.\n\n왼쪽에서 희미한 물소리가 들렸고, 정면으로는 낡은 구조물의 윤곽이 보였다. 오두막 같았다.\n\n그리고 오른쪽 나무 아래에 누군가 웅크리고 앉아 있었다. 두 팔로 무릎을 감싸고, 얼굴을 파묻은 채. 미세하게 어깨가 떨리고 있었다. 울고 있는 것 같기도 했다.',choices:[
+    {text:'▸ 웅크린 사람에게 다가간다',to:'forest_crying'},
+    {text:'▸ 오두막 쪽으로 간다',to:'cabin_approach'},
+    {text:'▸ 물소리 쪽으로 간다',to:'forest_stream'}
+  ]},
+
+  forest_crying:{text:'조심스럽게 다가갔다. 가까이 갈수록 떨림이 선명해졌다.\n\n"...괜찮아?"\n\n떨림이 멈췄다. 천천히 고개가 올라왔다.\n\n얼굴이 있어야 할 자리에 아무것도 없었다. 매끈한 피부만이 이마에서 턱까지 이어져 있었다. 눈도, 코도, 입도 없었다.\n\n<span class="eerie">그런데 울음소리는 계속 들리고 있었다. 그것에게서가 아니었다. 뒤에서.</span>',action:async()=>{
+    modStat('sanity',-15);triggerScare(1.5);
+    return{text:'다가갔다. 고개가 올라왔다.\n\n얼굴이 없었다. 매끈한 피부만.\n\n<span class="eerie">울음소리는 뒤에서 들리고 있었다.</span>',choices:[{text:'▸ 뒤를 돌아본다',to:'forest_behind'},{text:'▸ 돌아보지 않고 도망친다',to:'forest_run'}]};
+  }},
+
+  forest_behind:{text:'loading',action:async()=>{
+    triggerScare(2);modStat('sanity',-10);modStat('hp',-5);
+    return{text:'돌아봤다.\n\n<span class="danger">바로 뒤에 서 있었다. 같은 얼굴. 아니, 같은 없는 얼굴. 하나가 아니었다. 셋이었다. 나란히.</span>\n\n가운데 것이 팔을 뻗었다. 차가운 손끝이 이마를 스쳤다.',choices:[{text:'▸ 도망친다',to:'forest_run'},{text:'▸ 손을 뿌리친다 [근력 판정]',to:'forest_shove'}]};
+  }},
+
+  forest_shove:{text:'loading',action:async()=>{
+    const r=rollDice(14);
+    if(r.success){modStat('alert',10);return{text:'손을 뿌리쳤다.\n\n'+diceHTML(r)+'\n\n차가운 손이 물러났다. 그것들이 동시에 고개를 기울였다. 같은 방향, 같은 각도로.\n\n그리고 천천히 뒤로 물러났다. 안개 속으로.',choices:[{text:'▸ 서둘러 떠난다',to:'mid_fork'}]};}
+    modStat('hp',-10);return{text:'손을 뿌리치려 했지만 잡혔다.\n\n'+diceHTML(r)+'\n\n<span class="danger">차가운 손이 손목을 감쌌다. 힘이 빠져나가는 느낌이 들었다.</span>\n\n겨우 빼냈을 때 손목이 시렸다.',choices:[{text:'▸ 도망친다',to:'forest_run'}]};
+  }},
+
+  // — 안개 숲 4: 나무 위로 올라감 —
+  forest_climb:{text:'loading',action:async()=>{
+    const r=rollDice(14);
+    if(r.success){return{text:'가지를 붙잡고 올라갔다. 팔이 떨렸지만 겨우 높은 가지 위에 걸터앉았다.\n\n'+diceHTML(r)+'\n\n위에서 보니 주변이 조금 보였다. 안개 너머로 숲이 끝없이 이어져 있었고, 왼쪽으로 물이 반짝이는 곳이 있었다. 오른쪽에는 땅이 꺼진 곳이 보였다. 동굴 입구 같기도 했다.\n\n그리고 바로 아래, 안개 속을 누군가가 천천히 지나가고 있었다. 발소리가 없었다. 맨발이었고, 걷는 것이 아니라 미끄러지듯 움직이고 있었다.',choices:[{text:'▸ 물이 반짝이는 쪽으로 간다',to:'lake_enter'},{text:'▸ 동굴 입구 쪽으로 간다',to:'cave_enter'},{text:'▸ 아래의 존재가 지나갈 때까지 기다린다',to:'forest_climb_wait'}]};}
+    modStat('hp',-8);return{text:'가지를 붙잡았지만 손이 미끄러졌다. 등이 나무껍질에 긁히면서 떨어졌다.\n\n'+diceHTML(r)+'\n\n바닥에 부딪히는 소리가 숲에 울렸다. 너무 컸다. 주변의 공기가 달라졌다. 무언가가 이쪽을 인식한 느낌이었다.\n\n안개 속에서 발소리 없는 기척이 가까워지고 있었다.',choices:[{text:'▸ 일어나서 달린다',to:'forest_run'},{text:'▸ 엎드린 채로 숨을 죽인다 [은신 판정]',to:'forest_prone_hide'}]};
+  }},
+
+  forest_climb_wait:{text:'loading',action:async()=>{
+    modStat('sanity',-5);
+    const item=await findAvailableItem([15,19,20,16]);
+    if(item){const c=await claimItemById(item.id);if(c)return{text:'숨을 죽이고 기다렸다. 아래의 존재가 천천히 지나갔다.\n\n지나간 자리에 무언가 떨어져 있었다. 나무에서 내려와 주워봤다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 숲 안쪽으로 간다',to:'mid_fork'}]};}
+    return{text:'숨을 죽이고 기다렸다. 아래의 존재가 천천히 지나갔다.\n\n한참이 지난 뒤 나무에서 내려왔다. 주변은 고요했다.',choices:[{text:'▸ 숲 안쪽으로 간다',to:'mid_fork'}]};
+  }},
+
+  forest_prone_hide:{text:'loading',action:async()=>{
+    const r=rollDice(13);
+    if(r.success){return{text:'엎드린 채 숨을 죽였다. 낙엽 냄새가 코를 찔렀다.\n\n'+diceHTML(r)+'\n\n기척이 가까이 왔다가... 지나갔다. 맨발이 낙엽을 밟는 소리가 멀어졌다.\n\n한참 뒤에 일어났다.',choices:[{text:'▸ 조용히 이동한다',to:'mid_fork'}]};}
+    triggerScare(1.5);modStat('sanity',-10);
+    return{text:'엎드렸지만 심장 소리가 너무 컸다.\n\n'+diceHTML(r)+'\n\n<span class="danger">발 없는 그림자가 바로 옆에 멈춰 섰다. 차가운 기운이 등을 훑고 지나갔다.</span>',choices:[{text:'▸ 그대로 버틴다',to:'mid_fork'},{text:'▸ 벌떡 일어나 도망친다',to:'forest_run'}]};
+  }},
+
+  // — 공통: 도망 —
+  forest_run:{text:'loading',action:async()=>{
+    modStat('hp',-5);modStat('alert',10);
+    return{text:'뛰었다. 생각할 겨를이 없었다.\n\n나뭇가지가 얼굴을 스쳤다. 발이 뿌리에 걸렸다. 넘어질 뻔했지만 겨우 중심을 잡았다.\n\n얼마나 달렸을까. 숨이 턱까지 차올랐을 때, 주변이 조금 달라져 있었다.',choices:[{text:'▸ 멈춰서 주변을 살핀다',to:'mid_fork'}]};
+  }},
+
+  forest_freeze:{text:'loading',action:async()=>{
+    modStat('sanity',-8);
+    return{text:'몸이 굳었다. 움직일 수 없었다.\n\n그것이 천천히 다가왔다. 코앞까지. 숨결이 느껴졌다. 차가웠다.\n\n...얼마나 지났을까. 정신이 돌아왔을 때 그것은 없었다.',choices:[{text:'▸ 비틀거리며 이동한다',to:'mid_fork'}]};
+  }},
+
+  // ═══════════════════════════════════
+  // ZONE B: 늪지대 (SWAMP)
+  // ═══════════════════════════════════
+  swamp_enter:{text:'낮은 지대로 내려서자 공기가 무거워졌다. 발밑이 질척거리기 시작하더니 이내 발목까지 물이 차올랐다.\n\n고여 있는 물 위로 죽은 나무들이 비틀어진 채 서 있었다. 썩은 풀 냄새가 숨을 쉴 때마다 목 안쪽까지 파고들었고, 수면은 너무 고요했다.\n\n그런데 어딘가에서 거품이 올라오고 있었다. 느리게, 일정하게. 무언가 밑에서 숨을 쉬고 있는 것처럼.',choices:[
+    {text:'▸ 거품이 올라오는 쪽으로 다가간다',to:'swamp_bubble'},
+    {text:'▸ 물 밖으로 나갈 수 있는 마른 땅을 찾는다',to:'swamp_shore'},
+    {text:'▸ 수면 아래에서 빛나는 것에 손을 뻗는다 [용기 판정]',to:'swamp_light'},
+    {text:'▸ 죽은 나무를 붙잡고 높은 곳으로 올라간다 [체력 판정]',to:'swamp_climb'}
+  ]},
+
+  swamp_bubble:{text:'거품이 올라오는 쪽으로 조심스럽게 다가갔다. 물이 무릎까지 차올랐다.\n\n가까이 갈수록 냄새가 심해졌다. 거품은 일정한 간격으로 올라오고 있었다. 숨을 쉬는 것처럼.\n\n수면 바로 아래에 무언가 있었다. 희끗한 것이 물속에 잠겨 있었다. 사람의 손 같았다. 손가락이 천천히 움직이고 있었다.',choices:[
+    {text:'▸ 손을 잡아본다 [용기 판정]',to:'swamp_grab_hand'},
+    {text:'▸ 뒤로 물러난다',to:'swamp_shore'},
+    {text:'▸ 물속을 더 자세히 들여다본다',to:'swamp_look_deep'}
+  ]},
+
+  swamp_grab_hand:{text:'loading',action:async()=>{
+    const r=rollDice(16);modStat('sanity',-8);
+    const item=await findAvailableItem([7,8,11,16,25]);
+    if(r.success){
+      if(item){const c=await claimItemById(item.id);if(c)return{text:'손을 뻗어 그것을 잡았다. 차가웠다. 살아 있는 사람의 온도가 아니었다.\n\n'+diceHTML(r)+'\n\n손이 천천히 열렸다. 안에 무언가를 쥐고 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n손이 다시 물속으로 가라앉았다. 거품이 멈췄다.',choices:[{text:'▸ 마른 땅을 찾는다',to:'swamp_shore'},{text:'▸ 늪 안쪽으로 더 간다',to:'mid_fork'}]};}
+      return{text:'손을 잡았다. 텅 비어 있었다.\n\n'+diceHTML(r)+'\n\n손이 천천히 물러났다. 거품이 멈췄다.',choices:[{text:'▸ 마른 땅을 찾는다',to:'swamp_shore'}]};
+    }
+    triggerScare(1.5);modStat('hp',-10);
+    return{text:'손을 뻗었다. 그것이 손목을 잡았다.\n\n'+diceHTML(r)+'\n\n<span class="danger">차갑고 미끄러운 손이 아래로 끌어당겼다. 물이 가슴까지 차올랐다.</span>\n\n억지로 빼냈다. 손목에 붉은 자국이 남아 있었다.',choices:[{text:'▸ 서둘러 빠져나간다',to:'swamp_shore'}]};
+  }},
+
+  swamp_look_deep:{text:'loading',action:async()=>{
+    modStat('sanity',-12);triggerScare(1);
+    return{text:'물속을 들여다봤다.\n\n손 아래로 팔이 있었다. 어깨가 있었다. 그리고 — 얼굴이 있었다. 눈을 뜨고 있었다. 이쪽을 올려다보고 있었다.\n\n<span class="eerie">입이 움직였다. 거품이 그것의 말이었다.</span>\n\n수면이 출렁였다. 다른 곳에서도 거품이 올라오기 시작했다. 하나. 둘. 셋.',choices:[{text:'▸ 서둘러 빠져나간다',to:'swamp_shore'},{text:'▸ 물속의 얼굴에게 말을 건다',to:'swamp_talk_face'}]};
+  }},
+
+  swamp_talk_face:{text:'loading',action:async()=>{
+    modStat('sanity',-8);
+    return{text:'"...뭐라고 하는 거야?"\n\n거품이 빨라졌다. 수면이 흔들렸다.\n\n그리고 목소리가 들렸다. 물속에서. 물에 잠긴 것처럼 뭉개져 있었지만 알아들을 수 있었다.\n\n<span class="eerie">"...나가... 여기서... 나가..."</span>\n\n경고인 것 같았다. 아니면 부탁인 것 같기도 했다.',choices:[{text:'▸ 늪에서 빠져나간다',to:'mid_fork'}]};
+  }},
+
+  swamp_shore:{text:'물에서 벗어나려 걸었다. 발이 진흙에 빠질 때마다 무릎까지 잡아당기는 느낌이 들었다.\n\n겨우 마른 땅에 올라섰다. 죽은 나무들 사이로 좁은 길이 보였다.\n\n그런데 마른 땅 위에 발자국이 있었다. 맨발이었고, 보폭이 이상하게 좁았다. 한 발 한 발 정확하게 일직선. 사람이 자연스럽게 걷는 간격이 아니었다.',choices:[
+    {text:'▸ 발자국을 따라간다',to:'mid_fork'},
+    {text:'▸ 발자국의 반대 방향으로 간다',to:'deep_forest'},
+    {text:'▸ 발자국 주변을 살핀다 [수색 판정]',to:'swamp_tracks_search'}
+  ]},
+
+  swamp_tracks_search:{text:'loading',action:async()=>{
+    const r=rollDice(13);
+    const item=await findAvailableItem([12,14,15,19]);
+    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'발자국 주변을 살폈다.\n\n'+diceHTML(r)+'\n\n진흙 속에 무언가 반쯤 묻혀 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 길을 따라간다',to:'mid_fork'}]};}
+    return{text:'발자국 주변을 살폈다.\n\n'+diceHTML(r)+'\n\n진흙뿐이었다. 그런데 발자국이 하나 더 찍혀 있었다. 방금 전에는 없던 것.',choices:[{text:'▸ 서둘러 떠난다',to:'mid_fork'}]};
+  }},
+
+  swamp_light:{text:'loading',action:async()=>{
+    const r=rollDice(16);modStat('sanity',-5);
+    const item=await findAvailableItem([13,18,25,22]);
+    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'물속으로 팔을 뻗었다. 차가웠다. 손끝에 무언가 단단한 것이 닿았다.\n\n'+diceHTML(r)+'\n\n꺼내 보니 작은 물건이었다. 오래되어 보였지만 형태는 또렷했다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n그 순간 수면이 한 번 출렁였다.',choices:[{text:'▸ 마른 땅으로 나간다',to:'swamp_shore'},{text:'▸ 늪 안쪽으로 더 간다',to:'mid_fork'}]};}
+    modStat('hp',-10);triggerScare(1);
+    return{text:'물속으로 팔을 뻗었다. 손끝이 닿기 직전, 무언가가 손목을 잡았다.\n\n'+diceHTML(r)+'\n\n<span class="danger">차갑고 미끄러운 것이 손목을 감싸고 아래로 끌어당겼다.</span>\n\n억지로 빼냈다. 손목에 붉은 자국이 남아 있었다. 빛나던 것은 더 이상 보이지 않았다.',choices:[{text:'▸ 서둘러 빠져나간다',to:'swamp_shore'}]};
+  }},
+
+  swamp_climb:{text:'loading',action:async()=>{
+    const r=rollDice(14);
+    if(r.success){return{text:'죽은 나무의 가지를 붙잡고 올라갔다. 나무가 삐걱거렸지만 체중을 버텨주었다.\n\n'+diceHTML(r)+'\n\n높은 곳에서 보니 늪이 생각보다 넓었다. 안개가 수면 위로 흘러가고 있었고, 늪 가장자리를 따라 누군가 걷고 있었다. 느리게. 고개를 떨군 채.\n\n그리고 멀리 숲 안쪽으로 희미한 불빛 같은 것이 깜빡이는 게 보였다.',choices:[{text:'▸ 걷고 있는 존재를 피해 반대쪽으로 내려간다',to:'mid_fork'},{text:'▸ 나무 위에서 지켜본다',to:'swamp_climb_watch'},{text:'▸ 불빛 쪽으로 간다',to:'deep_forest'}]};}
+    modStat('hp',-8);
+    return{text:'나무를 붙잡았지만 껍질이 무르게 벗겨졌다. 미끄러지면서 물속으로 빠졌다.\n\n'+diceHTML(r)+'\n\n물이 얼굴까지 차올랐다가 겨우 일어섰다. 온몸이 젖었고, 물속에서 무언가가 발목을 스치고 지나갔다.',choices:[{text:'▸ 서둘러 마른 땅을 찾는다',to:'swamp_shore'},{text:'▸ 발목을 스친 것을 확인한다 [용기 판정]',to:'swamp_ankle'}]};
+  }},
+
+  swamp_climb_watch:{text:'loading',action:async()=>{
+    modStat('sanity',-5);
+    return{text:'나무 위에서 지켜봤다. 걷고 있는 존재가 멈췄다. 고개를 들었다.\n\n이쪽을 올려다보고 있었다. 얼마나 먼 거리인데 시선이 느껴졌다.\n\n<span class="eerie">천천히 방향을 바꿨다. 이쪽으로.</span>',choices:[{text:'▸ 서둘러 내려가서 반대쪽으로 간다',to:'mid_fork'},{text:'▸ 나무 위에서 숨을 죽인다 [은신 판정]',to:'swamp_climb_hide'}]};
+  }},
+
+  swamp_climb_hide:{text:'loading',action:async()=>{
+    const r=rollDice(14);
+    if(r.success){return{text:'숨을 죽였다. 나뭇잎 사이에 몸을 숨기고 움직이지 않았다.\n\n'+diceHTML(r)+'\n\n그것이 나무 아래까지 왔다. 올려다봤다. 한참을.\n\n...지나갔다.',choices:[{text:'▸ 내려가서 이동한다',to:'mid_fork'}]};}
+    triggerScare(1.5);modStat('sanity',-10);
+    return{text:'숨을 죽였지만 나뭇가지가 부러지며 소리가 났다.\n\n'+diceHTML(r)+'\n\n<span class="danger">그것이 올려다봤다. 눈이 마주쳤다. 그것에게 눈이 있었는지도 확실하지 않았지만.</span>',choices:[{text:'▸ 뛰어내려 도망친다',to:'forest_run'}]};
+  }},
+
+  swamp_ankle:{text:'loading',action:async()=>{
+    const r=rollDice(16);modStat('sanity',-8);
+    if(r.success){const item=await findAvailableItem([11,17,20]);if(item){const c=await claimItemById(item.id);if(c)return{text:'물속에 손을 넣었다. 발목 근처를 더듬었다.\n\n'+diceHTML(r)+'\n\n무언가 잡혔다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 마른 땅으로 나간다',to:'swamp_shore'}]};}
+    return{text:'물속을 더듬었지만 아무것도 없었다.\n\n'+diceHTML(r),choices:[{text:'▸ 마른 땅으로 나간다',to:'swamp_shore'}]};}
+    triggerScare(1);modStat('hp',-8);
+    return{text:'물속에 손을 넣는 순간 무언가가 손가락을 물었다.\n\n'+diceHTML(r)+'\n\n<span class="danger">이빨 자국이었다. 사람의 이빨 같았다.</span>',choices:[{text:'▸ 서둘러 빠져나간다',to:'swamp_shore'}]};
+  }},
+
+  // ═══════════════════════════════════
+  // ZONE C: 안개 호수 (MISTY LAKE)
+  // ═══════════════════════════════════
+  lake_enter:{text:'물소리를 따라 걸었다. 나무 사이가 점점 넓어지더니 탁 트인 공간이 나타났다.\n\n호수였다. 수면 위로 짙은 안개가 흘러내리고 있었고, 물과 안개의 경계를 구분할 수 없었다. 호수는 거울처럼 잔잔했지만, 비치는 것이 이상했다. 나무가 있어야 할 자리에 아무것도 없고, 없어야 할 자리에 무언가의 윤곽이 어른거렸다.\n\n어디선가 물방울 떨어지는 소리가 들렸다. 규칙적으로. 마치 누군가 세고 있는 것처럼.',choices:[
+    {text:'▸ 호숫가를 따라 걷는다',to:'lake_walk'},
+    {text:'▸ 수면에 비친 윤곽을 자세히 들여다본다',to:'lake_reflection'},
+    {text:'▸ 물방울 소리가 나는 방향으로 간다',to:'lake_drip'},
+    {text:'▸ 호수에 들어간다 [용기 판정]',to:'lake_wade'}
+  ]},
+
+  lake_walk:{text:'호숫가를 따라 걸었다. 발밑에 자갈이 깔려 있었다. 하나하나가 이상하게 매끄러웠다.\n\n걷다 보니 호숫가에 무언가 놓여 있었다. 옷이었다. 접혀 있었다. 깔끔하게. 신발도 가지런히 놓여 있었다.\n\n<span class="eerie">주인은 보이지 않았다.</span>',choices:[
+    {text:'▸ 옷 주변을 살핀다 [수색 판정]',to:'lake_clothes_search'},
+    {text:'▸ 호수 안쪽을 살핀다',to:'lake_reflection'},
+    {text:'▸ 자리를 뜬다',to:'mid_fork'}
+  ]},
+
+  lake_clothes_search:{text:'loading',action:async()=>{
+    const r=rollDice(12);
+    const item=await findAvailableItem([4,7,8,14,15]);
+    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'옷 사이를 살폈다. 주머니에 무언가 들어 있었다.\n\n'+diceHTML(r)+'\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n옷의 주인이 누구였는지는 알 수 없었다.',choices:[{text:'▸ 호숫가를 더 걷는다',to:'mid_fork'},{text:'▸ 호수를 들여다본다',to:'lake_reflection'}]};}
+    return{text:'옷 사이를 살폈다.\n\n'+diceHTML(r)+'\n\n빈 주머니. 아무것도 없었다. 다만 옷 안쪽에 글씨가 적혀 있었다. 손톱으로 긁은 것 같았다.\n\n<span class="eerie">"들여다보지 마"</span>',choices:[{text:'▸ 호수를 들여다본다',to:'lake_reflection'},{text:'▸ 자리를 뜬다',to:'mid_fork'}]};
+  }},
+
+  lake_reflection:{text:'loading',action:async()=>{
+    modStat('sanity',-10);
+    return{text:'수면을 들여다봤다.\n\n처음엔 자신의 얼굴이 비쳤다. 평범했다. 그런데 천천히 변하기 시작했다.\n\n반영된 얼굴이 웃고 있었다. 자신은 웃고 있지 않은데.\n\n<span class="eerie">반영이 손을 들었다. 수면 위로. 물이 갈라지며 손가락이 나왔다.</span>',choices:[{text:'▸ 뒤로 물러난다',to:'mid_fork'},{text:'▸ 나온 손을 잡는다 [용기 판정]',to:'lake_grab_reflection'}]};
+  }},
+
+  lake_grab_reflection:{text:'loading',action:async()=>{
+    const r=rollDice(18);modStat('sanity',-10);
+    const item=await findAvailableItem([22,21,25,13]);
+    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'손을 잡았다. 차가웠다. 자신의 손과 같은 크기였다.\n\n'+diceHTML(r)+'\n\n손이 무언가를 건넸다. 그리고 수면 아래로 사라졌다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n수면에 비친 얼굴은 다시 자신의 것이었다. 웃고 있지 않았다.',choices:[{text:'▸ 자리를 뜬다',to:'mid_fork'}]};}
+    triggerScare(2);modStat('hp',-12);
+    return{text:'손을 잡았다. 끌려갔다.\n\n'+diceHTML(r)+'\n\n<span class="danger">물속으로 빨려 들어갔다. 숨을 쉴 수 없었다. 수면 위로 자신의 얼굴이 내려다보고 있었다. 웃고 있었다.</span>\n\n...겨우 빠져나왔다. 온몸이 젖었다.',choices:[{text:'▸ 호수에서 떠난다',to:'mid_fork'}]};
+  }},
+
+  lake_drip:{text:'물방울 소리를 따라갔다. 호숫가를 벗어나 바위 사이로 들어섰다.\n\n소리의 근원지가 보였다. 바위 위에서 물이 떨어지고 있었다. 아래에 작은 웅덩이가 만들어져 있었다.\n\n<span class="eerie">물방울이 떨어질 때마다 웅덩이에 파문이 일었다. 그런데 파문의 형태가 이상했다. 원이 아니라 글자 같았다.</span>',choices:[
+    {text:'▸ 웅덩이를 자세히 살핀다 [교육 판정]',to:'lake_drip_read'},
+    {text:'▸ 바위 뒤를 살핀다 [수색 판정]',to:'lake_drip_behind'},
+    {text:'▸ 자리를 뜬다',to:'mid_fork'}
+  ]},
+
+  lake_drip_read:{text:'loading',action:async()=>{
+    const r=rollDice(15);modStat('sanity',-5);
+    if(r.success){return{text:'웅덩이를 살폈다. 파문이 만드는 형태를 읽으려 했다.\n\n'+diceHTML(r)+'\n\n글자였다. 반복되는 한 단어.\n\n<span class="eerie">"도망쳐. 도망쳐. 도망쳐."</span>\n\n물방울이 멈췄다. 갑자기. 주변이 너무 고요해졌다.',choices:[{text:'▸ 서둘러 떠난다',to:'mid_fork'},{text:'▸ 바위 뒤를 확인한다',to:'lake_drip_behind'}]};}
+    return{text:'웅덩이를 살폈지만 파문의 의미를 알 수 없었다.\n\n'+diceHTML(r)+'\n\n그냥 물이었다. 아마도.',choices:[{text:'▸ 바위 뒤를 살핀다',to:'lake_drip_behind'},{text:'▸ 자리를 뜬다',to:'mid_fork'}]};
+  }},
+
+  lake_drip_behind:{text:'loading',action:async()=>{
+    const r=rollDice(13);
+    const item=await findAvailableItem([16,17,19,20,11]);
+    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'바위 뒤를 돌아봤다.\n\n'+diceHTML(r)+'\n\n좁은 틈에 무언가 숨겨져 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 숲 안쪽으로 간다',to:'mid_fork'},{text:'▸ 호수로 돌아간다',to:'lake_enter'}]};}
+    return{text:'바위 뒤를 살폈다.\n\n'+diceHTML(r)+'\n\n아무것도 없었다. 다만 바위 표면에 손톱으로 긁은 자국이 있었다. 숫자였다. 셀 수 없을 만큼 많은 정(正)자.',choices:[{text:'▸ 자리를 뜬다',to:'mid_fork'}]};
+  }},
+
+  lake_wade:{text:'loading',action:async()=>{
+    const r=rollDice(16);modStat('sanity',-8);
+    if(r.success){return{text:'호수에 발을 담갔다. 물이 차가웠지만 견딜 수 있었다.\n\n'+diceHTML(r)+'\n\n무릎까지 들어갔을 때, 발밑에서 무언가 단단한 것이 느껴졌다. 돌이 아니었다. 규칙적인 형태. 계단 같았다.\n\n<span class="eerie">호수 아래에 무언가 있었다.</span>',choices:[{text:'▸ 더 깊이 들어간다',to:'cave_enter'},{text:'▸ 돌아 나온다',to:'mid_fork'}]};}
+    modStat('hp',-10);triggerScare(1);
+    return{text:'호수에 들어갔다. 물이 갑자기 깊어졌다.\n\n'+diceHTML(r)+'\n\n<span class="danger">발밑에 바닥이 없었다. 빠져들었다. 물속에서 무언가가 발을 잡았다.</span>\n\n겨우 빠져나왔다.',choices:[{text:'▸ 호숫가로 돌아간다',to:'mid_fork'}]};
+  }},
+
+  // ═══════════════════════════════════
+  // MID-GAME: 합류 지점
+  // ═══════════════════════════════════
+  mid_fork:{text:'숲 한가운데였다. 어느 방향에서 왔는지 기억이 흐릿해지고 있었다.\n\n길이 여러 갈래로 갈라져 있었다.',choices:[
     {text:'▸ 어두운 길로 간다',to:'dark_path'},
     {text:'▸ 안개 짙은 길로 간다',to:'fog_path'},
     {text:'▸ 소리가 나는 길로 간다',to:'sound_path'},
@@ -1994,59 +1958,56 @@ const scenes={
   ]},
 
   fork_search:{text:'loading',action:async()=>{
-    const r=rollDice(17);
+    const r=rollDice(15);
     const item=await findAvailableItem([11,12,14,15,19,20]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'갈림길 주변을 살폈다.\n\n'+diceHTML(r)+'\n\n나무 밑동에 무언가 묻혀 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 어두운 길로',to:'dark_path'},{text:'▸ 안개 길로',to:'fog_path'},{text:'▸ 소리 나는 길로',to:'sound_path'}]};}
-    return{text:'주변을 살폈다.\n\n'+diceHTML(r)+'\n\n쓸 만한 것은 없다.',choices:[{text:'▸ 어두운 길로',to:'dark_path'},{text:'▸ 안개 길로',to:'fog_path'},{text:'▸ 소리 나는 길로',to:'sound_path'}]};
+    return{text:'주변을 살폈다.\n\n'+diceHTML(r)+'\n\n쓸 만한 것은 없었다.',choices:[{text:'▸ 어두운 길로',to:'dark_path'},{text:'▸ 안개 길로',to:'fog_path'},{text:'▸ 소리 나는 길로',to:'sound_path'}]};
   }},
 
   dark_path:{text:'loading',action:async()=>{
-    gDepth++;const r=rollDice(16);
+    gDepth++;const r=rollDice(15);
     if(r.critFail){triggerScare(2);modStat('sanity',-15);modStat('hp',-10);
-    return{text:'어둠 속을 걸었다.\n\n'+diceHTML(r)+'\n\n<span class="danger">무언가에 부딪혔다. 부드럽다. 따뜻하다.</span>\n\n손전등이 있었다면. 없다.\n\n<span class="eerie">그것도 당신을 만지고 있다.</span>',choices:[{text:'▸ 비명을 지르며 뛴다',to:'run_panic'},{text:'▸ 그대로 멈춘다',to:'dark_freeze'}]};}
+    return{text:'어둠 속을 걸었다.\n\n'+diceHTML(r)+'\n\n<span class="danger">무언가에 부딪혔다. 부드럽고 차가웠다. 사람의 형태였다.</span>\n\n손전등이 있었다면. 하지만 없었다.\n\n<span class="eerie">그것도 당신을 만지고 있었다.</span>',choices:[{text:'▸ 뒤로 밀치고 도망친다',to:'forest_run'},{text:'▸ 그대로 멈춘다',to:'forest_freeze'}]};}
     const item=await findAvailableItem([11,12,14,15]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'어둠 속을 더듬으며 걸었다.\n\n'+diceHTML(r)+'\n\n손끝에 무언가 닿았다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 더 깊이',to:'deep_forest'},{text:'▸ 돌아간다',to:'mid_fork'}]};}
-    return{text:'어둠 속을 걸었다.\n\n'+diceHTML(r)+'\n\n아무것도 찾지 못했다. 뒤에서 숨소리가 들린 것 같았지만, 돌아보지 않았다.',choices:[{text:'▸ 더 깊이',to:'deep_forest'},{text:'▸ 돌아간다',to:'mid_fork'}]};
-  }},
-
-  dark_freeze:{text:'loading',action:async()=>{
-    const r=rollDice(18);modStat('sanity',-10);
-    if(r.success){modStat('alert',-10);return{text:'멈췄다. 숨도 쉬지 않았다.\n\n'+diceHTML(r)+'\n\n부드러운 것이 천천히 물러났다. 발굽 소리가 멀어진다.\n\n...\n\n살았다.',choices:[{text:'▸ 조용히 떠난다',to:'deep_forest'}]};}
-    triggerScare(2);return{text:'멈췄다.\n\n'+diceHTML(r)+'\n\n<span class="danger">코앞에서 숨소리가 느껴진다. 뜨겁다.</span>\n\n그리고 — 스쳐지나갔다. 옆구리를 긁으면서.',choices:[{text:'▸ 아프지만 뛴다',to:'mid_fork'}]};
+    return{text:'어둠 속을 걸었다.\n\n'+diceHTML(r)+'\n\n아무것도 찾지 못했다. 뒤에서 숨소리 같은 것이 들렸지만, 돌아보지 않았다.',choices:[{text:'▸ 더 깊이',to:'deep_forest'},{text:'▸ 돌아간다',to:'mid_fork'}]};
   }},
 
   fog_path:{text:'loading',action:async()=>{
     gDepth++;modStat('sanity',-8);
-    const r=rollDice(15);
+    const r=rollDice(14);
     const item=await findAvailableItem([16,17,19,20]);
     if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'안개 속을 걸었다.\n\n'+diceHTML(r)+'\n\n발에 무언가 걸렸다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 계속 간다',to:'deep_forest'},{text:'▸ 돌아간다',to:'mid_fork'}]};}
     screenFlicker();
-    return{text:'안개 속을 걸었다.\n\n'+diceHTML(r)+'\n\n앞이 보이지 않는다.\n\n발자국을 밟았다. 사슴의 것. 그리고—\n\n<span class="eerie">자신의 발자국 위에 겹쳐 있다. 여기를 이미 지나갔다.</span>',choices:[{text:'▸ 계속 걷는다',to:'deep_forest'}]};
+    return{text:'안개 속을 걸었다.\n\n'+diceHTML(r)+'\n\n앞이 보이지 않았다.\n\n발자국을 밟았다. 사슴의 것. 그리고—\n\n<span class="eerie">자신의 발자국 위에 겹쳐 있었다. 여기를 이미 지나간 적이 있었다.</span>',choices:[{text:'▸ 계속 걷는다',to:'deep_forest'}]};
   }},
 
-  sound_path:{text:'소리를 따라갔다.\n\n속삭임이다. 점점 많아진다. 알아들을 수 없는 말.\n\n<span class="eerie">하지만 한 단어만은 분명하다.</span>',action:async()=>{
+  sound_path:{text:'loading',action:async()=>{
     modStat('sanity',-10);gDepth++;
-    return{text:'소리를 따라갔다.\n\n속삭임이다. 점점 가까워진다.\n\n<span class="eerie">당신의 이름 같기도 하다.</span>\n\n소리의 끝에 오두막이 있다.',choices:[{text:'▸ 오두막으로 들어간다',to:'cabin'},{text:'▸ 소리를 무시하고 돌아간다',to:'mid_fork'}]};
+    return{text:'소리를 따라갔다.\n\n속삭임이었다. 점점 가까워졌다.\n\n<span class="eerie">당신의 이름 같기도 했다.</span>\n\n소리의 끝에 오래된 구조물이 있었다. 오두막이었다.',choices:[{text:'▸ 오두막으로 들어간다',to:'cabin_approach'},{text:'▸ 소리를 무시하고 돌아간다',to:'mid_fork'}]};
   }},
 
+  // ═══════════════════════════════════
+  // DEEP FOREST + ENCOUNTERS
+  // ═══════════════════════════════════
   deep_forest:{text:'loading',action:async()=>{
     gDepth++;modStat('alert',10);
     const isIntense=gDepth>=3||gAlert>=50;
     if(isIntense){showDeerEyes();modStat('sanity',-5);}
-    return{text:'숲이 깊어진다.\n\n나무가 더 크고, 더 빽빽하다. 안개가 발목 위로 차오른다.\n\n'+(isIntense?'<span class="danger">울음소리가 가깝다. 너무 가깝다.</span>\n\n<span class="eerie">뿔의 윤곽이 안개 사이로 보인다.</span>':'어딘가에서 울음소리가 들린다. 낮고, 길게.'),choices:[
-      {text:'▸ 울음소리 쪽으로 간다 [용기 판정]',to:'deer_encounter'},
+    return{text:'숲이 깊어졌다.\n\n나무가 더 크고, 더 빽빽했다. 안개가 발목 위로 차올랐다.\n\n'+(isIntense?'<span class="danger">울음소리가 가까웠다. 너무 가까웠다.</span>\n\n<span class="eerie">뿔의 윤곽이 안개 사이로 보였다.</span>':'어딘가에서 울음소리가 들렸다. 낮고, 길게.'),choices:[
+      {text:'▸ 울음소리 쪽으로 간다',to:'deer_encounter'},
       {text:'▸ 반대편으로 간다',to:'mid_fork'},
-      {text:'▸ 숨는다 [은신 판정]',to:'hide_check'},
-      {text:'▸ 숲에서 나간다',to:'exit_check'}
+      {text:'▸ 숨는다 [은신 판정]',to:'deep_hide'},
+      {text:'▸ 숲에서 나가려 한다',to:'exit_check'}
     ]};
   }},
 
   deer_encounter:{text:'loading',action:async()=>{
     gDepth++;triggerScare(1.5);modStat('alert',20);
-    return{text:'걸었다.\n\n안개 사이로 윤곽이 보인다. 사슴의 형태. 하지만 사슴이라고 부르기엔 이상하다.\n\n크다. 너무 크다. 뿔이 나무처럼 뻗어 있고, 눈이 초록빛으로 빛난다.\n\n<span class="eerie">그것이 고개를 돌려 당신을 본다.</span>',choices:[
-      {text:'▸ 눈을 마주한다 [정신력 판정]',to:'deer_stare'},
+    return{text:'걸었다.\n\n안개 사이로 윤곽이 보였다. 사슴의 형태. 하지만 사슴이라고 부르기엔 이상했다.\n\n크다. 너무 컸다. 뿔이 나무처럼 뻗어 있었고, 눈이 초록빛으로 빛나고 있었다.\n\n<span class="eerie">그것이 고개를 돌려 이쪽을 봤다.</span>',choices:[
+      {text:'▸ 눈을 마주한다 [의지 판정]',to:'deer_stare'},
       {text:'▸ 눈을 피하고 뒤로 물러난다',to:'deer_retreat'},
-      {text:'▸ 도망친다!',to:'run_panic'}
+      {text:'▸ 도망친다',to:'forest_run'}
     ]};
   }},
 
@@ -2055,23 +2016,117 @@ const scenes={
     const item=await findAvailableItem([22,21,25,13]);
     if(r.success){
       if(item){const c=await claimItemById(item.id);if(c)return{text:'눈을 마주했다.\n\n'+diceHTML(r)+'\n\n시간이 멈춘 것 같았다. 얼마나 지났는지 모르겠다.\n\n그것이 고개를 끄덕였다. 그리고 사라졌다.\n\n사라진 자리에 무언가 남아 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 탐색을 계속한다',to:'mid_fork'},{text:'▸ 숲에서 나간다',to:'ending'}]};}
-      return{text:'눈을 마주했다.\n\n'+diceHTML(r)+'\n\n그것이 사라졌다. 발자국만 남았다.\n\n몸이 풀렸다. 숨을 쉴 수 있다.',choices:[{text:'▸ 탐색을 계속한다',to:'mid_fork'},{text:'▸ 숲에서 나간다',to:'ending'}]};
+      return{text:'눈을 마주했다.\n\n'+diceHTML(r)+'\n\n그것이 사라졌다. 발자국만 남았다.\n\n몸이 풀렸다. 숨을 쉴 수 있었다.',choices:[{text:'▸ 탐색을 계속한다',to:'mid_fork'},{text:'▸ 숲에서 나간다',to:'ending'}]};
     }
     triggerScare(2.5);modStat('hp',-15);
-    return{text:'눈을 마주했다.\n\n'+diceHTML(r)+'\n\n<span class="danger">움직일 수 없다. 몸이 굳었다.</span>\n\n그것이 한 발 다가왔다. 또 한 발.\n\n코앞까지 왔다. 뜨거운 숨결이 얼굴에 닿는다.\n\n...그리고 스쳐지나갔다. 옆구리에 통증이 느껴진다.',choices:[{text:'▸ 쓰러진다',to:'mid_fork'}]};
+    return{text:'눈을 마주했다.\n\n'+diceHTML(r)+'\n\n<span class="danger">움직일 수 없었다. 몸이 굳었다.</span>\n\n그것이 한 발 다가왔다. 또 한 발.\n\n코앞까지 왔다. 뜨거운 숨결이 얼굴에 닿았다.\n\n...그리고 스쳐지나갔다. 옆구리에 통증이 느껴졌다.',choices:[{text:'▸ 쓰러진다',to:'mid_fork'}]};
   }},
 
-  deer_retreat:{text:'눈을 피하고 뒤로 물러났다.\n\n그것이 한 발 다가왔다. 발굽 소리가 울렸다.\n\n멈췄다. 고개를 돌렸다. 안개 속으로 사라졌다.\n\n심장이 빠르게 뛴다.',action:async()=>{
+  deer_retreat:{text:'loading',action:async()=>{
     modStat('sanity',-5);
-    return{text:'눈을 피하고 물러났다.\n\n그것이 한 발 다가왔다가... 멈췄다.\n\n고개를 돌렸다. 사라졌다.',choices:[{text:'▸ 사라진 자리를 확인한다',to:'deer_item'},{text:'▸ 서둘러 떠난다',to:'mid_fork'}]};
+    return{text:'눈을 피하고 물러났다.\n\n그것이 한 발 다가왔다가... 멈췄다.\n\n고개를 돌렸다. 사라졌다.',choices:[{text:'▸ 사라진 자리를 확인한다 [수색 판정]',to:'deer_item_search'},{text:'▸ 서둘러 떠난다',to:'mid_fork'}]};
   }},
 
+  deer_item_search:{text:'loading',action:async()=>{
+    const r=rollDice(15);
+    const item=await findAvailableItem([13,18,25,7,8,4]);
+    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'사라진 자리를 살폈다.\n\n'+diceHTML(r)+'\n\n이끼 사이에 무언가 빛나고 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 숲 안쪽으로',to:'deep_forest'},{text:'▸ 나가려 한다',to:'exit_check'}]};}
+    return{text:'사라진 자리를 살폈다.\n\n'+diceHTML(r)+'\n\n아무것도 없었다. 발자국만.',choices:[{text:'▸ 계속 간다',to:'mid_fork'}]};
+  }},
+
+  deep_hide:{text:'loading',action:async()=>{
+    const r=rollDice(13);
+    if(r.success){return{text:'나무 뒤에 몸을 숨겼다. 숨을 죽였다.\n\n'+diceHTML(r)+'\n\n발굽 소리가 다가왔다. 점점 가까이.\n\n나무 바로 옆을 지나갔다. 안개 사이로 다리가 보였다. 가늘고 길었다. 관절이 반대로 꺾여 있었다.\n\n...지나갔다.',choices:[{text:'▸ 조용히 이동한다',to:'mid_fork'}]};}
+    modStat('alert',15);triggerScare(1);
+    return{text:'숨으려 했지만 소리를 냈다.\n\n'+diceHTML(r)+'\n\n<span class="danger">발굽 소리가 멈췄다. 이쪽을 향하고 있었다.</span>',choices:[{text:'▸ 도망친다',to:'forest_run'},{text:'▸ 버틴다',to:'forest_freeze'}]};
+  }},
+
+  // ═══════════════════════════════════
+  // CABIN
+  // ═══════════════════════════════════
+  cabin_approach:{text:'오두막이 보였다. 낡고 기울어져 있었다.\n\n창문이 하나 있었다. 안이 어두웠다.\n\n문 앞에 사슴 뿔이 걸려 있었다.',choices:[
+    {text:'▸ 창문으로 안을 들여다본다',to:'cabin_peek'},
+    {text:'▸ 문을 열고 들어간다',to:'cabin_enter'},
+    {text:'▸ 오두막 주변을 살핀다 [수색 판정]',to:'cabin_outside'}
+  ]},
+
+  cabin_peek:{text:'loading',action:async()=>{
+    modStat('sanity',-5);
+    return{text:'창문에 얼굴을 대고 안을 들여다봤다.\n\n어두웠다. 낡은 의자 하나, 테이블 하나. 테이블 위에 무언가 놓여 있었다. 종이 같았다.\n\n<span class="eerie">그런데 유리에 비친 것이 이상했다. 자신의 뒤에 누군가 서 있었다. 유리에만 비치고, 돌아보면 없을 것 같았다.</span>',choices:[{text:'▸ 돌아본다',to:'cabin_look_back'},{text:'▸ 돌아보지 않고 문을 열고 들어간다',to:'cabin_enter'}]};
+  }},
+
+  cabin_look_back:{text:'loading',action:async()=>{
+    triggerScare(1.5);modStat('sanity',-8);
+    return{text:'돌아봤다.\n\n<span class="danger">아무도 없었다. 하지만 방금 전까지 숨소리가 들렸던 것 같았다.</span>\n\n다시 창문을 봤다. 유리에 비친 것은 자신뿐이었다.',choices:[{text:'▸ 문을 열고 들어간다',to:'cabin_enter'},{text:'▸ 이 자리를 떠난다',to:'mid_fork'}]};
+  }},
+
+  cabin_enter:{text:'loading',action:async()=>{
+    const item=await findAvailableItem([4,7,8,18,13]);
+    if(item){const c=await claimItemById(item.id);if(c)return{text:'문을 열었다. 삐걱거리는 소리가 숲에 울렸다.\n\n안에는 낡은 가구와 먼지뿐이었다. 테이블 위에 종이가 놓여 있었다. 글씨가 적혀 있었다. 손으로 쓴 것 같았다.\n\n<span class="eerie">"이것을 읽고 있다면, 이미 늦었다."</span>\n\n테이블 서랍에서 무언가를 발견했다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 오두막을 나선다',to:'mid_fork'}]};}
+    return{text:'문을 열었다.\n\n안에는 먼지와 거미줄뿐이었다. 테이블 위에 종이가 한 장 놓여 있었다.\n\n<span class="eerie">"이것을 읽고 있다면, 이미 늦었다."</span>\n\n그게 전부였다.',choices:[{text:'▸ 오두막을 나선다',to:'mid_fork'}]};
+  }},
+
+  cabin_outside:{text:'loading',action:async()=>{
+    const r=rollDice(13);
+    const item=await findAvailableItem([12,14,15,19,20]);
+    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'오두막 주변을 살폈다.\n\n'+diceHTML(r)+'\n\n뒤쪽 풀 사이에 무언가 숨겨져 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 오두막에 들어간다',to:'cabin_enter'},{text:'▸ 다른 곳으로 간다',to:'mid_fork'}]};}
+    return{text:'오두막 주변을 살폈다.\n\n'+diceHTML(r)+'\n\n뒤쪽에 흙이 파헤쳐진 자국이 있었다. 최근의 것 같았다. 무언가를 묻었거나, 꺼낸 자국.',choices:[{text:'▸ 오두막에 들어간다',to:'cabin_enter'},{text:'▸ 다른 곳으로 간다',to:'mid_fork'}]};
+  }},
+
+  // ═══════════════════════════════════
+  // ZONE D: 지하 동굴 (UNDERGROUND CAVE)
+  // ═══════════════════════════════════
+  cave_enter:{text:'땅이 꺼진 곳으로 내려갔다. 동굴 입구였다.\n\n안에서 찬 공기가 흘러나왔다. 축축했고, 흙 냄새가 진했다.\n\n입구는 사람 하나가 겨우 지나갈 수 있는 폭이었다. 안쪽은 어두워서 아무것도 보이지 않았다.',choices:[
+    {text:'▸ 동굴 안으로 들어간다',to:'cave_inside'},
+    {text:'▸ 입구 주변을 살핀다 [수색 판정]',to:'cave_entrance_search'},
+    {text:'▸ 돌아간다',to:'mid_fork'}
+  ]},
+
+  cave_entrance_search:{text:'loading',action:async()=>{
+    const r=rollDice(12);
+    const item=await findAvailableItem([4,7,11,12]);
+    if(r.success&&item){const c=await claimItemById(item.id);if(c)return{text:'입구 주변을 살폈다.\n\n'+diceHTML(r)+'\n\n바위 틈에 무언가 끼어 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>',choices:[{text:'▸ 동굴 안으로 들어간다',to:'cave_inside'},{text:'▸ 돌아간다',to:'mid_fork'}]};}
+    return{text:'입구 주변을 살폈다.\n\n'+diceHTML(r)+'\n\n바위에 긁힌 자국이 있었다. 손톱으로 긁은 것 같았다. 안쪽에서 바깥쪽으로.',choices:[{text:'▸ 동굴 안으로 들어간다',to:'cave_inside'},{text:'▸ 돌아간다',to:'mid_fork'}]};
+  }},
+
+  cave_inside:{text:'동굴 안으로 들어갔다. 벽에 손을 대고 더듬으며 걸었다.\n\n공기가 점점 차가워졌다. 물 떨어지는 소리가 울렸다.\n\n<span class="eerie">벽이 맥박처럼 뛰고 있었다. 미세하게. 하지만 분명하게.</span>',action:async()=>{
+    modStat('sanity',-8);gDepth++;
+    return{text:'동굴 안쪽으로 걸었다. 벽이 맥박처럼 뛰고 있었다.\n\n앞이 갈라졌다. 왼쪽에서는 물소리가, 오른쪽에서는 바람이 불어왔다.',choices:[{text:'▸ 왼쪽(물소리)으로 간다',to:'cave_water'},{text:'▸ 오른쪽(바람)으로 간다',to:'cave_wind'},{text:'▸ 벽을 더듬어 살핀다 [교육 판정]',to:'cave_wall'}]};
+  }},
+
+  cave_water:{text:'loading',action:async()=>{
+    modStat('sanity',-5);
+    const item=await findAvailableItem([16,17,22,25]);
+    if(item){const c=await claimItemById(item.id);if(c)return{text:'물소리를 따라갔다. 지하 샘이 있었다. 물이 희미하게 빛나고 있었다.\n\n샘 옆에 무언가 놓여 있었다.\n\n<span class="highlight">'+c.name+'</span>을(를) 발견했다.\n\n<span class="eerie">'+c.description+'</span>\n\n물속에서 얼굴이 올려다보고 있었다. 자신의 얼굴이 아니었다.',choices:[{text:'▸ 돌아 나간다',to:'exit_check'},{text:'▸ 바람이 부는 쪽으로',to:'cave_wind'}]};}
+    return{text:'물소리를 따라갔다. 지하 샘이 있었다.\n\n물속에서 얼굴이 올려다보고 있었다. 자신의 얼굴이 아니었다.',choices:[{text:'▸ 돌아 나간다',to:'exit_check'}]};
+  }},
+
+  cave_wind:{text:'loading',action:async()=>{
+    modStat('alert',10);
+    return{text:'바람이 부는 쪽으로 걸었다. 동굴이 넓어졌다.\n\n벽에 그림이 있었다. 오래된 벽화. 사슴의 형상. 그 앞에 무릎 꿇은 사람들.\n\n<span class="eerie">벽화 속 사슴의 눈이 초록빛으로 칠해져 있었다. 아직 마르지 않은 것처럼 빛나고 있었다.</span>\n\n바람이 부는 곳에 출구가 있었다.',choices:[{text:'▸ 출구로 나간다',to:'exit_check'},{text:'▸ 벽화를 자세히 살핀다 [교육 판정]',to:'cave_mural'}]};
+  }},
+
+  cave_wall:{text:'loading',action:async()=>{
+    const r=rollDice(15);modStat('sanity',-5);
+    if(r.success){return{text:'벽을 더듬었다. 글씨가 새겨져 있었다. 오래된 한자.\n\n'+diceHTML(r)+'\n\n<span class="eerie">"제단에 바쳐진 자는 돌아오지 못한다."</span>\n\n그 아래에 더 작은 글씨가 있었다.\n\n<span class="eerie">"하지만 제단이 원하는 것을 주면, 제단도 무언가를 준다."</span>',choices:[{text:'▸ 왼쪽으로',to:'cave_water'},{text:'▸ 오른쪽으로',to:'cave_wind'}]};}
+    return{text:'벽을 더듬었지만 읽을 수 없었다.\n\n'+diceHTML(r)+'\n\n손끝에 무언가 끈적한 것이 묻었다.',choices:[{text:'▸ 왼쪽으로',to:'cave_water'},{text:'▸ 오른쪽으로',to:'cave_wind'}]};
+  }},
+
+  cave_mural:{text:'loading',action:async()=>{
+    const r=rollDice(16);modStat('sanity',-5);
+    if(r.success){return{text:'벽화를 살폈다.\n\n'+diceHTML(r)+'\n\n사슴 앞에 무릎 꿇은 사람들. 그 중 하나가 무언가를 들고 있었다. 제물. 벽화의 순서가 보였다.\n\n<span class="eerie">제물을 바치면, 사슴이 길을 열어준다. 하지만 바친 자는 숲에 남는다.</span>\n\n벽화의 마지막 장면에서 사슴의 눈이 깜빡인 것 같았다.',choices:[{text:'▸ 출구로 나간다',to:'exit_check'}]};}
+    return{text:'벽화를 살폈지만 의미를 알 수 없었다.\n\n'+diceHTML(r)+'\n\n사슴, 사람, 안개. 반복되는 패턴.',choices:[{text:'▸ 출구로 나간다',to:'exit_check'}]};
+  }},
+
+  // ═══════════════════════════════════
+  // EXIT & ENDINGS
+  // ═══════════════════════════════════
   exit_check:{text:'loading',action:async()=>{
     const dc=10+gDepth*2;
     const r=rollDice(dc);
-    if(r.success)return{text:'숲에서 나가려고 걸었다.\n\n'+diceHTML(r)+'\n\n안개가 옅어진다. 나무 사이로 빛이 보인다.\n\n<span class="eerie">뒤에서 울음소리가 한 번 더 들렸다.</span>',choices:[{text:'▸ 돌아보지 않고 걷는다',to:'ending'},{text:'▸ 돌아본다',to:'exit_lookback'}]};
+    if(r.success)return{text:'숲에서 나가려고 걸었다.\n\n'+diceHTML(r)+'\n\n안개가 옅어졌다. 나무 사이로 빛이 보였다.\n\n<span class="eerie">뒤에서 울음소리가 한 번 더 들렸다.</span>',choices:[{text:'▸ 돌아보지 않고 걷는다',to:'ending'},{text:'▸ 돌아본다',to:'exit_lookback'}]};
     modStat('sanity',-5);screenFlicker();
-    return{text:'숲에서 나가려 했다.\n\n'+diceHTML(r)+'\n\n<span class="eerie">걸어도 걸어도 같은 곳이다.</span>\n\n숲이 놓아주지 않는다.',choices:[{text:'▸ 다시 시도한다',to:'exit_check'},{text:'▸ 탐색을 계속한다',to:'mid_fork'}]};
+    return{text:'숲에서 나가려 했다.\n\n'+diceHTML(r)+'\n\n<span class="eerie">걸어도 걸어도 같은 곳이었다.</span>\n\n숲이 놓아주지 않았다.',choices:[{text:'▸ 다시 시도한다',to:'exit_check'},{text:'▸ 탐색을 계속한다',to:'mid_fork'}]};
   }},
 
   exit_lookback:{text:'loading',action:async()=>{
@@ -2079,12 +2134,11 @@ const scenes={
     return{text:'돌아봤다.\n\n<span class="danger">바로 뒤에 있었다.</span>\n\n초록빛 눈이 코앞에서 빛났다. 뿔이 머리 위를 덮고 있었다.\n\n...\n\n눈을 떴다.',choices:[{text:'▸ 깨어난다',to:'result'}]};
   }},
 
-  // ─── ENDINGS ───
-  ending:{text:'걸었다. 얼마나 걸었는지 모르겠다.\n\n안개가 옅어진다. 나무 사이로 빛이 보인다.\n\n뒤에서 울음소리가 한 번 더 들렸다. 낮고, 길게.\n\n돌아보지 않았다.\n\n눈을 떴다.',choices:[{text:'▸ 깨어난다',to:'result'}]},
+  ending:{text:'걸었다. 얼마나 걸었는지 모르겠다.\n\n안개가 옅어졌다. 나무 사이로 빛이 보였다.\n\n뒤에서 울음소리가 한 번 더 들렸다. 낮고, 길게.\n\n돌아보지 않았다.\n\n눈을 떴다.',choices:[{text:'▸ 깨어난다',to:'result'}]},
 
-  death_hp:{text:'<span class="danger">더 이상 움직일 수 없다.</span>\n\n몸이 무거워진다. 땅에 쓰러졌다.\n\n안개가 밀려온다. 시야가 좁아진다.\n\n마지막으로 본 것은 초록빛 눈이었다.\n\n<span class="eerie">가까이. 아주 가까이.</span>',scare:1,choices:[{text:'▸ ...',to:'result'}]},
+  death_hp:{text:'<span class="danger">더 이상 움직일 수 없었다.</span>\n\n몸이 무거워졌다. 땅에 쓰러졌다.\n\n안개가 밀려왔다. 시야가 좁아졌다.\n\n마지막으로 본 것은 초록빛 눈이었다.\n\n<span class="eerie">가까이. 아주 가까이.</span>',scare:1,choices:[{text:'▸ ...',to:'result'}]},
 
-  death_sanity:{text:'<span class="danger">기억이 사라진다.</span>\n\n이름이 뭐였는지. 왜 여기 있는지. 무엇을 찾고 있었는지.\n\n안개가 몸을 감싼다. 따뜻하다.\n\n<span class="eerie">숲의 일부가 되어가고 있다.</span>\n\n초록빛 눈이 앞에 있다. 무섭지 않다. 이상하게도.',choices:[{text:'▸ ...',to:'result'}]},
+  death_sanity:{text:'<span class="danger">기억이 사라져 갔다.</span>\n\n이름이 뭐였는지. 왜 여기 있는지. 무엇을 찾고 있었는지.\n\n안개가 몸을 감쌌다. 따뜻했다.\n\n<span class="eerie">숲의 일부가 되어가고 있었다.</span>\n\n초록빛 눈이 앞에 있었다. 무섭지 않았다. 이상하게도.',choices:[{text:'▸ ...',to:'result'}]},
 
   result:{text:'loading',action:async()=>{
     const t=gItems.length>0?gItems.map(i=>'<span class="highlight">· '+i.name+'</span>').join('<br>'):'아무것도 찾지 못했다.';
@@ -2094,7 +2148,7 @@ const scenes={
     return{text:'<div style="text-align:center;padding:1em 0;"><div style="font-family:KimJwaJinGeneral,serif;font-size:1.5rem;color:var(--text-bright);letter-spacing:0.2em;margin-bottom:0.5em;">탐색 종료</div><div style="font-size:0.9rem;color:'+statusColor+';margin-bottom:1em;">'+status+'</div><div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:1em;">정신력 '+gSanity+' / 체력 '+gHP+'</div><div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1.5em;">획득한 아이템: '+gCount+'개</div>'+t+'<div style="margin-top:2em;font-size:0.8rem;color:var(--text-dim);">획득한 아이템은 캐릭터 프로필에 표시됩니다.</div></div>',choices:[{text:'▸ 메인으로 돌아가기',to:'_main'}]};
   }},
 
-  timeout:{text:'<span class="danger">안개가 짙어진다. 너무 짙다. 앞이 보이지 않는다.</span>\n\n<span class="danger">숨이 막힌다. 안개가 폐를 채운다.</span>\n\n<span class="eerie">초록빛 눈이 보인다. 가까이. 아주 가까이.</span>\n\n눈을 떴다.',scare:1,choices:[{text:'▸ 깨어난다',to:'result'}]},
+  timeout:{text:'<span class="danger">안개가 짙어졌다. 너무 짙었다. 앞이 보이지 않았다.</span>\n\n<span class="danger">숨이 막혔다. 안개가 폐를 채웠다.</span>\n\n<span class="eerie">초록빛 눈이 보였다. 가까이. 아주 가까이.</span>',scare:1,choices:[{text:'▸ ...',to:'result'}]},
 };
 
 async function goScene(name){
