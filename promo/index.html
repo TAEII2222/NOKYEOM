@@ -875,6 +875,7 @@
 <audio id="bgm" loop preload="auto">
   <source src="bgm.mp3" type="audio/mpeg">
 </audio>
+<audio id="paperSound" preload="auto"><source src="paper.mp3" type="audio/mpeg"></audio>
 <div class="bgm-toggle" id="bgm-toggle" onclick="toggleBGM()" title="배경음악">
   <span id="bgm-icon">♪</span>
 </div>
@@ -1023,7 +1024,15 @@
   function showSensationText() {
     const texts = document.querySelectorAll('#sensation-text p');
     texts.forEach((t, i) => {
-      setTimeout(() => t.classList.add('show'), i * 1500);
+      setTimeout(() => {
+        t.classList.add('show');
+        // Play paper sound on "손에 무언가가" line (index 4)
+        if (i === 4) {
+          const ps = document.getElementById('paperSound');
+          ps.volume = 0.6;
+          ps.play().catch(() => {});
+        }
+      }, i * 1500);
     });
     setTimeout(() => {
       document.getElementById('sensation-btn').classList.add('show');
