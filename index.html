@@ -624,7 +624,15 @@
       .char-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:2em;}
       .char-card{background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:1.2em;cursor:pointer;transition:all 0.3s ease;text-align:center;}
       .char-card:hover{border-color:var(--green-mid);transform:translateY(-2px);}
-      .char-card-avatar{width:60px;height:60px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--green-light);font-weight:700;margin:0 auto 0.8em;overflow:hidden;}
+      .char-card-avatar{width:60px;height:60px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--green-light);font-weight:700;margin:0 auto 0.8em;overflow:hidden;position:relative;}
+      .border-b1{box-shadow:0 0 0 3px #8B6914,0 0 8px rgba(139,105,20,0.4);}
+      .border-b2{box-shadow:0 0 0 3px var(--green-mid),0 0 12px rgba(45,90,39,0.5);}
+      .border-b3{box-shadow:0 0 0 3px rgba(212,216,210,0.5),0 0 15px rgba(212,216,210,0.3),0 0 30px rgba(212,216,210,0.1);}
+      .border-b4{box-shadow:0 0 0 3px var(--green-light),0 0 10px rgba(74,140,63,0.4);animation:borderPulse 3s ease-in-out infinite;}
+      .border-b5{box-shadow:0 0 0 3px #6a3d8a,0 0 15px rgba(106,61,138,0.4),0 0 30px rgba(106,61,138,0.2);}
+      .border-b6{box-shadow:0 0 0 3px var(--green-light),0 0 15px rgba(58,125,50,0.6),0 0 30px rgba(58,125,50,0.3),0 0 45px rgba(58,125,50,0.1);animation:borderGlow 2s ease-in-out infinite;}
+      @keyframes borderPulse{0%,100%{box-shadow:0 0 0 3px var(--green-light),0 0 10px rgba(74,140,63,0.4);}50%{box-shadow:0 0 0 4px var(--green-light),0 0 20px rgba(74,140,63,0.6);}}
+      @keyframes borderGlow{0%,100%{box-shadow:0 0 0 3px var(--green-light),0 0 15px rgba(58,125,50,0.6),0 0 30px rgba(58,125,50,0.3);}50%{box-shadow:0 0 0 4px var(--green-pale),0 0 20px rgba(58,125,50,0.8),0 0 40px rgba(58,125,50,0.4);}}
       .char-card-avatar img{width:100%;height:100%;object-fit:cover;}
       .char-card-name{font-size:0.9rem;font-weight:500;color:var(--text-bright);margin-bottom:0.3em;}
       .char-card-status{font-size:0.65rem;color:var(--text-dim);letter-spacing:0.1em;}
@@ -808,7 +816,7 @@
         <div class="ni">파밍 아이템 판매 — 숲 탐색에서 획득한 아이템을 자판기의 '판매' 탭에서 안개 조각으로 교환할 수 있습니다.</div>
         <div class="ni">관리자 수동 지급 — 특별 보상 등의 사유로 총괄이 직접 지급하는 경우가 있습니다.</div>
         <h3 class="ns-sub">사용처</h3>
-        <div class="ni">자판기에서 소모품, 칭호, 테두리, 선물 아이템을 구매할 수 있습니다.</div>
+        <div class="ni">자판기에서 소모품, 테두리, 선물 아이템을 구매할 수 있습니다.</div>
         <div class="ni">현재 보유량은 사이드바와 자판기 상단에서 확인 가능합니다.</div>
       </section>
 
@@ -851,8 +859,7 @@
         <div class="ni">자판기는 안개 조각을 사용하여 다양한 아이템을 구매할 수 있는 상점입니다.</div>
         <h3 class="ns-sub">탭 구성</h3>
         <div class="ni">소모품 — 체력/정신력 회복, 판정 보너스, 주의 감소 등의 효과가 있는 아이템입니다. 구매 즉시 효과가 적용됩니다.</div>
-        <div class="ni">칭호 — 캐릭터 프로필에 표시되는 칭호를 구매할 수 있습니다.</div>
-        <div class="ni">테두리 — 캐릭터 프로필 아바타에 적용되는 장식 테두리입니다.</div>
+        <div class="ni">테두리 — 캐릭터 프로필 아바타에 적용되는 장식 테두리입니다. 구매 시 자동 장착됩니다.</div>
         <div class="ni">선물 — 다른 캐릭터에게 보낼 수 있는 선물 아이템입니다.</div>
         <div class="ni">판매 — 파밍에서 획득한 아이템을 안개 조각으로 교환할 수 있습니다.</div>
         <h3 class="ns-sub">선물 기능</h3>
@@ -918,13 +925,11 @@
         </div>
         <div class="shop-tabs">
           <button class="shop-tab active" data-shop-tab="consumable">소모품</button>
-          <button class="shop-tab" data-shop-tab="title">칭호</button>
           <button class="shop-tab" data-shop-tab="border">테두리</button>
           <button class="shop-tab" data-shop-tab="gift">선물</button>
           <button class="shop-tab" data-shop-tab="sell">판매</button>
         </div>
         <div class="shop-panel active" id="shopConsumable"></div>
-        <div class="shop-panel" id="shopTitle"></div>
         <div class="shop-panel" id="shopBorder"></div>
         <div class="shop-panel" id="shopGift"></div>
         <div class="shop-panel" id="shopSell"></div>
@@ -2689,9 +2694,12 @@ function renderShopTab(tab){
           if(item.effect.includes('정신력')){const m=item.effect.match(/정신력\s*\+(\d+)/);if(m)updateData.sanity=Math.min(100,csan+parseInt(m[1]));}
           if(item.effect.includes('alert')){const m=item.effect.match(/alert\)\s*-(\d+)/);if(m)updateData.alert_level=Math.max(0,calert-parseInt(m[1]));}
         }
+        // Apply border equip
+        const borderItem=SHOP_ITEMS.border?.find(i=>i.id===id);
+        if(borderItem){updateData.equipped_border=id;}
         await sb.from('invite_codes').update(updateData).eq('code',sessionCode);
         await sb.from('shop_purchases').insert({buyer_code:sessionCode,buyer_name:sessionCharName,item_id:id,item_name:name,price:price});
-        alert('구매 완료!');
+        alert(borderItem?'테두리가 장착되었습니다!':'구매 완료!');
       }
       await loadShopCurrency();
       renderShopTab(btn.closest('.shop-panel').id.replace('shop','').toLowerCase());
@@ -2788,7 +2796,7 @@ async function loadCharGrid(){
   const grid=document.getElementById('charGrid');
   grid.innerHTML='<div class="char-empty" style="text-align:center;padding:2em;grid-column:1/-1;">불러오는 중...</div>';
   
-  const{data}=await sb.from('invite_codes').select('code,character_name,status,avatar_url,position').not('code','like','%ADMIN%').order('character_name');
+  const{data}=await sb.from('invite_codes').select('code,character_name,status,avatar_url,position,equipped_border').not('code','like','%ADMIN%').order('character_name');
   if(!data||data.length===0){grid.innerHTML='<div class="char-empty" style="text-align:center;padding:2em;grid-column:1/-1;">등록된 캐릭터가 없습니다.</div>';return;}
   
   charAllData=data.filter(d=>!d.code.includes('ADMIN'));
@@ -2797,8 +2805,9 @@ async function loadCharGrid(){
     const statusLabel={active:'활동중',warned:'경고',banned:'제명',departed:'하차'};
     const displayName=c.character_name||c.code;
     const av=c.avatar_url?`<img src="${c.avatar_url}" alt="">`:`${displayName.charAt(0)}`;
+    const borderCls=c.equipped_border?'border-'+c.equipped_border:'';
     return `<div class="char-card" data-char-code="${c.code}">
-      <div class="char-card-avatar">${av}</div>
+      <div class="char-card-avatar ${borderCls}">${av}</div>
       <div class="char-card-name">${escHtml(displayName)}</div>
       ${c.position?`<div style="font-size:0.65rem;color:var(--green-light);letter-spacing:0.1em;">${c.position}</div>`:''}
       <div class="char-card-status">${statusLabel[c.status||'active']}</div>
@@ -2823,6 +2832,7 @@ async function openCharProfile(code){
   const statusLabel={active:'활동중',warned:'경고',banned:'제명',departed:'하차'};
   
   const avatarEl=document.getElementById('charPAvatar');
+  avatarEl.className='char-profile-avatar'+(user.equipped_border?' border-'+user.equipped_border:'');
   if(user.avatar_url){
     avatarEl.innerHTML=`<img src="${user.avatar_url}" alt="">`;
   }else{
