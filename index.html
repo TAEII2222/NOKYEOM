@@ -1307,6 +1307,9 @@ async function handleEntry(){
     // 정상 로그인
     sessionCode=code;
     sessionCharName=data.character_name||code;
+    if(!data.character_name&&!code.includes('ADMIN')){
+      await promptCharName(code);
+    }
     doEnter();
 
   }catch(err){
@@ -1333,9 +1336,24 @@ document.getElementById('changePwBtn').addEventListener('click',async()=>{
 
   sessionCode=pendingLoginData.code;
   sessionCharName=pendingLoginData.character_name||pendingLoginData.code;
+  if(!pendingLoginData.character_name&&!pendingLoginData.code.includes('ADMIN')){
+    await promptCharName(pendingLoginData.code);
+  }
   doEnter();
 });
 document.getElementById('newPw2').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('changePwBtn').click();});
+
+// 캐릭터명 미설정 시 강제 입력
+async function promptCharName(code){
+  let name='';
+  while(!name){
+    name=prompt('캐릭터명을 입력해주세요.\n(입장 후 캐릭터 도감에서 수정 가능합니다.)');
+    if(!name||!name.trim()){name='';alert('캐릭터명은 필수입니다.');}
+  }
+  name=name.trim();
+  await sb.from('invite_codes').update({character_name:name}).eq('code',code);
+  sessionCharName=name;
+}
 
 // 입장 애니메이션
 function doEnter(){
@@ -2770,17 +2788,18 @@ async function loadCharGrid(){
   const grid=document.getElementById('charGrid');
   grid.innerHTML='<div class="char-empty" style="text-align:center;padding:2em;grid-column:1/-1;">불러오는 중...</div>';
   
-  const{data}=await sb.from('invite_codes').select('code,character_name,status,avatar_url,position').not('character_name','is',null).order('character_name');
+  const{data}=await sb.from('invite_codes').select('code,character_name,status,avatar_url,position').not('code','like','%ADMIN%').order('character_name');
   if(!data||data.length===0){grid.innerHTML='<div class="char-empty" style="text-align:center;padding:2em;grid-column:1/-1;">등록된 캐릭터가 없습니다.</div>';return;}
   
-  charAllData=data.filter(d=>d.character_name&&!d.code.includes('ADMIN'));
+  charAllData=data.filter(d=>!d.code.includes('ADMIN'));
   
   grid.innerHTML=charAllData.map(c=>{
     const statusLabel={active:'활동중',warned:'경고',banned:'제명',departed:'하차'};
-    const av=c.avatar_url?`<img src="${c.avatar_url}" alt="">`:`${c.character_name.charAt(0)}`;
+    const displayName=c.character_name||c.code;
+    const av=c.avatar_url?`<img src="${c.avatar_url}" alt="">`:`${displayName.charAt(0)}`;
     return `<div class="char-card" data-char-code="${c.code}">
       <div class="char-card-avatar">${av}</div>
-      <div class="char-card-name">${escHtml(c.character_name)}</div>
+      <div class="char-card-name">${escHtml(displayName)}</div>
       ${c.position?`<div style="font-size:0.65rem;color:var(--green-light);letter-spacing:0.1em;">${c.position}</div>`:''}
       <div class="char-card-status">${statusLabel[c.status||'active']}</div>
     </div>`;
