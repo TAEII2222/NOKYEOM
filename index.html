@@ -743,6 +743,10 @@
         <!-- Tab: Inventory -->
         <div class="charp-panel" id="charpInventory">
           <div class="char-section" style="margin-bottom:1.5em;">
+            <div class="char-section-title">보유 소모품</div>
+            <div id="charPConsumables"><span class="char-empty">소모품이 없습니다.</span></div>
+          </div>
+          <div class="char-section" style="margin-bottom:1.5em;">
             <div class="char-section-title">장착 중인 테두리</div>
             <div id="charPBorder"><span class="char-empty">장착된 테두리가 없습니다.</span></div>
           </div>
@@ -2693,21 +2697,17 @@ function renderShopTab(tab){
       }else{
         if(!confirm(`${name}을(를) 구매합니다. (${price} 안개 조각)`))return;
         const updateData={currency:shopUserCurrency-price};
-        // Apply consumable effects
-        const item=SHOP_ITEMS.consumable?.find(i=>i.id===id);
-        if(item?.effect){
-          const{data:cur}=await sb.from('invite_codes').select('hp,sanity,alert_level').eq('code',sessionCode).maybeSingle();
-          const chp=cur?.hp??100,csan=cur?.sanity??100,calert=cur?.alert_level??0;
-          if(item.effect.includes('체력')){const m=item.effect.match(/체력\s*\+(\d+)/);if(m)updateData.hp=Math.min(100,chp+parseInt(m[1]));}
-          if(item.effect.includes('정신력')){const m=item.effect.match(/정신력\s*\+(\d+)/);if(m)updateData.sanity=Math.min(100,csan+parseInt(m[1]));}
-          if(item.effect.includes('alert')){const m=item.effect.match(/alert\)\s*-(\d+)/);if(m)updateData.alert_level=Math.max(0,calert-parseInt(m[1]));}
-        }
-        // Apply border equip
+        // Border: equip immediately
         const borderItem=SHOP_ITEMS.border?.find(i=>i.id===id);
         if(borderItem){updateData.equipped_border=id;}
+        // Consumable: store in inventory (don't apply yet)
+        const consumeItem=SHOP_ITEMS.consumable?.find(i=>i.id===id);
+        if(consumeItem){
+          await sb.from('inventory').insert({user_code:sessionCode,item_id:id,item_name:name,item_effect:consumeItem.effect||null});
+        }
         await sb.from('invite_codes').update(updateData).eq('code',sessionCode);
         await sb.from('shop_purchases').insert({buyer_code:sessionCode,buyer_name:sessionCharName,item_id:id,item_name:name,price:price});
-        alert(borderItem?'테두리가 장착되었습니다!':'구매 완료!');
+        alert(borderItem?'테두리가 장착되었습니다!':consumeItem?'인벤토리에 보관되었습니다. 캐릭터 프로필에서 사용할 수 있습니다.':'구매 완료!');
       }
       await loadShopCurrency();
       renderShopTab(btn.closest('.shop-panel').id.replace('shop','').toLowerCase());
@@ -2968,6 +2968,55 @@ document.querySelectorAll('[data-charptab]').forEach(tab=>{
 });
 
 async function loadCharInventory(code){
+  // Consumables (unused)
+  const{data:inv}=await sb.from('inventory').select('*').eq('user_code',code).eq('is_used',false).order('purchased_at',{ascending:false});
+  const conEl=document.getElementById('charPConsumables');
+  if(inv&&inv.length>0){
+    const isOwn=code===sessionCode;
+    conEl.innerHTML=inv.map(i=>{
+      const shopItem=SHOP_ITEMS.consumable?.find(s=>s.id===i.item_id);
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.6em;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;margin-bottom:0.5em;">
+        <div>
+          <div style="font-size:0.85rem;font-weight:500;color:var(--text-bright);">${escHtml(i.item_name)}</div>
+          <div style="font-size:0.7rem;color:var(--text-dim);">${escHtml(i.item_effect||'')} ${shopItem?'· '+escHtml(shopItem.desc):''}</div>
+        </div>
+        ${isOwn?`<button class="adm-btn" data-use-inv="${i.id}" data-use-effect="${escHtml(i.item_effect||'')}" data-use-name="${escHtml(i.item_name)}">사용</button>`:''}
+      </div>`;
+    }).join('');
+    if(isOwn){
+      conEl.querySelectorAll('[data-use-inv]').forEach(btn=>{
+        btn.addEventListener('click',async()=>{
+          const invId=btn.dataset.useInv;
+          const effect=btn.dataset.useEffect;
+          const itemName=btn.dataset.useName;
+          if(!confirm(`${itemName}을(를) 사용합니다.`))return;
+          // Apply effect
+          const{data:cur}=await sb.from('invite_codes').select('hp,sanity,alert_level').eq('code',sessionCode).maybeSingle();
+          const updateData={};
+          const chp=cur?.hp??100,csan=cur?.sanity??100,calert=cur?.alert_level??0;
+          if(effect.includes('체력')){const m=effect.match(/체력\s*\+(\d+)/);if(m)updateData.hp=Math.min(100,chp+parseInt(m[1]));}
+          if(effect.includes('정신력')){const m=effect.match(/정신력\s*\+(\d+)/);if(m)updateData.sanity=Math.min(100,csan+parseInt(m[1]));}
+          if(effect.includes('alert')){const m=effect.match(/alert\)\s*-(\d+)/);if(m)updateData.alert_level=Math.max(0,calert-parseInt(m[1]));}
+          if(Object.keys(updateData).length>0)await sb.from('invite_codes').update(updateData).eq('code',sessionCode);
+          // Mark as used
+          await sb.from('inventory').update({is_used:true,used_at:new Date().toISOString()}).eq('id',invId);
+          alert(`${itemName} 사용 완료!`);
+          loadCharInventory(code);
+          // Refresh stats tab too
+          const{data:st}=await sb.from('invite_codes').select('hp,sanity,alert_level').eq('code',sessionCode).maybeSingle();
+          document.getElementById('charPHp').textContent=st?.hp??100;
+          document.getElementById('charPHpBar').style.width=(st?.hp??100)+'%';
+          document.getElementById('charPSan').textContent=st?.sanity??100;
+          document.getElementById('charPSanBar').style.width=(st?.sanity??100)+'%';
+          document.getElementById('charPAlert').textContent=st?.alert_level??0;
+          document.getElementById('charPAlertBar').style.width=(st?.alert_level??0)+'%';
+        });
+      });
+    }
+  }else{
+    conEl.innerHTML='<span class="char-empty">소모품이 없습니다.</span>';
+  }
+
   // Equipped border
   const{data:user}=await sb.from('invite_codes').select('equipped_border').eq('code',code).maybeSingle();
   const borderEl=document.getElementById('charPBorder');
