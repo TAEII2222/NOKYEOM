@@ -591,22 +591,8 @@
       </div>
     </div>
 
-    <!-- Jumpscare 1 - Deer -->
-    <div class="jumpscare" id="jumpscare" onclick="dismissScare()">
-      <img class="jumpscare-img" src="deer.png" alt="">
-    </div>
-    <!-- Jumpscare 2 - Forest figure (fullscreen) -->
-    <div class="jumpscare" id="jumpscare2" onclick="dismissScare2()">
-      <img class="jumpscare-img" src="scare2.png" alt="" style="max-width:100vw;max-height:100vh;object-fit:cover;">
-    </div>
-    <!-- Jumpscare 3 - Stalker hand (fullscreen) -->
-    <div class="jumpscare" id="jumpscare3" onclick="dismissScare3()">
-      <img class="jumpscare-img" src="scare3.png" alt="" style="max-width:100vw;max-height:100vh;object-fit:cover;">
-    </div>
-    <!-- Jumpscare 4 - Fullscreen flash variant (reuses images with different effect) -->
-    <div class="jumpscare" id="jumpscare4" onclick="dismissScare4()" style="background:rgba(0,0,0,0.95);">
-      <img id="scare4img" class="jumpscare-img" src="deer.png" alt="" style="max-width:100vw;max-height:100vh;object-fit:cover;animation:scareZoom 0.4s ease-out forwards;">
-    </div>
+    <!-- Scare flash overlay -->
+    <div id="scareFlash" style="display:none;position:fixed;inset:0;z-index:999;pointer-events:none;transition:background 0.08s ease;"></div>
     <!-- Scare sound -->
     <audio id="scareSound" preload="auto"><source src="click.mp3" type="audio/mpeg"></audio>
   </div>
@@ -1557,43 +1543,31 @@ function triggerScare(intensity){
   const scene=document.getElementById('gameScene');
   if(i>=2){scene.classList.add('screen-shake');setTimeout(()=>scene.classList.remove('screen-shake'),400);}
   
-  if(Math.random()<0.4*i){
+  // Glitch effect
+  if(Math.random()<0.5*i){
     scene.classList.add('glitch-active');
     setTimeout(()=>scene.classList.remove('glitch-active'),600);
   }
   
-  // Pick scare type based on intensity
-  const roll=Math.random();
+  // Flash + flicker only (no images)
+  const flash=document.getElementById('scareFlash');
   if(i>=2){
-    // High intensity — fullscreen scares
-    if(roll<0.3){
-      // Fullscreen zoom with random image
-      const imgs=['deer.png','scare2.png','scare3.png'];
-      document.getElementById('scare4img').src=imgs[Math.floor(Math.random()*imgs.length)];
-      const j4=document.getElementById('jumpscare4');j4.classList.add('active');setTimeout(()=>j4.classList.remove('active'),1200+i*300);
-    }else if(roll<0.55){
-      const j3=document.getElementById('jumpscare3');j3.classList.add('active');setTimeout(()=>j3.classList.remove('active'),1500+i*400);
-    }else if(roll<0.8){
-      const j2=document.getElementById('jumpscare2');j2.classList.add('active');setTimeout(()=>j2.classList.remove('active'),1500+i*400);
-    }else{
-      const j=document.getElementById('jumpscare');j.classList.add('active');setTimeout(()=>j.classList.remove('active'),800+i*400);
-    }
+    // High intensity — strong white flash + shake + flicker
+    flash.style.background='rgba(255,255,255,0.9)';
+    flash.style.display='block';
+    setTimeout(()=>{flash.style.background='rgba(138,48,48,0.6)';},80);
+    setTimeout(()=>{flash.style.background='rgba(255,255,255,0.7)';},150);
+    setTimeout(()=>{flash.style.display='none';},300+i*100);
+    screenFlicker();
   }else if(i>=1){
-    // Medium intensity
-    if(roll<0.25){
-      const j3=document.getElementById('jumpscare3');j3.classList.add('active');setTimeout(()=>j3.classList.remove('active'),1200);
-    }else if(roll<0.5){
-      const j2=document.getElementById('jumpscare2');j2.classList.add('active');setTimeout(()=>j2.classList.remove('active'),1200);
-    }else if(roll<0.75){
-      const j=document.getElementById('jumpscare');j.classList.add('active');setTimeout(()=>j.classList.remove('active'),800);
-    }else{
-      // Glitch + flicker only, no image (psychological)
-      screenFlicker();
-    }
+    // Medium — quick flash
+    flash.style.background='rgba(255,255,255,0.7)';
+    flash.style.display='block';
+    setTimeout(()=>{flash.style.display='none';},150);
+    if(Math.random()<0.5)screenFlicker();
   }else{
-    // Low intensity — subtle
-    if(roll<0.4){showDeerEyes();}
-    else if(roll<0.7){screenFlicker();}
+    // Low — subtle flicker or whisper
+    if(Math.random()<0.5){screenFlicker();}
     else{randomWhisper();}
   }
   
@@ -2111,7 +2085,7 @@ const scenes={
   result:{text:'loading',action:async()=>{
     const t=gItems.length>0?gItems.map(i=>'<span class="highlight">· '+i.name+'</span>').join('<br>'):'아무것도 찾지 못했다.';
     const survived=gHP>0&&gSanity>0;
-    const status=survived?'생존':'사망';
+    const status=survived?'생존':'혼절';
     const statusColor=survived?'var(--green-light)':'var(--accent-red)';
     return{text:'<div style="text-align:center;padding:1em 0;"><div style="font-family:KimJwaJinGeneral,serif;font-size:1.5rem;color:var(--text-bright);letter-spacing:0.2em;margin-bottom:0.5em;">탐색 종료</div><div style="font-size:0.9rem;color:'+statusColor+';margin-bottom:1em;">'+status+'</div><div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:1em;">정신력 '+gSanity+' / 체력 '+gHP+'</div><div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1.5em;">획득한 아이템: '+gCount+'개</div>'+t+'<div style="margin-top:2em;font-size:0.8rem;color:var(--text-dim);">획득한 아이템은 캐릭터 프로필에 표시됩니다.</div></div>',choices:[{text:'▸ 메인으로 돌아가기',to:'_main'}]};
   }},
